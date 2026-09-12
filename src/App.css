@@ -322,11 +322,6 @@
   cursor: pointer;
   padding: 0.5rem;
   border-radius: 4px;
-  transition: background-color 0.2s;
-}
-
-.radio-item:hover {
-  background-color: var(--accent-bg);
 }
 
 .radio-item input[type="radio"] {
