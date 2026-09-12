@@ -1,4 +1,7 @@
-const StaffView = ({ employees = {} }) => {
+import 'react';
+import { formatDate } from '../utils/formatters';
+
+const StaffView = ({ employees = {}, settings }) => {
   const employeeList = Object.entries(employees);
 
   return (
@@ -38,7 +41,7 @@ const StaffView = ({ employees = {} }) => {
                     <div className="space-y-1">
                       {data.terms.map((term, index) => (
                         <div key={index} className="text-xs h-5 flex items-center">
-                          {term.validFrom}
+                          {formatDate(term.validFrom, settings?.dateFormat)}
                         </div>
                       ))}
                     </div>
@@ -47,7 +50,7 @@ const StaffView = ({ employees = {} }) => {
                     <div className="space-y-1">
                       {data.terms.map((term, index) => (
                         <div key={index} className="text-xs h-5 flex items-center">
-                          {term.validTo || 'Present'}
+                          {term.validTo ? formatDate(term.validTo, settings?.dateFormat) : 'Present'}
                         </div>
                       ))}
                     </div>

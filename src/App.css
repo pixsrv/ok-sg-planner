@@ -182,3 +182,161 @@
     border-right-color: var(--border);
   }
 }
+
+/* WeekView Styles */
+.week-view-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 2rem;
+}
+
+.week-info {
+  font-size: 1.2rem;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.week-grid-wrapper {
+  overflow-x: auto;
+  background: var(--bg);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+
+.week-grid {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.week-grid th, 
+.week-grid td {
+  border: 1px solid var(--border);
+  padding: 0.75rem;
+}
+
+.employee-col-header,
+.employee-name-cell {
+  position: sticky;
+  left: 0;
+  background: var(--bg);
+  z-index: 10;
+  min-width: 200px;
+  font-weight: 600;
+}
+
+.day-col-header {
+  min-width: 120px;
+  background-color: var(--social-bg);
+}
+
+.day-header-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.day-name {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.day-date {
+  font-size: 1rem;
+  font-weight: bold;
+  color: var(--text-h);
+}
+
+.week-num {
+  font-size: 0.75rem;
+  color: var(--text);
+  opacity: 0.8;
+}
+
+.employee-row:hover {
+  background-color: var(--accent-bg);
+}
+
+.time-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.time-field input {
+  width: 100%;
+  padding: 0.25rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text);
+    font-family: var(--mono), serif;
+  font-size: 0.85rem;
+}
+
+.time-field input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text);
+  font-style: italic;
+}
+
+/* Settings Styles */
+.settings-panel {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow);
+}
+
+.settings-panel h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  color: var(--text-h);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 0.5rem;
+}
+
+.radio-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.radio-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.radio-item:hover {
+  background-color: var(--accent-bg);
+}
+
+.radio-item input[type="radio"] {
+  cursor: pointer;
+  width: 1.1rem;
+  height: 1.1rem;
+  accent-color: var(--accent);
+}
+
+.radio-item span {
+  font-size: 1rem;
+  color: var(--text);
+}

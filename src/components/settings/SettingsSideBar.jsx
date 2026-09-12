@@ -1,8 +1,9 @@
-import { User, Bell, Shield } from 'lucide-react';
+import { User, Bell, Shield, Clock } from 'lucide-react';
 
 const SettingsSideBar = ({ currentView, onViewChange }) => {
   const items = [
     { id: 'Profile', icon: <User size={20} />, text: 'Profile' },
+    { id: 'DateTime', icon: <Clock size={20} />, text: 'Date & Time' },
     { id: 'Notifications', icon: <Bell size={20} />, text: 'Notifications' },
     { id: 'Security', icon: <Shield size={20} />, text: 'Security' },
   ];

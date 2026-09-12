@@ -1,9 +1,14 @@
 const DB_NAME = 'SGPlannerDB';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 const EMPLOYEES_STORE = 'employees';
 const MONTHS_STORE = 'months';
+const SETTINGS_STORE = 'settings';
+
+let dbInstance = null;
 
 export const initDB = () => {
+  if (dbInstance) return Promise.resolve(dbInstance);
+
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
 
@@ -13,7 +18,8 @@ export const initDB = () => {
     };
 
     request.onsuccess = (event) => {
-      resolve(event.target.result);
+      dbInstance = event.target.result;
+      resolve(dbInstance);
     };
 
     request.onupgradeneeded = (event) => {
@@ -24,6 +30,9 @@ export const initDB = () => {
       if (!db.objectStoreNames.contains(MONTHS_STORE)) {
         db.createObjectStore(MONTHS_STORE);
       }
+      if (!db.objectStoreNames.contains(SETTINGS_STORE)) {
+        db.createObjectStore(SETTINGS_STORE);
+      }
     };
   });
 };
@@ -33,11 +42,18 @@ export const saveItem = async (storeName, key, data) => {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction([storeName], 'readwrite');
     const store = transaction.objectStore(storeName);
-    const request = store.put(data, key);
+    store.put(data, key);
 
-    request.onsuccess = () => resolve();
-    request.onerror = (event) => {
-      console.error(`Error saving to ${storeName} at ${key}:`, event.target.error);
+    transaction.oncomplete = () => {
+      console.log(`Saved to ${storeName}: ${key} =`, data);
+      resolve();
+    };
+    transaction.onerror = (event) => {
+      console.error(`Transaction error saving to ${storeName} at ${key}:`, event.target.error);
+      reject(`Error saving to ${storeName}`);
+    };
+    transaction.onabort = () => {
+      console.error(`Transaction aborted saving to ${storeName} at ${key}:`, transaction.error);
       reject(`Error saving to ${storeName}`);
     };
   });
@@ -48,14 +64,17 @@ export const saveItems = async (storeName, itemsMap) => {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction([storeName], 'readwrite');
     const store = transaction.objectStore(storeName);
-    
+
     Object.entries(itemsMap).forEach(([key, value]) => {
       store.put(value, key);
     });
 
-    transaction.oncomplete = () => resolve();
+    transaction.oncomplete = () => {
+      console.log(`Saved multiple items to ${storeName}`);
+      resolve();
+    };
     transaction.onerror = (event) => {
-      console.error(`Error saving items to ${storeName}:`, event.target.error);
+      console.error(`Transaction error saving items to ${storeName}:`, event.target.error);
       reject(`Error saving items to ${storeName}`);
     };
   });
@@ -73,6 +92,9 @@ export const getItem = async (storeName, key) => {
       console.error(`Error getting from ${storeName} at ${key}:`, event.target.error);
       reject(`Error getting from ${storeName}`);
     };
+    transaction.onerror = (event) => {
+      console.error(`Transaction error getting from ${storeName} at ${key}:`, event.target.error);
+    };
   });
 };
 
@@ -81,12 +103,7 @@ export const getAllItems = async (storeName) => {
   return new Promise((resolve, reject) => {
     const transaction = db.transaction([storeName], 'readonly');
     const store = transaction.objectStore(storeName);
-    
-    // Check if it's an object store that uses keys manually or auto-increment
-    // Since we are using IDs as keys, we want to return a map/object for employees
-    // and potentially an array for months if we stored them differently, 
-    // but the issue specifically asks for employees to be separate items.
-    
+
     const request = store.openCursor();
     const result = {};
     const arrayResult = [];
@@ -94,20 +111,23 @@ export const getAllItems = async (storeName) => {
     request.onsuccess = (event) => {
       const cursor = event.target.result;
       if (cursor) {
-        if (storeName === EMPLOYEES_STORE) {
+        if (storeName === EMPLOYEES_STORE || storeName === SETTINGS_STORE) {
           result[cursor.key] = cursor.value;
         } else {
           arrayResult.push(cursor.value);
         }
         cursor.continue();
       } else {
-        resolve(storeName === EMPLOYEES_STORE ? result : arrayResult);
+        resolve((storeName === EMPLOYEES_STORE || storeName === SETTINGS_STORE) ? result : arrayResult);
       }
     };
 
     request.onerror = (event) => {
       console.error(`Error getting all items from ${storeName}:`, event.target.error);
       reject(`Error getting all items from ${storeName}`);
+    };
+    transaction.onerror = (event) => {
+      console.error(`Transaction error getting all items from ${storeName}:`, event.target.error);
     };
   });
 };
