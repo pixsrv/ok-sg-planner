@@ -24,6 +24,7 @@ const StaffView = ({ employees = {} }) => {
                 <th className="px-6 py-3">Last Name</th>
                 <th className="px-6 py-3">Valid From</th>
                 <th className="px-6 py-3">Valid To</th>
+                <th className="px-6 py-3">Position</th>
                 <th className="px-6 py-3">FTE</th>
               </tr>
             </thead>
@@ -47,6 +48,15 @@ const StaffView = ({ employees = {} }) => {
                       {data.terms.map((term, index) => (
                         <div key={index} className="text-xs h-5 flex items-center">
                           {term.validTo || 'Present'}
+                        </div>
+                      ))}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="space-y-1">
+                      {data.terms.map((term, index) => (
+                        <div key={index} className="text-xs h-5 flex items-center">
+                          {term.position}
                         </div>
                       ))}
                     </div>
