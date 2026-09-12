@@ -1,12 +1,47 @@
-import 'react';
+import { useState, useEffect } from 'react';
 
 const DateTimeView = ({ settings, onSettingChange }) => {
+  const [now, setNow] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatDate = (date, format) => {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+
+    switch (format) {
+      case 'YYYY-MM-DD': return `${year}-${month}-${day}`;
+      case 'DD-MM-YYYY': return `${day}-${month}-${year}`;
+      case 'MM/DD/YYYY': return `${month}/${day}/${year}`;
+      case 'YYYY/MM/DD': return `${year}/${month}/${day}`;
+      case 'DD.MM.YYYY': return `${day}.${month}.${year}`;
+      default: return format;
+    }
+  };
+
+  const formatTime = (date, format) => {
+    const hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+    if (format === '24h') {
+      return `${String(hours).padStart(2, '0')}:${minutes}`;
+    } else {
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      const hours12 = hours % 12 || 12;
+      return `${hours12}:${minutes} ${ampm}`;
+    }
+  };
+
   const dateFormats = [
-    'YYYY-MM-DD',
-    'DD-MM-YYYY',
-    'MM/DD/YYYY',
-    'YYYY/MM/DD',
-    'DD.MM.YYYY'
+    { id: 'YYYY-MM-DD', label: 'YYYY-MM-DD (ISO)' },
+    { id: 'DD-MM-YYYY', label: 'DD-MM-YYYY' },
+    { id: 'MM/DD/YYYY', label: 'MM/DD/YYYY' },
+    { id: 'YYYY/MM/DD', label: 'YYYY/MM/DD' },
+    { id: 'DD.MM.YYYY', label: 'DD.MM.YYYY' }
   ];
 
   const timeFormats = [
@@ -31,15 +66,15 @@ const DateTimeView = ({ settings, onSettingChange }) => {
         <h3>Date Format</h3>
         <div className="radio-list">
           {dateFormats.map((format) => (
-            <label key={format} className="radio-item">
+            <label key={format.id} className="radio-item">
               <input
                 type="radio"
                 name="dateFormat"
-                value={format}
-                checked={currentDateFormat === format}
+                value={format.id}
+                checked={currentDateFormat === format.id}
                 onChange={(e) => onSettingChange('dateFormat', e.target.value)}
               />
-              <span>{format}</span>
+              <span>{format.label} ({formatDate(now, format.id)})</span>
             </label>
           ))}
         </div>
@@ -57,14 +92,14 @@ const DateTimeView = ({ settings, onSettingChange }) => {
                 checked={currentTimeFormat === format.id}
                 onChange={(e) => onSettingChange('timeFormat', e.target.value)}
               />
-              <span>{format.label}</span>
+              <span>{format.label} ({formatTime(now, format.id)})</span>
             </label>
           ))}
         </div>
       </div>
 
       <div className="settings-panel">
-        <h3>Week Format</h3>
+        <h3>Week Start</h3>
         <div className="radio-list">
           {weekStartDays.map((day) => (
             <label key={day.id} className="radio-item">
