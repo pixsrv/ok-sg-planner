@@ -9,19 +9,32 @@ import ProfileView from './views/settings/ProfileView.jsx'
 import DateTimeView from './views/settings/DateTimeView.jsx'
 import NotificationsView from './views/settings/NotificationsView.jsx'
 import SecurityView from './views/settings/SecurityView.jsx'
+import SidebarView from './views/settings/SidebarView.jsx'
 import { getAllItems, saveItem, saveItems } from './utils/db'
 
 function App() {
   const [currentView, setCurrentView] = useState('Staff')
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  const [settingsView, setSettingsView] = useState('Profile')
+  const [settingsView, setSettingsView] = useState('Sidebar')
   const [appSettings, setAppSettings] = useState({
     dateFormat: 'YYYY-MM-DD',
-    timeFormat: '24h'
+    timeFormat: '24h',
+    weekStart: 'Monday',
+    sidebar: [
+      { id: 'Staff', name: 'Staff', visible: true, default: true },
+      { id: 'Month', name: 'Month', visible: true, default: false },
+      { id: 'Week', name: 'Week', visible: true, default: false },
+    ]
   })
   const [draftSettings, setDraftSettings] = useState({
     dateFormat: 'YYYY-MM-DD',
-    timeFormat: '24h'
+    timeFormat: '24h',
+    weekStart: 'Monday',
+    sidebar: [
+      { id: 'Staff', name: 'Staff', visible: true, default: true },
+      { id: 'Month', name: 'Month', visible: true, default: false },
+      { id: 'Week', name: 'Week', visible: true, default: false },
+    ]
   })
   
   const [employees, setEmployees] = useState({})
@@ -52,6 +65,13 @@ function App() {
         if (storedSettings && Object.keys(storedSettings).length > 0) {
           setAppSettings(prev => ({ ...prev, ...storedSettings }));
           setDraftSettings(prev => ({ ...prev, ...storedSettings }));
+          
+          if (storedSettings.sidebar) {
+            const defaultView = storedSettings.sidebar.find(item => item.default);
+            if (defaultView) {
+              setCurrentView(defaultView.id);
+            }
+          }
         }
       } catch (error) {
         console.error('Failed to load data from IndexedDB:', error);
@@ -86,8 +106,19 @@ function App() {
 
   const handleSaveSettings = async () => {
     setAppSettings(draftSettings);
+    
+    // Apply default view if it changed (matches initial load behavior)
+    if (draftSettings.sidebar) {
+      const defaultView = draftSettings.sidebar.find(item => item.default);
+      if (defaultView) {
+        setCurrentView(defaultView.id);
+      }
+    }
+    
     await saveItem('settings', 'dateFormat', draftSettings.dateFormat);
     await saveItem('settings', 'timeFormat', draftSettings.timeFormat);
+    await saveItem('settings', 'weekStart', draftSettings.weekStart);
+    await saveItem('settings', 'sidebar', draftSettings.sidebar);
     setIsSettingsOpen(false);
   };
 
@@ -111,6 +142,8 @@ function App() {
 
   const renderSettingsView = () => {
     switch (settingsView) {
+      case 'Sidebar':
+        return <SidebarView settings={draftSettings} onSettingChange={handleSettingChange} />
       case 'Profile':
         return <ProfileView />
       case 'DateTime':
@@ -141,6 +174,7 @@ function App() {
     <MainLayout 
       currentView={currentView} 
       onViewChange={setCurrentView}
+      sidebarSettings={appSettings.sidebar}
       onSettingsClick={() => {
         setDraftSettings(appSettings)
         setIsSettingsOpen(true)

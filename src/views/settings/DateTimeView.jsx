@@ -14,8 +14,14 @@ const DateTimeView = ({ settings, onSettingChange }) => {
     { id: '12h', label: '12 Hours (AM/PM)' }
   ];
 
+  const weekStartDays = [
+    { id: 'Monday', label: 'Monday (ISO)' },
+    { id: 'Sunday', label: 'Sunday' }
+  ];
+
   const currentDateFormat = settings.dateFormat || 'YYYY-MM-DD';
   const currentTimeFormat = settings.timeFormat || '24h';
+  const currentWeekStart = settings.weekStart || 'Monday';
 
   return (
     <div className="view-container">
@@ -52,6 +58,24 @@ const DateTimeView = ({ settings, onSettingChange }) => {
                 onChange={(e) => onSettingChange('timeFormat', e.target.value)}
               />
               <span>{format.label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className="settings-panel">
+        <h3>Week Format</h3>
+        <div className="radio-list">
+          {weekStartDays.map((day) => (
+            <label key={day.id} className="radio-item">
+              <input
+                type="radio"
+                name="weekStart"
+                value={day.id}
+                checked={currentWeekStart === day.id}
+                onChange={(e) => onSettingChange('weekStart', e.target.value)}
+              />
+              <span>{day.label}</span>
             </label>
           ))}
         </div>

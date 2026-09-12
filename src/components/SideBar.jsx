@@ -1,14 +1,26 @@
 import { Users, Calendar, Columns, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 
-const SideBar = ({ currentView, onViewChange }) => {
+const SideBar = ({ currentView, onViewChange, sidebarSettings }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const items = [
-    { id: 'Staff', icon: <Users size={20} />, text: 'Staff' },
-    { id: 'Month', icon: <Calendar size={20} />, text: 'Month' },
-    { id: 'Week', icon: <Columns size={20} />, text: 'Week' },
-  ];
+  const iconMap = {
+    'Staff': <Users size={20} />,
+    'Month': <Calendar size={20} />,
+    'Week': <Columns size={20} />,
+  };
+
+  const items = (sidebarSettings || [
+    { id: 'Staff', name: 'Staff', visible: true, default: true },
+    { id: 'Month', name: 'Month', visible: true, default: false },
+    { id: 'Week', name: 'Week', visible: true, default: false },
+  ])
+    .filter(item => item.visible)
+    .map(item => ({
+      id: item.id,
+      icon: iconMap[item.id],
+      text: item.name
+    }));
 
   return (
     <aside className={`side-bar ${isCollapsed ? 'collapsed' : ''}`}>

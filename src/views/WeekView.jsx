@@ -2,11 +2,20 @@ import 'react';
 import {formatDate, formatTime} from '../utils/formatters';
 
 const WeekView = ({ employees, settings }) => {
-  // Helper to get start of current week (Monday)
+  // Helper to get start of current week
   const getStartOfWeek = (date) => {
     const d = new Date(date);
     const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+    const isSundayStart = settings?.weekStart === 'Sunday';
+    
+    let diff;
+    if (isSundayStart) {
+      diff = d.getDate() - day;
+    } else {
+      // Monday start (ISO)
+      diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    }
+    
     const newDate = new Date(d.setDate(diff));
     newDate.setHours(0, 0, 0, 0);
     return newDate;
@@ -23,7 +32,9 @@ const WeekView = ({ employees, settings }) => {
   const today = new Date();
   const startOfWeek = getStartOfWeek(today);
   const weekDays = [];
-  const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const dayNames = settings?.weekStart === 'Sunday' 
+    ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+    : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   for (let i = 0; i < 7; i++) {
     const date = new Date(startOfWeek);
