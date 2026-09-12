@@ -60,7 +60,7 @@ const DateTimeView = ({ settings, onSettingChange }) => {
 
   return (
     <div className="view-container">
-      <h2>Date and Time Settings</h2>
+      {/*<h2>Date and Time Settings</h2>*/}
       
       <div className="settings-panel">
         <h3>Date Format</h3>

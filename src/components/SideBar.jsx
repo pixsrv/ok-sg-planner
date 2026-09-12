@@ -1,9 +1,6 @@
 import { Users, Calendar, Columns, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useState } from 'react';
 
-const SideBar = ({ currentView, onViewChange, sidebarSettings }) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-
+const SideBar = ({ currentView, onViewChange, sidebarSettings, isCollapsed, onToggle }) => {
   const iconMap = {
     'Staff': <Users size={20} />,
     'Month': <Calendar size={20} />,
@@ -27,7 +24,7 @@ const SideBar = ({ currentView, onViewChange, sidebarSettings }) => {
       <div className="toggle-container">
         <button 
           className="toggle-button" 
-          onClick={() => setIsCollapsed(!isCollapsed)}
+          onClick={onToggle} 
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}

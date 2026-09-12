@@ -60,8 +60,10 @@ const SidebarView = ({ settings, onSettingChange }) => {
 
   return (
     <div className="view-container">
-      <h2>Sidebar Settings</h2>
+      {/*<h2>Sidebar</h2>*/}
+      
       <div className="settings-panel">
+        <h3>Items</h3>
         <table className="sidebar-grid">
           <thead>
             <tr>
@@ -112,6 +114,24 @@ const SidebarView = ({ settings, onSettingChange }) => {
             ))}
           </tbody>
         </table>
+      </div>
+
+      <div className="settings-panel">
+        <h3>Folding</h3>
+        <div className="setting-item flex items-center justify-between p-4 bg-[var(--bg)] border border-[var(--border)] rounded-lg">
+          <div>
+            <div className="font-semibold text-[var(--text-h)]">Start with folded sidebar</div>
+            <div className="text-sm text-[var(--text-light)]">If enabled, the sidebar will be collapsed when the application starts.</div>
+          </div>
+          <label className="switch">
+            <input 
+              type="checkbox" 
+              checked={settings.sidebarFolded || false} 
+              onChange={(e) => onSettingChange('sidebarFolded', e.target.checked)}
+            />
+            <span className="slider round"></span>
+          </label>
+        </div>
       </div>
     </div>
   );

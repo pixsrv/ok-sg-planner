@@ -20,6 +20,7 @@ function App() {
     dateFormat: 'YYYY-MM-DD',
     timeFormat: '24h',
     weekStart: 'Monday',
+    sidebarFolded: false,
     sidebar: [
       { id: 'Staff', name: 'Staff', visible: true, default: true },
       { id: 'Month', name: 'Month', visible: true, default: false },
@@ -30,6 +31,7 @@ function App() {
     dateFormat: 'YYYY-MM-DD',
     timeFormat: '24h',
     weekStart: 'Monday',
+    sidebarFolded: false,
     sidebar: [
       { id: 'Staff', name: 'Staff', visible: true, default: true },
       { id: 'Month', name: 'Month', visible: true, default: false },
@@ -39,6 +41,7 @@ function App() {
   
   const [employees, setEmployees] = useState({})
   const [months, setMonths] = useState([])
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
 
   useEffect(() => {
     const loadFromDB = async () => {
@@ -65,6 +68,10 @@ function App() {
         if (storedSettings && Object.keys(storedSettings).length > 0) {
           setAppSettings(prev => ({ ...prev, ...storedSettings }));
           setDraftSettings(prev => ({ ...prev, ...storedSettings }));
+          
+          if (storedSettings.sidebarFolded !== undefined) {
+            setIsSidebarCollapsed(storedSettings.sidebarFolded);
+          }
           
           if (storedSettings.sidebar) {
             const defaultView = storedSettings.sidebar.find(item => item.default);
@@ -107,6 +114,9 @@ function App() {
   const handleSaveSettings = async () => {
     setAppSettings(draftSettings);
     
+    // Update live sidebar state if it changed in settings
+    setIsSidebarCollapsed(draftSettings.sidebarFolded);
+    
     // Apply default view if it changed (matches initial load behavior)
     if (draftSettings.sidebar) {
       const defaultView = draftSettings.sidebar.find(item => item.default);
@@ -118,6 +128,7 @@ function App() {
     await saveItem('settings', 'dateFormat', draftSettings.dateFormat);
     await saveItem('settings', 'timeFormat', draftSettings.timeFormat);
     await saveItem('settings', 'weekStart', draftSettings.weekStart);
+    await saveItem('settings', 'sidebarFolded', draftSettings.sidebarFolded);
     await saveItem('settings', 'sidebar', draftSettings.sidebar);
     setIsSettingsOpen(false);
   };
@@ -175,6 +186,8 @@ function App() {
       currentView={currentView} 
       onViewChange={setCurrentView}
       sidebarSettings={appSettings.sidebar}
+      isSidebarCollapsed={isSidebarCollapsed}
+      onToggleSidebar={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       onSettingsClick={() => {
         setDraftSettings(appSettings)
         setIsSettingsOpen(true)
