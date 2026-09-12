@@ -89,23 +89,27 @@ const SidebarView = ({ settings, onSettingChange }) => {
                   </div>
                 </td>
                 <td className="col-visible">
-                  <label className="switch">
-                    <input 
-                      type="checkbox" 
-                      checked={item.visible} 
-                      disabled={item.default}
-                      onChange={() => handleToggleVisible(item.id, item.visible, item.default)}
-                    />
-                    <span className="slider round"></span>
-                  </label>
+                  <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    <label className="switch">
+                      <input 
+                        type="checkbox" 
+                        checked={item.visible} 
+                        disabled={item.default}
+                        onChange={() => handleToggleVisible(item.id, item.visible, item.default)}
+                      />
+                      <span className="slider round"></span>
+                    </label>
+                  </div>
                 </td>
                 <td className="col-default">
-                  <input 
-                    type="radio" 
-                    name="defaultView"
-                    checked={item.default}
-                    onChange={() => updateItem(item.id, 'default', true)}
-                  />
+                  <label className="radio-item" style={{ justifyContent: 'center', padding: 0 }}>
+                    <input 
+                      type="radio" 
+                      name="defaultView"
+                      checked={item.default}
+                      onChange={() => updateItem(item.id, 'default', true)}
+                    />
+                  </label>
                 </td>
                 <td className="col-name">
                   {item.name}
