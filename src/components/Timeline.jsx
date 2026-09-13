@@ -53,7 +53,7 @@ const Timeline = ({
       if (!isDragging.current) return;
       
       const x = e.pageX - container.offsetLeft;
-      const walk = (x - startX.current) * 2;
+      const walk = (x - startX.current);
       
       // Only start "dragging" (blocking clicks) if moved more than 5px
       if (Math.abs(x - startX.current) > 5) {
