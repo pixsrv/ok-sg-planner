@@ -470,3 +470,27 @@ input:disabled + .slider {
 .slider.round:before {
   border-radius: 50%;
 }
+
+/* Hide scrollbar for Timeline */
+.cursor-grab::-webkit-scrollbar {
+  display: none;
+}
+
+.cursor-grab {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.active-dragging {
+  cursor: grabbing !important;
+  user-select: none;
+}
+
+.active-dragging * {
+  pointer-events: none;
+}
+
+.timeline-week-selected {
+  background-color: var(--accent-bg) !important;
+  box-shadow: inset 0 -3px 0 0 var(--accent) !important;
+}

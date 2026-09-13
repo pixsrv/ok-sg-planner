@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import {useState} from 'react';
 import {formatDate, formatTime} from '../utils/formatters';
 import Timeline from '../components/Timeline';
 
@@ -34,6 +34,7 @@ const WeekView = ({ employees, settings }) => {
   };
 
   const startOfWeek = getStartOfWeek(referenceDate);
+  const currentWeekNumber = getWeekNumber(startOfWeek);
   const weekDays = [];
   const dayNames = settings?.weekStart === 'Sunday' 
     ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -62,10 +63,9 @@ const WeekView = ({ employees, settings }) => {
 
   const handleWeekClick = (weekNum) => {
     // Find a date in the selected year that corresponds to weekNum
-    const year = selectedYear;
     // Simple way to find a date in a given ISO week:
     // 1. Start at Jan 4th (which is always in week 1)
-    const d = new Date(year, 0, 4);
+    const d = new Date(selectedYear, 0, 4);
     // 2. Adjust to the Monday of that week
     const day = d.getDay();
     const diff = d.getDate() - day + (day === 0 ? -6 : 1);
@@ -77,8 +77,7 @@ const WeekView = ({ employees, settings }) => {
 
   const handleMonthClick = (monthIndex) => {
     // monthIndex is 1-12
-    const year = selectedYear;
-    const d = new Date(year, monthIndex - 1, 1);
+    const d = new Date(selectedYear, monthIndex - 1, 1);
     setReferenceDate(d);
   };
 
@@ -100,6 +99,7 @@ const WeekView = ({ employees, settings }) => {
     <div className="view-container">
       <Timeline 
         year={selectedYear} 
+        selectedWeek={currentWeekNumber}
         onWeekClick={handleWeekClick}
         onMonthClick={handleMonthClick}
       />
