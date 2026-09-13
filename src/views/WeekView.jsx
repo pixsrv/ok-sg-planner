@@ -1,7 +1,11 @@
-import 'react';
+import { useState } from 'react';
 import {formatDate, formatTime} from '../utils/formatters';
+import Timeline from '../components/Timeline';
 
 const WeekView = ({ employees, settings }) => {
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [referenceDate, setReferenceDate] = useState(new Date());
+
   // Helper to get start of current week
   const getStartOfWeek = (date) => {
     const d = new Date(date);
@@ -29,8 +33,7 @@ const WeekView = ({ employees, settings }) => {
     return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
   };
 
-  const today = new Date();
-  const startOfWeek = getStartOfWeek(today);
+  const startOfWeek = getStartOfWeek(referenceDate);
   const weekDays = [];
   const dayNames = settings?.weekStart === 'Sunday' 
     ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -46,10 +49,44 @@ const WeekView = ({ employees, settings }) => {
     });
   }
 
+  const handleYearChange = (year) => {
+    const yearNum = parseInt(year, 10);
+    setSelectedYear(yearNum);
+    
+    // If we change year, we should also update referenceDate to stay within that year
+    // Try to keep the same month and day, but in the new year
+    const newDate = new Date(referenceDate);
+    newDate.setFullYear(yearNum);
+    setReferenceDate(newDate);
+  };
+
+  const handleWeekClick = (weekNum) => {
+    // Find a date in the selected year that corresponds to weekNum
+    const year = selectedYear;
+    // Simple way to find a date in a given ISO week:
+    // 1. Start at Jan 4th (which is always in week 1)
+    const d = new Date(year, 0, 4);
+    // 2. Adjust to the Monday of that week
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    d.setDate(diff);
+    // 3. Add (weekNum - 1) * 7 days
+    d.setDate(d.getDate() + (weekNum - 1) * 7);
+    setReferenceDate(d);
+  };
+
+  const handleMonthClick = (monthIndex) => {
+    // monthIndex is 1-12
+    const year = selectedYear;
+    const d = new Date(year, monthIndex - 1, 1);
+    setReferenceDate(d);
+  };
+
   const employeeList = Object.values(employees || {});
 
   const getCurrentPosition = (emp) => {
     if (!emp.terms || emp.terms.length === 0) return '';
+    const today = new Date();
     const todayStr = today.toISOString().split('T')[0];
     const currentTerm = emp.terms.find(term => {
       const from = term.validFrom;
@@ -61,8 +98,24 @@ const WeekView = ({ employees, settings }) => {
 
   return (
     <div className="view-container">
+      <Timeline 
+        year={selectedYear} 
+        onWeekClick={handleWeekClick}
+        onMonthClick={handleMonthClick}
+      />
       <div className="week-view-header">
-        <h1>Week View</h1>
+        <div className="flex items-center gap-4">
+          <h1>Week View</h1>
+          <select 
+            className="year-selector bg-[var(--bg)] border border-[var(--border)] rounded px-2 py-1 text-sm font-semibold"
+            value={selectedYear}
+            onChange={(e) => handleYearChange(e.target.value)}
+          >
+            {[selectedYear - 2, selectedYear - 1, selectedYear, selectedYear + 1, selectedYear + 2].map(y => (
+              <option key={y} value={y}>{y}</option>
+            ))}
+          </select>
+        </div>
         <div className="week-info">
           Week {weekDays[0]?.weekNumber} ({weekDays[0]?.date} - {weekDays[6]?.date})
         </div>
