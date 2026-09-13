@@ -48,6 +48,17 @@ const WeekView = ({ employees, settings }) => {
 
   const employeeList = Object.values(employees || {});
 
+  const getCurrentPosition = (emp) => {
+    if (!emp.terms || emp.terms.length === 0) return '';
+    const todayStr = today.toISOString().split('T')[0];
+    const currentTerm = emp.terms.find(term => {
+      const from = term.validFrom;
+      const to = term.validTo || '9999-12-31';
+      return todayStr >= from && todayStr <= to;
+    }) || emp.terms[emp.terms.length - 1];
+    return currentTerm?.position || '';
+  };
+
   return (
     <div className="view-container">
       <div className="week-view-header">
@@ -78,7 +89,10 @@ const WeekView = ({ employees, settings }) => {
               employeeList.map((emp, idx) => (
                 <tr key={idx} className="employee-row">
                   <td className="employee-name-cell">
-                    {emp.firstName} {emp.lastName}
+                    <div className="employee-info-wrapper">
+                      <div className="employee-full-name">{emp.firstName} {emp.lastName}</div>
+                      <div className="employee-position">{getCurrentPosition(emp)}</div>
+                    </div>
                   </td>
                   {weekDays.map((_, dayIdx) => (
                     <td key={dayIdx} className="day-cell">

@@ -217,6 +217,10 @@
   padding: 0.75rem;
 }
 
+.day-cell {
+  text-align: center;
+}
+
 .employee-col-header,
 .employee-name-cell {
   position: sticky;
@@ -224,7 +228,28 @@
   background: var(--bg);
   z-index: 10;
   min-width: 200px;
+}
+
+.employee-col-header {
   font-weight: 600;
+}
+
+.employee-info-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.employee-full-name {
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.employee-position {
+  font-size: 0.75rem;
+  color: var(--text);
+  font-weight: 400;
+  opacity: 0.8;
 }
 
 .day-col-header {
@@ -264,6 +289,7 @@
 .time-inputs {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 0.5rem;
 }
 
