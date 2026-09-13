@@ -1,4 +1,4 @@
-import  { useMemo, useRef, useEffect } from 'react';
+import {useEffect, useMemo, useRef} from 'react';
 
 const getISOWeek = (d, anchorYear) => {
   const date = new Date(d.getTime());
@@ -13,7 +13,7 @@ const Timeline = ({
   year = new Date().getFullYear(),
   selectedWeek,
   onMonthClick,
-  onWeekClick
+  onWeekClick,
 }) => {
   const scrollContainerRef = useRef(null);
   const isDragging = useRef(false);
@@ -39,7 +39,7 @@ const Timeline = ({
 
     const handleMouseUp = () => {
       isDragging.current = false;
-      
+
       if (container.classList.contains('active-dragging')) {
         // If we WERE dragging, we keep the class for a tiny bit 
         // to block the click event via pointer-events: none.
@@ -51,10 +51,10 @@ const Timeline = ({
 
     const handleMouseMove = (e) => {
       if (!isDragging.current) return;
-      
+
       const x = e.pageX - container.offsetLeft;
       const walk = (x - startX.current);
-      
+
       // Only start "dragging" (blocking clicks) if moved more than 5px
       if (Math.abs(x - startX.current) > 5) {
         container.classList.add('active-dragging');
@@ -69,6 +69,7 @@ const Timeline = ({
     const handleWheel = (e) => {
       if (e.deltaY !== 0) {
         e.preventDefault();
+        // noinspection JSSuspiciousNameCombination
         container.scrollLeft += e.deltaY;
       }
     };
@@ -77,7 +78,7 @@ const Timeline = ({
     container.addEventListener('mouseleave', handleMouseLeave);
     container.addEventListener('mouseup', handleMouseUp);
     container.addEventListener('mousemove', handleMouseMove);
-    container.addEventListener('wheel', handleWheel, { passive: false });
+    container.addEventListener('wheel', handleWheel, {passive: false});
     return () => {
       container.removeEventListener('mousedown', handleMouseDown);
       container.removeEventListener('mouseleave', handleMouseLeave);
@@ -87,13 +88,13 @@ const Timeline = ({
     };
   }, []);
 
-  const { months, weeks } = useMemo(() => {
+  const {months, weeks} = useMemo(() => {
     const isLeap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
     const totalDays = isLeap ? 366 : 365;
 
     const monthNames = [
       'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      'July', 'August', 'September', 'October', 'November', 'December',
     ];
     const monthDays = [31, isLeap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
@@ -103,7 +104,7 @@ const Timeline = ({
         name,
         index: i + 1,
         widthPercent: (monthDays[i] / totalDays) * 100,
-        leftPercent: (daysBefore / totalDays) * 100
+        leftPercent: (daysBefore / totalDays) * 100,
       };
     });
 
@@ -125,17 +126,17 @@ const Timeline = ({
       weeksData.push({
         num: weekNum,
         widthPercent: (7 / totalDays) * 100,
-        leftPercent: (diffDays / totalDays) * 100
+        leftPercent: (diffDays / totalDays) * 100,
       });
 
       currentDate.setDate(currentDate.getDate() + 7);
     }
 
-    return { months: monthsData, weeks: weeksData };
+    return {months: monthsData, weeks: weeksData};
   }, [year]);
 
   return (
-    <div 
+    <div
       ref={scrollContainerRef}
       className="w-full overflow-x-auto overflow-y-hidden border border-[var(--border)] bg-[var(--code-bg)] mb-6 rounded-lg shadow-sm cursor-grab"
     >
@@ -154,13 +155,13 @@ const Timeline = ({
               className="absolute top-0 h-[40px] flex items-center justify-center cursor-pointer select-none hover:bg-[var(--accent-bg)] hover:text-[var(--accent)] bg-[var(--code-bg)] border-b border-[var(--border)] transition-colors"
               style={{
                 left: `${month.leftPercent}%`,
-                width: `${month.widthPercent}%`
+                width: `${month.widthPercent}%`,
               }}
               onClick={handleClick}
             >
               <span className="text-sm font-semibold truncate px-2 text-[var(--text-h)]">{month.name}</span>
               {idx < months.length - 1 && (
-                <div className="absolute right-0 top-0 w-[1px] h-[40px] bg-[var(--border)] z-20" />
+                <div className="absolute right-0 top-0 w-[1px] h-[40px] bg-[var(--border)] z-20"/>
               )}
             </div>
           );
@@ -181,13 +182,14 @@ const Timeline = ({
               className={`absolute top-[40px] h-[40px] flex items-center justify-center cursor-pointer select-none hover:bg-[var(--accent-bg)] hover:text-[var(--accent)] bg-[var(--code-bg)] transition-colors ${isSelected ? 'timeline-week-selected' : ''}`}
               style={{
                 left: `${week.leftPercent}%`,
-                width: `${week.widthPercent}%`
+                width: `${week.widthPercent}%`,
               }}
               onClick={handleClick}
             >
-              <span className={`text-xs px-1 transition-colors ${isSelected ? 'text-[var(--accent)]' : 'text-[var(--text)]'} ${idx === weeks.length - 1 ? '' : 'truncate'}`}>{week.num}</span>
+              <span
+                className={`text-xs px-1 transition-colors ${isSelected ? 'text-[var(--accent)]' : 'text-[var(--text)]'} ${idx === weeks.length - 1 ? '' : 'truncate'}`}>{week.num}</span>
               {idx < weeks.length - 1 && (
-                <div className="absolute right-0 bottom-0 w-[1px] h-[40px] bg-[var(--border)] z-20" />
+                <div className="absolute right-0 bottom-0 w-[1px] h-[40px] bg-[var(--border)] z-20"/>
               )}
             </div>
           );
