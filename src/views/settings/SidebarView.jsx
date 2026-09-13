@@ -122,11 +122,7 @@ const SidebarView = ({ settings, onSettingChange }) => {
 
       <div className="settings-panel">
         <h3>Folding</h3>
-        <div className="setting-item flex items-center justify-between p-4 bg-[var(--bg)] border border-[var(--border)] rounded-lg">
-          <div>
-            <div className="font-semibold text-[var(--text-h)]">Start with folded sidebar</div>
-            <div className="text-sm text-[var(--text-light)]">If enabled, the sidebar will be collapsed when the application starts.</div>
-          </div>
+        <div className="flex items-center gap-4">
           <label className="switch">
             <input 
               type="checkbox" 
@@ -135,6 +131,10 @@ const SidebarView = ({ settings, onSettingChange }) => {
             />
             <span className="slider round"></span>
           </label>
+          <div>
+            <div className="font-semibold text-[var(--text-h)]">Start with folded sidebar</div>
+            <div className="text-sm text-[var(--text-light)]">If enabled, the sidebar will be collapsed when the application starts.</div>
+          </div>
         </div>
       </div>
     </div>
