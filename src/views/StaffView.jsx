@@ -38,7 +38,7 @@ const StaffView = ({employees = {}, settings}) => {
 
   return (
     <div className="view-container">
-      <div className="flex justify-end items-center mb-6">
+      <div className="week-view-header">
         <div className="flex items-center gap-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-light)]"/>
@@ -64,9 +64,9 @@ const StaffView = ({employees = {}, settings}) => {
               </button>
             )}
           </div>
-          <div className="text-sm text-[var(--text-light)] ml-2">
-            Total Employees: {filteredEmployees.length}
-          </div>
+        </div>
+        <div className="text-sm text-[var(--text-light)]">
+          Total Employees: {filteredEmployees.length}
         </div>
       </div>
 

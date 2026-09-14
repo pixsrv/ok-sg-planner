@@ -1,9 +1,11 @@
 import {useState, useEffect} from 'react';
+import {Calendar, Search, X} from 'lucide-react';
 import {formatDate, formatTime} from '../utils/formatters';
 import Timeline from '../components/Timeline';
+import DateOmnibox from '../components/DateOmnibox';
 
 const WeekView = ({ employees, settings }) => {
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [employeeSearchQuery, setEmployeeSearchQuery] = useState('');
   const [referenceDate, setReferenceDate] = useState(() => {
     // Try to load from localStorage
     try {
@@ -89,7 +91,6 @@ const WeekView = ({ employees, settings }) => {
 
   const handleYearChange = (year) => {
     const yearNum = parseInt(year, 10);
-    setSelectedYear(yearNum);
     
     // If we change year, we should also update referenceDate to stay within that year
     // Try to keep the same month and day, but in the new year
@@ -99,11 +100,7 @@ const WeekView = ({ employees, settings }) => {
   };
 
   const handleWeekClick = (weekNum, weekYear) => {
-    // If weekYear is provided, we might need to change the selected year
-    if (weekYear && weekYear !== selectedYear) {
-      setSelectedYear(weekYear);
-    }
-    const yearToUse = weekYear || selectedYear;
+    const yearToUse = weekYear || currentWeekYear;
     
     // Find a date in the selected year that corresponds to weekNum
     // Simple way to find a date in a given ISO week:
@@ -119,18 +116,59 @@ const WeekView = ({ employees, settings }) => {
   };
 
   const handleMonthClick = (monthIndex, monthYear) => {
-    // If monthYear is provided, we might need to change the selected year
-    if (monthYear && monthYear !== selectedYear) {
-      setSelectedYear(monthYear);
-    }
-    const yearToUse = monthYear || selectedYear;
+    const yearToUse = monthYear || currentWeekYear;
     
     // monthIndex is 1-12
     const d = new Date(yearToUse, monthIndex - 1, 1);
     setReferenceDate(d);
   };
 
-  const employeeList = Object.values(employees || {});
+  const handleDateSelect = (selection) => {
+    if (selection.date) {
+      setReferenceDate(selection.date);
+    } else if (selection.type === 'year') {
+      handleYearChange(selection.year);
+    } else if (selection.weekNum) {
+      handleWeekClick(selection.weekNum, selection.year);
+    } else if (selection.monthIndex) {
+      handleMonthClick(selection.monthIndex, selection.year);
+    }
+  };
+
+  const handleTodayClick = () => {
+    setReferenceDate(new Date());
+  };
+
+  const handleClearEmployeeSearch = () => {
+    setEmployeeSearchQuery('');
+  };
+
+  const employeeList = Object.entries(employees || {});
+
+  const filteredEmployees = employeeList.filter(([id, data]) => {
+    if (!employeeSearchQuery) return true;
+
+    const terms = employeeSearchQuery.toLowerCase().split(/\s+/).filter(term => term.length > 0);
+    if (terms.length === 0) return true;
+
+    // Every term must be found in at least one field
+    return terms.every(term => {
+      // Check ID
+      if (id.toLowerCase().includes(term)) return true;
+
+      // Check top-level employee data
+      if (data.firstName?.toLowerCase().includes(term)) return true;
+      if (data.lastName?.toLowerCase().includes(term)) return true;
+
+      // Check terms
+      return data.terms?.some(t =>
+        t.position?.toLowerCase().includes(term) ||
+        t.fte?.toString().toLowerCase().includes(term) ||
+        formatDate(t.validFrom, settings?.dateFormat)?.toLowerCase().includes(term) ||
+        (t.validTo ? formatDate(t.validTo, settings?.dateFormat) : 'present').toLowerCase().includes(term),
+      );
+    });
+  });
 
   const getCurrentPosition = (emp) => {
     if (!emp.terms || emp.terms.length === 0) return '';
@@ -147,7 +185,7 @@ const WeekView = ({ employees, settings }) => {
   return (
     <div className="view-container">
       <Timeline 
-        year={selectedYear} 
+        year={currentWeekYear} 
         selectedWeek={currentWeekNumber}
         onWeekClick={handleWeekClick}
         onMonthClick={handleMonthClick}
@@ -155,15 +193,44 @@ const WeekView = ({ employees, settings }) => {
       />
       <div className="week-view-header">
         <div className="flex items-center gap-4">
-          <select 
-            className="year-selector bg-[var(--bg)] border border-[var(--border)] rounded px-2 py-1 text-sm font-semibold"
-            value={selectedYear}
-            onChange={(e) => handleYearChange(e.target.value)}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-light)]"/>
+            <input
+              type="text"
+              placeholder="Search employees..."
+              className="pl-10 pr-10 py-2 bg-[var(--bg)] border border-[var(--border)] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] w-64"
+              value={employeeSearchQuery}
+              onChange={(e) => setEmployeeSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  handleClearEmployeeSearch();
+                }
+              }}
+            />
+            {employeeSearchQuery && (
+              <button
+                onClick={handleClearEmployeeSearch}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-light)] hover:text-[var(--text)] transition-colors"
+                title="Clear search"
+              >
+                <X className="w-4 h-4"/>
+              </button>
+            )}
+          </div>
+          <DateOmnibox 
+            selectedWeek={currentWeekNumber}
+            selectedYear={currentWeekYear}
+            onDateSelect={handleDateSelect}
+            settings={settings}
+          />
+          <button 
+            className="today-button flex items-center gap-2 px-3 py-2 bg-[var(--bg)] border border-[var(--border)] rounded-md text-sm font-medium text-[var(--text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-border)] transition-colors"
+            onClick={handleTodayClick}
+            title="Go to today"
           >
-            {[selectedYear - 2, selectedYear - 1, selectedYear, selectedYear + 1, selectedYear + 2].map(y => (
-              <option key={y} value={y}>{y}</option>
-            ))}
-          </select>
+            <Calendar className="w-4 h-4 text-[var(--accent)]" />
+            <span>Today</span>
+          </button>
         </div>
         <div className="week-info">
           Week {weekDays[0]?.weekData.weekNum} ({weekDays[0]?.date} - {weekDays[6]?.date})
@@ -187,8 +254,8 @@ const WeekView = ({ employees, settings }) => {
             </tr>
           </thead>
           <tbody>
-            {employeeList.length > 0 ? (
-              employeeList.map((emp, idx) => (
+            {filteredEmployees.length > 0 ? (
+              filteredEmployees.map(([, emp], idx) => (
                 <tr key={idx} className="employee-row">
                   <td className="employee-name-cell">
                     <div className="employee-info-wrapper">

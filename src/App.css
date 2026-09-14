@@ -187,14 +187,13 @@
 .week-view-header {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
   margin-bottom: 0.5rem;
 }
 
 .week-info {
-  font-size: 1.2rem;
-  color: var(--text);
-  font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--text-light);
 }
 
 .week-grid-wrapper {
@@ -314,6 +313,15 @@
   padding: 2rem;
   color: var(--text);
   font-style: italic;
+}
+
+.today-button {
+  cursor: pointer;
+  line-height: 1.25rem;
+}
+
+.today-button:active {
+  transform: translateY(1px);
 }
 
 /* Settings Styles */
