@@ -21,15 +21,6 @@ const SideBar = ({ currentView, onViewChange, sidebarSettings, isCollapsed, onTo
 
   return (
     <aside className={`side-bar ${isCollapsed ? 'collapsed' : ''}`}>
-      <div className="toggle-container">
-        <button 
-          className="toggle-button" 
-          onClick={onToggle} 
-          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-        </button>
-      </div>
       <nav>
         <ul>
           {items.map((item) => (
@@ -45,6 +36,15 @@ const SideBar = ({ currentView, onViewChange, sidebarSettings, isCollapsed, onTo
           ))}
         </ul>
       </nav>
+      <div className="toggle-container">
+        <button 
+          className="toggle-button" 
+          onClick={onToggle} 
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+        </button>
+      </div>
     </aside>
   );
 };
