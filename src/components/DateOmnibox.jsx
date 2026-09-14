@@ -257,7 +257,16 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect}) => {
       }
     }
 
-    // 3. Month name recognition
+    // 3. Today recognition
+    if ('today'.startsWith(input)) {
+      matches.push({
+        type: 'today',
+        label: 'Today',
+        value: new Date()
+      });
+    }
+
+    // 4. Month name recognition
     const monthNamesLower = MONTH_NAMES.map(m => m.toLowerCase());
     
     monthNamesLower.forEach((name, index) => {
@@ -295,6 +304,8 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect}) => {
       onDateSelect({ monthIndex: result.monthIndex, year: result.year });
     } else if (result.type === 'year') {
       onDateSelect({ type: 'year', year: result.year });
+    } else if (result.type === 'today') {
+      onDateSelect({ date: result.value });
     } else if (result.type === 'move') {
       const contextDate = getDateFromWeek(selectedWeek, selectedYear);
       let targetDate;
