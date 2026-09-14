@@ -101,6 +101,52 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect}) => {
       });
     }
 
+    // Relative movement: "-2", "+3", "+2m", "-1w", etc.
+    const relMatch = input.match(/^([-+])(\d+)([dwmy]?)$/);
+    if (relMatch) {
+      const sign = relMatch[1];
+      const amount = parseInt(relMatch[2], 10);
+      const unit = relMatch[3];
+      const isBack = sign === '-';
+      const labelPrefix = isBack ? 'Move back' : 'Move forward';
+      
+      if (!unit || unit === 'd') {
+        matches.push({
+          type: 'move',
+          unit: 'days',
+          amount: isBack ? -amount : amount,
+          label: `${labelPrefix} ${amount} day${amount !== 1 ? 's' : ''}`
+        });
+      }
+
+      if (!unit || unit === 'w') {
+        matches.push({
+          type: 'move',
+          unit: 'weeks',
+          amount: isBack ? -amount : amount,
+          label: `${labelPrefix} ${amount} week${amount !== 1 ? 's' : ''}`
+        });
+      }
+
+      if (!unit || unit === 'm') {
+        matches.push({
+          type: 'move',
+          unit: 'months',
+          amount: isBack ? -amount : amount,
+          label: `${labelPrefix} ${amount} month${amount !== 1 ? 's' : ''}`
+        });
+      }
+
+      if (!unit || unit === 'y') {
+        matches.push({
+          type: 'move',
+          unit: 'years',
+          amount: isBack ? -amount : amount,
+          label: `${labelPrefix} ${amount} year${amount !== 1 ? 's' : ''}`
+        });
+      }
+    }
+
     // Space separator: "m7 d24"
     const mdMatch = input.match(/^m(\d+)\s+d(\d+)$/);
     if (mdMatch) {
@@ -249,6 +295,27 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect}) => {
       onDateSelect({ monthIndex: result.monthIndex, year: result.year });
     } else if (result.type === 'year') {
       onDateSelect({ type: 'year', year: result.year });
+    } else if (result.type === 'move') {
+      const contextDate = getDateFromWeek(selectedWeek, selectedYear);
+      let targetDate;
+      
+      if (result.unit === 'days') {
+        targetDate = new Date(contextDate);
+        targetDate.setDate(contextDate.getDate() + result.amount);
+      } else if (result.unit === 'weeks') {
+        targetDate = new Date(contextDate);
+        targetDate.setDate(contextDate.getDate() + (result.amount * 7));
+      } else if (result.unit === 'months') {
+        targetDate = new Date(contextDate);
+        targetDate.setMonth(contextDate.getMonth() + result.amount);
+      } else if (result.unit === 'years') {
+        targetDate = new Date(contextDate);
+        targetDate.setFullYear(contextDate.getFullYear() + result.amount);
+      }
+      
+      if (targetDate) {
+        onDateSelect({ date: targetDate });
+      }
     }
     setQuery('');
     setIsOpen(false);
