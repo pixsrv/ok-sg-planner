@@ -70,7 +70,7 @@ const WeekView = ({ employees, settings }) => {
     } catch (e) {
       console.error('Failed to save ok-sg-current to localStorage', e);
     }
-  }, [currentWeekNumber]);
+  }, [currentWeekNumber, currentWeekYear]);
 
   const weekDays = [];
   const dayNames = settings?.weekStart === 'Sunday' 

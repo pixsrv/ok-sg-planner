@@ -104,7 +104,7 @@ const Timeline = ({
       const diffDays = (firstDayOfMonth.getTime() - startDate.getTime()) / 86400000;
       
       monthsData.push({
-        name: mYear !== year ? `${mName} ${mYear}` : mName,
+        name: `${mName} '${String(mYear).slice(-2)}`,
         index: mIndex + 1,
         year: mYear,
         isAdditional: mYear !== year,
