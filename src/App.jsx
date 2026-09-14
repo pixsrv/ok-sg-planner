@@ -81,7 +81,7 @@ function App() {
           }
         }
       } catch (error) {
-        console.error('Failed to load data from IndexedDB:', error);
+        console.error('Failed to load data from localStorage:', error);
       }
     };
 
@@ -104,7 +104,7 @@ function App() {
         await saveItem('months', month.name, month);
       }
     }
-    console.log('Data loaded and saved to IndexedDB:', data);
+    console.log('Data loaded and saved to localStorage:', data);
   };
 
   const handleSettingChange = (key, value) => {
