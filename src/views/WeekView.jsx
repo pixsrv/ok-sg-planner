@@ -135,6 +135,7 @@ const WeekView = ({ employees, settings }) => {
         selectedWeek={currentWeekNumber}
         onWeekClick={handleWeekClick}
         onMonthClick={handleMonthClick}
+        settings={settings}
       />
       <div className="week-view-header">
         <div className="flex items-center gap-4">

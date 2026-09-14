@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useRef} from 'react';
+import {useEffect, useMemo, useRef, useState} from 'react';
 
 const getISOWeek = (d, anchorYear) => {
   const date = new Date(d.getTime());
@@ -14,11 +14,63 @@ const Timeline = ({
   selectedWeek,
   onMonthClick,
   onWeekClick,
+  settings,
 }) => {
   const scrollContainerRef = useRef(null);
   const isDragging = useRef(false);
   const startX = useRef(0);
   const scrollLeft = useRef(0);
+  const [hoveredWeek, setHoveredWeek] = useState(null);
+
+  const getWeekRange = (weekNum, yr) => {
+    const d = new Date(yr, 0, 4);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+    d.setDate(diff + (weekNum - 1) * 7);
+
+    const start = new Date(d);
+    const end = new Date(d);
+    end.setDate(end.getDate() + 6);
+
+    const format = settings?.dateFormat || 'YYYY-MM-DD';
+    const showYear = start.getFullYear() !== end.getFullYear();
+
+    const formatDateCustom = (date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+
+      let result;
+      switch (format) {
+        case 'YYYY-MM-DD':
+          result = showYear ? `${year}-${month}-${day}` : `${month}-${day}`;
+          break;
+        case 'YYYY/MM/DD':
+          result = showYear ? `${year}/${month}/${day}` : `${month}/${day}`;
+          break;
+        case 'DD-MM-YYYY':
+          result = showYear ? `${day}-${month}-${year}` : `${day}-${month}`;
+          break;
+        case 'MM/DD/YYYY':
+          result = showYear ? `${month}/${day}/${year}` : `${month}/${day}`;
+          break;
+        case 'DD.MM.YYYY':
+          result = showYear ? `${day}.${month}.${year}` : `${day}.${month}`;
+          break;
+        default:
+          if (format.startsWith('YYYY')) {
+            const separator = format.charAt(4);
+            result = showYear ? `${year}${separator}${month}${separator}${day}` : `${month}${separator}${day}`;
+          } else {
+            // Assume format like DD-MM-YYYY
+            result = showYear ? `${day}-${month}-${year}` : `${day}-${month}`;
+          }
+      }
+      return result;
+    };
+
+    return `${formatDateCustom(start)} - ${formatDateCustom(end)}`;
+  };
 
   const {months, weeks} = useMemo(() => {
     const isLeap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
@@ -116,8 +168,12 @@ const Timeline = ({
     const handleWheel = (e) => {
       if (e.deltaY !== 0) {
         e.preventDefault();
+        // Use scrollBy with smooth behavior for fluent wheel scroll
         // noinspection JSSuspiciousNameCombination
-        container.scrollLeft += e.deltaY;
+        container.scrollBy({
+          left: e.deltaY,
+          behavior: 'smooth',
+        });
       }
     };
 
@@ -126,6 +182,7 @@ const Timeline = ({
     container.addEventListener('mouseup', handleMouseUp);
     container.addEventListener('mousemove', handleMouseMove);
     container.addEventListener('wheel', handleWheel, {passive: false});
+
     return () => {
       container.removeEventListener('mousedown', handleMouseDown);
       container.removeEventListener('mouseleave', handleMouseLeave);
@@ -139,12 +196,14 @@ const Timeline = ({
     const container = scrollContainerRef.current;
     if (!container) return;
 
+    let animationFrameId = null;
+
     const currentYear = new Date().getFullYear();
     if (year === currentYear && selectedWeek) {
       const selectedWeekData = weeks.find(w => w.num === selectedWeek);
       if (selectedWeekData) {
         const containerWidth = container.offsetWidth;
-// The inner relative div has min-w-[1700px] and mx-8 (32px total margin)
+        // The inner relative div has min-w-[1700px] and mx-8 (32px total margin)
         // We need to find the pixel position of the week.
         // week.leftPercent is relative to the inner content width.
         const innerContent = container.querySelector('.relative');
@@ -153,78 +212,113 @@ const Timeline = ({
           const weekLeft = (selectedWeekData.leftPercent / 100) * contentWidth;
           const weekLeftWithMargin = weekLeft + 32; // mx-8 is 2rem (32px)
           const weekWidth = (selectedWeekData.widthPercent / 100) * contentWidth;
-          
+
           // Center the week: weekLeftWithMargin + weekWidth/2 - containerWidth/2
           const targetScroll = weekLeftWithMargin + (weekWidth / 2) - (containerWidth / 2);
-          
-          container.scrollTo({
-            left: targetScroll,
-            behavior: 'smooth'
-          });
+
+          // Fluent animated scroll using requestAnimationFrame
+          const startScroll = container.scrollLeft;
+          const distance = targetScroll - startScroll;
+          const duration = 400; // ms
+          let startTime = null;
+
+          const animate = (currentTime) => {
+            if (!startTime) startTime = currentTime;
+            const timeElapsed = currentTime - startTime;
+            const progress = Math.min(timeElapsed / duration, 1);
+
+            // Easing function: easeOutQuad
+            const easeProgress = progress * (2 - progress);
+
+            container.scrollLeft = startScroll + distance * easeProgress;
+
+            if (timeElapsed < duration) {
+              animationFrameId = requestAnimationFrame(animate);
+            }
+          };
+
+          animationFrameId = requestAnimationFrame(animate);
         }
       }
     }
+
+    return () => {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
   }, [selectedWeek, year, weeks]);
 
   return (
-    <div
-      ref={scrollContainerRef}
-      className="w-full overflow-x-auto overflow-y-hidden border border-[var(--border)] bg-[var(--code-bg)] mb-6 rounded-lg shadow-sm cursor-grab"
-    >
-      <div className="relative mx-8 min-w-[1700px] h-[80px] overflow-visible">
-        {months.map((month, idx) => {
-          const handleClick = () => {
-            // Only trigger click if we are not in a drag state
-            if (!scrollContainerRef.current?.classList.contains('active-dragging')) {
-              onMonthClick && onMonthClick(month.index);
-            }
-          };
+    <div className="flex flex-col mb-6">
+      <div
+        ref={scrollContainerRef}
+        className="w-full overflow-x-auto overflow-y-hidden border border-[var(--border)] bg-[var(--code-bg)] rounded-lg shadow-sm cursor-grab"
+      >
+        <div className="relative mx-8 min-w-[1700px] h-[80px] overflow-visible">
+          {months.map((month, idx) => {
+            const handleClick = () => {
+              // Only trigger click if we are not in a drag state
+              if (!scrollContainerRef.current?.classList.contains('active-dragging')) {
+                onMonthClick && onMonthClick(month.index);
+              }
+            };
 
-          return (
-            <div
-              key={`m-${month.index}`}
-              className="absolute top-0 h-[40px] flex items-center justify-center cursor-pointer select-none hover:bg-[var(--accent-bg)] hover:text-[var(--accent)] bg-[var(--code-bg)] border-b border-[var(--border)] transition-colors"
-              style={{
-                left: `${month.leftPercent}%`,
-                width: `${month.widthPercent}%`,
-              }}
-              onClick={handleClick}
-            >
-              <span className="text-sm font-semibold truncate px-2 text-[var(--text-h)]">{month.name}</span>
-              {idx < months.length - 1 && (
-                <div className="absolute right-0 top-0 w-[1px] h-[40px] bg-[var(--border)] z-20"/>
-              )}
-            </div>
-          );
-        })}
+            return (
+              <div
+                key={`m-${month.index}`}
+                className="absolute top-0 h-[40px] flex items-center justify-center cursor-pointer select-none hover:bg-[var(--accent-bg)] hover:text-[var(--accent)] bg-[var(--code-bg)] border-b border-[var(--border)] transition-colors"
+                style={{
+                  left: `${month.leftPercent}%`,
+                  width: `${month.widthPercent}%`,
+                }}
+                onClick={handleClick}
+              >
+                <span className="text-sm font-semibold truncate px-2 text-[var(--text-h)]">{month.name}</span>
+                {idx < months.length - 1 && (
+                  <div className="absolute right-0 top-0 w-[1px] h-[40px] bg-[var(--border)] z-20"/>
+                )}
+              </div>
+            );
+          })}
 
-        {weeks.map((week, idx) => {
-          const isSelected = week.num === selectedWeek;
-          const handleClick = () => {
-            // Only trigger click if we are not in a drag state
-            if (!scrollContainerRef.current?.classList.contains('active-dragging')) {
-              onWeekClick && onWeekClick(week.num);
-            }
-          };
+          {weeks.map((week, idx) => {
+            const isSelected = week.num === selectedWeek;
+            const handleClick = () => {
+              // Only trigger click if we are not in a drag state
+              if (!scrollContainerRef.current?.classList.contains('active-dragging')) {
+                onWeekClick && onWeekClick(week.num);
+              }
+            };
 
-          return (
-            <div
-              key={`w-${week.num}-${idx}`}
-              className={`absolute top-[40px] h-[40px] flex items-center justify-center cursor-pointer select-none hover:bg-[var(--accent-bg)] hover:text-[var(--accent)] bg-[var(--code-bg)] transition-colors ${isSelected ? 'timeline-week-selected' : ''}`}
-              style={{
-                left: `${week.leftPercent}%`,
-                width: `${week.widthPercent}%`,
-              }}
-              onClick={handleClick}
-            >
-              <span
-                className={`text-xs px-1 transition-colors ${isSelected ? 'text-[var(--accent)]' : 'text-[var(--text)]'} ${idx === weeks.length - 1 ? '' : 'truncate'}`}>{week.num}</span>
-              {idx < weeks.length - 1 && (
-                <div className="absolute right-0 bottom-0 w-[1px] h-[40px] bg-[var(--border)] z-20"/>
-              )}
-            </div>
-          );
-        })}
+            return (
+              <div
+                key={`w-${week.num}-${idx}`}
+                className={`absolute top-[40px] h-[40px] flex items-center justify-center cursor-pointer select-none hover:bg-[var(--accent-bg)] hover:text-[var(--accent)] bg-[var(--code-bg)] transition-colors ${isSelected ? 'timeline-week-selected' : ''}`}
+                style={{
+                  left: `${week.leftPercent}%`,
+                  width: `${week.widthPercent}%`,
+                }}
+                onClick={handleClick}
+                onMouseEnter={() => setHoveredWeek(week.num)}
+                onMouseLeave={() => setHoveredWeek(null)}
+              >
+                <span
+                  className={`text-xs px-1 transition-colors ${isSelected ? 'text-[var(--accent)]' : 'text-[var(--text)]'} ${idx === weeks.length - 1 ? '' : 'truncate'}`}>{week.num}</span>
+                {idx < weeks.length - 1 && (
+                  <div className="absolute right-0 bottom-0 w-[1px] h-[40px] bg-[var(--border)] z-20"/>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <div className="h-4 mt-1 flex justify-end">
+        {hoveredWeek && (
+          <span className="text-xs text-[var(--text)] opacity-70 px-2">
+            Week {hoveredWeek}: {getWeekRange(hoveredWeek, year)}
+          </span>
+        )}
       </div>
     </div>
   );
