@@ -20,6 +20,53 @@ const Timeline = ({
   const startX = useRef(0);
   const scrollLeft = useRef(0);
 
+  const {months, weeks} = useMemo(() => {
+    const isLeap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+    const totalDays = isLeap ? 366 : 365;
+
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December',
+    ];
+    const monthDays = [31, isLeap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+    const monthsData = monthNames.map((name, i) => {
+      const daysBefore = monthDays.slice(0, i).reduce((a, b) => a + b, 0);
+      return {
+        name,
+        index: i + 1,
+        widthPercent: (monthDays[i] / totalDays) * 100,
+        leftPercent: (daysBefore / totalDays) * 100,
+      };
+    });
+
+    const weeksDataResult = [];
+    const firstDayOfYear = new Date(year, 0, 1);
+    const lastDayOfYear = new Date(year, 11, 31);
+
+    // Find the Monday of the week containing Jan 1st
+    const startOfFirstWeek = new Date(firstDayOfYear);
+    const firstDayOfWeek = (startOfFirstWeek.getDay() + 6) % 7;
+    startOfFirstWeek.setDate(startOfFirstWeek.getDate() - firstDayOfWeek);
+
+    let currentDate = new Date(startOfFirstWeek);
+
+    while (currentDate <= lastDayOfYear) {
+      const weekNum = getISOWeek(currentDate, year);
+      const diffDays = (currentDate.getTime() - firstDayOfYear.getTime()) / 86400000;
+
+      weeksDataResult.push({
+        num: weekNum,
+        widthPercent: (7 / totalDays) * 100,
+        leftPercent: (diffDays / totalDays) * 100,
+      });
+
+      currentDate.setDate(currentDate.getDate() + 7);
+    }
+
+    return {months: monthsData, weeks: weeksDataResult};
+  }, [year]);
+
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
@@ -88,52 +135,36 @@ const Timeline = ({
     };
   }, []);
 
-  const {months, weeks} = useMemo(() => {
-    const isLeap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
-    const totalDays = isLeap ? 366 : 365;
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
 
-    const monthNames = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December',
-    ];
-    const monthDays = [31, isLeap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-
-    const monthsData = monthNames.map((name, i) => {
-      const daysBefore = monthDays.slice(0, i).reduce((a, b) => a + b, 0);
-      return {
-        name,
-        index: i + 1,
-        widthPercent: (monthDays[i] / totalDays) * 100,
-        leftPercent: (daysBefore / totalDays) * 100,
-      };
-    });
-
-    const weeksData = [];
-    const firstDayOfYear = new Date(year, 0, 1);
-    const lastDayOfYear = new Date(year, 11, 31);
-
-    // Find the Monday of the week containing Jan 1st
-    const startOfFirstWeek = new Date(firstDayOfYear);
-    const firstDayOfWeek = (startOfFirstWeek.getDay() + 6) % 7;
-    startOfFirstWeek.setDate(startOfFirstWeek.getDate() - firstDayOfWeek);
-
-    let currentDate = new Date(startOfFirstWeek);
-
-    while (currentDate <= lastDayOfYear) {
-      const weekNum = getISOWeek(currentDate, year);
-      const diffDays = (currentDate.getTime() - firstDayOfYear.getTime()) / 86400000;
-
-      weeksData.push({
-        num: weekNum,
-        widthPercent: (7 / totalDays) * 100,
-        leftPercent: (diffDays / totalDays) * 100,
-      });
-
-      currentDate.setDate(currentDate.getDate() + 7);
+    const currentYear = new Date().getFullYear();
+    if (year === currentYear && selectedWeek) {
+      const selectedWeekData = weeks.find(w => w.num === selectedWeek);
+      if (selectedWeekData) {
+        const containerWidth = container.offsetWidth;
+// The inner relative div has min-w-[1700px] and mx-8 (32px total margin)
+        // We need to find the pixel position of the week.
+        // week.leftPercent is relative to the inner content width.
+        const innerContent = container.querySelector('.relative');
+        if (innerContent) {
+          const contentWidth = innerContent.offsetWidth;
+          const weekLeft = (selectedWeekData.leftPercent / 100) * contentWidth;
+          const weekLeftWithMargin = weekLeft + 32; // mx-8 is 2rem (32px)
+          const weekWidth = (selectedWeekData.widthPercent / 100) * contentWidth;
+          
+          // Center the week: weekLeftWithMargin + weekWidth/2 - containerWidth/2
+          const targetScroll = weekLeftWithMargin + (weekWidth / 2) - (containerWidth / 2);
+          
+          container.scrollTo({
+            left: targetScroll,
+            behavior: 'smooth'
+          });
+        }
+      }
     }
-
-    return {months: monthsData, weeks: weeksData};
-  }, [year]);
+  }, [selectedWeek, year, weeks]);
 
   return (
     <div

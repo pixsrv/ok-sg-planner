@@ -1,10 +1,30 @@
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 import {formatDate, formatTime} from '../utils/formatters';
 import Timeline from '../components/Timeline';
 
 const WeekView = ({ employees, settings }) => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [referenceDate, setReferenceDate] = useState(new Date());
+  const [referenceDate, setReferenceDate] = useState(() => {
+    // Try to load from localStorage
+    try {
+      const stored = localStorage.getItem('ok-sg-current');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed.selectedWeek) {
+          // weekNum is stored, let's convert it to a date in current year
+          const year = new Date().getFullYear();
+          const d = new Date(year, 0, 4);
+          const day = d.getDay();
+          const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+          d.setDate(diff + (parsed.selectedWeek - 1) * 7);
+          return d;
+        }
+      }
+    } catch (e) {
+      console.error('Failed to parse ok-sg-current from localStorage', e);
+    }
+    return new Date();
+  });
 
   // Helper to get start of current week
   const getStartOfWeek = (date) => {
@@ -35,6 +55,19 @@ const WeekView = ({ employees, settings }) => {
 
   const startOfWeek = getStartOfWeek(referenceDate);
   const currentWeekNumber = getWeekNumber(startOfWeek);
+
+  // Save selected week to localStorage
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('ok-sg-current');
+      let currentData = stored ? JSON.parse(stored) : {};
+      currentData.selectedWeek = currentWeekNumber;
+      localStorage.setItem('ok-sg-current', JSON.stringify(currentData));
+    } catch (e) {
+      console.error('Failed to save ok-sg-current to localStorage', e);
+    }
+  }, [currentWeekNumber]);
+
   const weekDays = [];
   const dayNames = settings?.weekStart === 'Sunday' 
     ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
