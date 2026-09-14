@@ -1,8 +1,7 @@
 const MonthView = ({ months = [] }) => {
   return (
     <div className="view-container">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-[var(--text-h)]">Months</h1>
+      <div className="flex justify-end items-center mb-6">
         <div className="text-sm text-[var(--text-light)]">
           Total Months Loaded: {months.length}
         </div>

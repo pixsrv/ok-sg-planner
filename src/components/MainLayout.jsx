@@ -4,7 +4,7 @@ import SideBar from './SideBar';
 const MainLayout = ({ children, currentView, onViewChange, sidebarSettings, isSidebarCollapsed, onToggleSidebar, onSettingsClick, onDataLoaded }) => {
   return (
     <div className="flex flex-col h-screen w-full">
-      <TopBar onSettingsClick={onSettingsClick} onDataLoaded={onDataLoaded} />
+      <TopBar currentView={currentView} onSettingsClick={onSettingsClick} onDataLoaded={onDataLoaded} />
       <div className="main-layout">
         <SideBar 
           currentView={currentView} 

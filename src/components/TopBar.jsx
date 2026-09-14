@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Settings, MoreVertical, Layout, Upload } from 'lucide-react';
 import { parseJsonFile } from '../utils/fileUtils';
 
-const TopBar = ({ onSettingsClick, onDataLoaded }) => {
+const TopBar = ({ onSettingsClick, onDataLoaded, currentView }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -53,6 +53,15 @@ const TopBar = ({ onSettingsClick, onDataLoaded }) => {
     event.target.value = '';
   };
 
+  const getHumanReadableName = (view) => {
+    switch (view) {
+      case 'Staff': return 'Staff';
+      case 'Month': return 'Months';
+      case 'Week': return 'Weeks';
+      default: return view;
+    }
+  };
+
   return (
     <header className="flex justify-between items-center px-4 h-[60px] border-b border-[var(--border)] bg-[var(--bg)] relative">
       <input
@@ -65,7 +74,15 @@ const TopBar = ({ onSettingsClick, onDataLoaded }) => {
       />
       <div className="flex items-center gap-3">
         <Layout className="text-[var(--accent)]" />
-        <span className="font-semibold text-xl text-[var(--text-h)]">SG Planner</span>
+        <div className="flex items-center text-xl">
+          <span className="font-semibold text-[var(--text-h)]">SG Planner</span>
+          {currentView && (
+            <>
+              <span className="mx-2 text-[var(--text-light)] font-normal">&gt;</span>
+              <span className="text-[var(--text)] font-normal">{getHumanReadableName(currentView)}</span>
+            </>
+          )}
+        </div>
       </div>
       <div className="flex gap-2">
         <button 

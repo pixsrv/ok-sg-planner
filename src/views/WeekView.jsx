@@ -105,7 +105,6 @@ const WeekView = ({ employees, settings }) => {
       />
       <div className="week-view-header">
         <div className="flex items-center gap-4">
-          <h1>Week View</h1>
           <select 
             className="year-selector bg-[var(--bg)] border border-[var(--border)] rounded px-2 py-1 text-sm font-semibold"
             value={selectedYear}

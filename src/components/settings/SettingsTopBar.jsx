@@ -1,11 +1,28 @@
 import { Settings } from 'lucide-react';
 
-const SettingsTopBar = ({ onSave, onCancel }) => {
+const SettingsTopBar = ({ onSave, onCancel, currentView }) => {
+  const getHumanReadableName = (view) => {
+    switch (view) {
+      case 'DateTime': return 'Date and Time';
+      default: return view;
+    }
+  };
+
   return (
     <header className="flex justify-between items-center px-4 h-[60px] border-b border-[var(--border)] bg-[var(--bg)]">
       <div className="flex items-center gap-3">
         <Settings className="text-[var(--accent)]" />
-        <span className="font-semibold text-xl text-[var(--text-h)]">SG Planner Settings</span>
+        <div className="flex items-center text-xl">
+          <span className="font-semibold text-[var(--text-h)]">SG Planner</span>
+          <span className="mx-2 text-[var(--text-light)] font-normal">&gt;</span>
+          <span className="text-[var(--text)] font-normal">Settings</span>
+          {currentView && (
+            <>
+              <span className="mx-2 text-[var(--text-light)] font-normal">&gt;</span>
+              <span className="text-[var(--text)] font-normal">{getHumanReadableName(currentView)}</span>
+            </>
+          )}
+        </div>
       </div>
       <div className="flex gap-3">
         <button 

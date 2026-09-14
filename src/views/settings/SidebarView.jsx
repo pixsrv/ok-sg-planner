@@ -60,7 +60,6 @@ const SidebarView = ({ settings, onSettingChange }) => {
 
   return (
     <div className="view-container">
-      {/*<h2>Sidebar</h2>*/}
       
       <div className="settings-panel">
         <h3>Items</h3>
