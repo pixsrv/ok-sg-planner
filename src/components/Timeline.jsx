@@ -1,14 +1,6 @@
 import {useEffect, useMemo, useRef, useState} from 'react';
+import { getISOWeek, MONTH_NAMES } from '../utils/dateUtils';
 
-const getISOWeek = (d) => {
-  const date = new Date(d.getTime());
-  date.setHours(0, 0, 0, 0);
-  date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
-  const weekYear = date.getFullYear();
-  const week1 = new Date(weekYear, 0, 4);
-  const weekNum = 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
-  return { weekNum, weekYear };
-};
 
 const Timeline = ({
   year = new Date().getFullYear(),
@@ -83,11 +75,6 @@ const Timeline = ({
     // Calculate total days for percentage calculations
     const days = (endDate.getTime() - startDate.getTime()) / 86400000 + 1;
 
-    const monthNames = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December',
-    ];
-
     const monthsData = [];
     let currentMonth = new Date(startDate);
     currentMonth.setDate(1); // Ensure we start at the beginning of a month
@@ -95,7 +82,7 @@ const Timeline = ({
     while (currentMonth <= endDate) {
       const mYear = currentMonth.getFullYear();
       const mIndex = currentMonth.getMonth();
-      const mName = monthNames[mIndex];
+      const mName = MONTH_NAMES[mIndex];
       
       const firstDayOfMonth = new Date(mYear, mIndex, 1);
       const lastDayOfMonth = new Date(mYear, mIndex + 1, 0);

@@ -1,5 +1,6 @@
 import  { useState, useEffect, useRef } from 'react';
-import { Search, X, Calendar } from 'lucide-react';
+import { ArrowLeftRight, X, Calendar } from 'lucide-react';
+import { getMonthName, getOrdinalSuffix, getDateFromWeek, MONTH_NAMES } from '../utils/dateUtils';
 
 const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect}) => {
   const [query, setQuery] = useState('');
@@ -18,28 +19,6 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect}) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const getMonthName = (monthIndex) => {
-    return new Date(2000, monthIndex).toLocaleString('default', { month: 'long' });
-  };
-
-  const getOrdinalSuffix = (day) => {
-    if (day > 3 && day < 21) return 'th';
-    switch (day % 10) {
-      case 1: return 'st';
-      case 2: return 'nd';
-      case 3: return 'rd';
-      default: return 'th';
-    }
-  };
-
-  // Helper to get year/month of a specific week
-  const getDateFromWeek = (week, year) => {
-    const d = new Date(year, 0, 4);
-    const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-    d.setDate(diff + (week - 1) * 7);
-    return d;
-  };
 
   const handleSearch = (text) => {
     setQuery(text);
@@ -57,7 +36,89 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect}) => {
     const contextMonth = contextDate.getMonth();
     const contextYear = selectedYear;
 
-    // 1. Try to parse as single number
+    // 1. Prefix-based parsing
+    // "d" with a number
+    const dMatch = input.match(/^d(\d+)$/);
+    if (dMatch) {
+      const day = parseInt(dMatch[1], 10);
+      if (day >= 1 && day <= 31) {
+        // "17th (of the current month)"
+        const date1 = new Date(contextYear, contextMonth, day);
+        if (date1.getMonth() === contextMonth) {
+          matches.push({
+            type: 'date',
+            label: `${getMonthName(contextMonth)} ${day}${getOrdinalSuffix(day)}`,
+            value: date1
+          });
+        }
+        // "December 17th"
+        const date2 = new Date(contextYear, 11, day);
+        matches.push({
+          type: 'date',
+          label: `December ${day}${getOrdinalSuffix(day)}`,
+          value: date2
+        });
+      }
+    }
+
+    // "w" with a number
+    const wMatch = input.match(/^w(\d+)$/);
+    if (wMatch) {
+      const week = parseInt(wMatch[1], 10);
+      if (week >= 1 && week <= 53) {
+        matches.push({
+          type: 'week',
+          label: `Week ${week}`,
+          weekNum: week,
+          year: contextYear
+        });
+      }
+    }
+
+    // "m" with a number
+    const mMatch = input.match(/^m(\d+)$/);
+    if (mMatch) {
+      const month = parseInt(mMatch[1], 10);
+      if (month >= 1 && month <= 12) {
+        matches.push({
+          type: 'month',
+          label: getMonthName(month - 1),
+          monthIndex: month,
+          year: contextYear
+        });
+      }
+    }
+
+    // "y" with a number
+    const yMatch = input.match(/^y(\d+)$/);
+    if (yMatch) {
+      let year = parseInt(yMatch[1], 10);
+      if (year < 100) year += 2000;
+      matches.push({
+        type: 'year',
+        label: `${year}`,
+        year: year
+      });
+    }
+
+    // Space separator: "m7 d24"
+    const mdMatch = input.match(/^m(\d+)\s+d(\d+)$/);
+    if (mdMatch) {
+      const month = parseInt(mdMatch[1], 10);
+      const day = parseInt(mdMatch[2], 10);
+      if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+        const date = new Date(contextYear, month - 1, day);
+        if (date.getMonth() === month - 1) {
+          matches.push({
+            type: 'date',
+            label: `${getMonthName(month - 1)} ${day}${getOrdinalSuffix(day)}`,
+            value: date
+          });
+        }
+      }
+    }
+
+    // 2. Try to parse as single number (Legacy/Fallback)
     if (/^\d+$/.test(input)) {
       const num = parseInt(input, 10);
       
@@ -150,14 +211,11 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect}) => {
       }
     }
 
-    // 3. Month name matches
-    const monthNames = [
-      'january', 'february', 'march', 'april', 'may', 'june',
-      'july', 'august', 'september', 'october', 'november', 'december'
-    ];
+    // 3. Month name recognition
+    const monthNamesLower = MONTH_NAMES.map(m => m.toLowerCase());
     
-    monthNames.forEach((name, index) => {
-      if (name.startsWith(input) || (input.length >= 3 && name.includes(input))) {
+    monthNamesLower.forEach((name, index) => {
+      if (name.startsWith(input)) {
         matches.push({
           type: 'month',
           label: getMonthName(index),
@@ -199,7 +257,7 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect}) => {
   return (
     <div className="relative" ref={containerRef}>
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-light)]" />
+        <ArrowLeftRight className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-light)]" />
         <input
           type="text"
           placeholder="Jump to date, week or month..."

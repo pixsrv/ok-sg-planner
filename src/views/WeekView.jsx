@@ -1,6 +1,7 @@
 import {useState, useEffect} from 'react';
 import {Calendar, Search, X} from 'lucide-react';
 import {formatDate, formatTime} from '../utils/formatters';
+import { getISOWeek, getDateFromWeek } from '../utils/dateUtils';
 import Timeline from '../components/Timeline';
 import DateOmnibox from '../components/DateOmnibox';
 
@@ -15,11 +16,7 @@ const WeekView = ({ employees, settings }) => {
         if (parsed.selectedWeek) {
           // Use stored year if available, otherwise current year
           const year = parsed.selectedYear || new Date().getFullYear();
-          const d = new Date(year, 0, 4);
-          const day = d.getDay();
-          const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-          d.setDate(diff + (parsed.selectedWeek - 1) * 7);
-          return d;
+          return getDateFromWeek(parsed.selectedWeek, year);
         }
       }
     } catch (e) {
@@ -49,13 +46,7 @@ const WeekView = ({ employees, settings }) => {
 
   // Helper to get week number
   const getWeekNumber = (d) => {
-    const date = new Date(d.getTime());
-    date.setHours(0, 0, 0, 0);
-    date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
-    const weekYear = date.getFullYear();
-    const week1 = new Date(weekYear, 0, 4);
-    const weekNum = 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
-    return { weekNum, weekYear };
+    return getISOWeek(d);
   };
 
   const startOfWeek = getStartOfWeek(referenceDate);
@@ -101,18 +92,7 @@ const WeekView = ({ employees, settings }) => {
 
   const handleWeekClick = (weekNum, weekYear) => {
     const yearToUse = weekYear || currentWeekYear;
-    
-    // Find a date in the selected year that corresponds to weekNum
-    // Simple way to find a date in a given ISO week:
-    // 1. Start at Jan 4th (which is always in week 1)
-    const d = new Date(yearToUse, 0, 4);
-    // 2. Adjust to the Monday of that week
-    const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-    d.setDate(diff);
-    // 3. Add (weekNum - 1) * 7 days
-    d.setDate(d.getDate() + (weekNum - 1) * 7);
-    setReferenceDate(d);
+    setReferenceDate(getDateFromWeek(weekNum, yearToUse));
   };
 
   const handleMonthClick = (monthIndex, monthYear) => {
