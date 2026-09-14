@@ -57,6 +57,14 @@ const DateTimeView = ({ settings, onSettingChange }) => {
   const currentDateFormat = settings.dateFormat || 'YYYY-MM-DD';
   const currentTimeFormat = settings.timeFormat || '24h';
   const currentWeekStart = settings.weekStart || 'Monday';
+  const currentTimelineExtension = settings.timelineExtension || '0';
+
+  const timelineExtensions = [
+    { id: '0', label: 'None' },
+    { id: '1', label: '1 Month' },
+    { id: '2', label: '2 Months' },
+    { id: '3', label: '3 Months' },
+  ];
 
   return (
     <div className="view-container">
@@ -110,6 +118,25 @@ const DateTimeView = ({ settings, onSettingChange }) => {
                 onChange={(e) => onSettingChange('weekStart', e.target.value)}
               />
               <span>{day.label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className="settings-panel">
+        <h3>Timeline Extension</h3>
+        <p className="text-sm text-[var(--text-muted)] mb-3">Show additional months before and after currently displayed year.</p>
+        <div className="radio-list">
+          {timelineExtensions.map((ext) => (
+            <label key={ext.id} className="radio-item">
+              <input
+                type="radio"
+                name="timelineExtension"
+                value={ext.id}
+                checked={currentTimelineExtension === ext.id}
+                onChange={(e) => onSettingChange('timelineExtension', e.target.value)}
+              />
+              <span>{ext.label}</span>
             </label>
           ))}
         </div>

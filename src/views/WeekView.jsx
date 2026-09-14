@@ -94,11 +94,17 @@ const WeekView = ({ employees, settings }) => {
     setReferenceDate(newDate);
   };
 
-  const handleWeekClick = (weekNum) => {
+  const handleWeekClick = (weekNum, weekYear) => {
+    // If weekYear is provided, we might need to change the selected year
+    if (weekYear && weekYear !== selectedYear) {
+      setSelectedYear(weekYear);
+    }
+    const yearToUse = weekYear || selectedYear;
+    
     // Find a date in the selected year that corresponds to weekNum
     // Simple way to find a date in a given ISO week:
     // 1. Start at Jan 4th (which is always in week 1)
-    const d = new Date(selectedYear, 0, 4);
+    const d = new Date(yearToUse, 0, 4);
     // 2. Adjust to the Monday of that week
     const day = d.getDay();
     const diff = d.getDate() - day + (day === 0 ? -6 : 1);
@@ -108,9 +114,15 @@ const WeekView = ({ employees, settings }) => {
     setReferenceDate(d);
   };
 
-  const handleMonthClick = (monthIndex) => {
+  const handleMonthClick = (monthIndex, monthYear) => {
+    // If monthYear is provided, we might need to change the selected year
+    if (monthYear && monthYear !== selectedYear) {
+      setSelectedYear(monthYear);
+    }
+    const yearToUse = monthYear || selectedYear;
+    
     // monthIndex is 1-12
-    const d = new Date(selectedYear, monthIndex - 1, 1);
+    const d = new Date(yearToUse, monthIndex - 1, 1);
     setReferenceDate(d);
   };
 

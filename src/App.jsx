@@ -20,6 +20,7 @@ function App() {
     dateFormat: 'YYYY-MM-DD',
     timeFormat: '24h',
     weekStart: 'Monday',
+    timelineExtension: '0',
     sidebarFolded: false,
     sidebar: [
       { id: 'Staff', name: 'Staff', visible: true, default: true },
@@ -31,6 +32,7 @@ function App() {
     dateFormat: 'YYYY-MM-DD',
     timeFormat: '24h',
     weekStart: 'Monday',
+    timelineExtension: '0',
     sidebarFolded: false,
     sidebar: [
       { id: 'Staff', name: 'Staff', visible: true, default: true },
@@ -128,6 +130,7 @@ function App() {
     await saveItem('settings', 'dateFormat', draftSettings.dateFormat);
     await saveItem('settings', 'timeFormat', draftSettings.timeFormat);
     await saveItem('settings', 'weekStart', draftSettings.weekStart);
+    await saveItem('settings', 'timelineExtension', draftSettings.timelineExtension);
     await saveItem('settings', 'sidebarFolded', draftSettings.sidebarFolded);
     await saveItem('settings', 'sidebar', draftSettings.sidebar);
     setIsSettingsOpen(false);
