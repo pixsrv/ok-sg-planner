@@ -4,8 +4,10 @@ const getISOWeek = (d) => {
   const date = new Date(d.getTime());
   date.setHours(0, 0, 0, 0);
   date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
-  const week1 = new Date(date.getFullYear(), 0, 4);
-  return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+  const weekYear = date.getFullYear();
+  const week1 = new Date(weekYear, 0, 4);
+  const weekNum = 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+  return { weekNum, weekYear };
 };
 
 const Timeline = ({
@@ -122,9 +124,8 @@ const Timeline = ({
     let currentDate = new Date(startOfFirstWeek);
 
     while (currentDate <= endDate) {
-      const weekNum = getISOWeek(currentDate);
+      const { weekNum, weekYear } = getISOWeek(currentDate);
       const diffDays = (currentDate.getTime() - startDate.getTime()) / 86400000;
-      const weekYear = currentDate.getFullYear();
 
       weeksDataResult.push({
         num: weekNum,

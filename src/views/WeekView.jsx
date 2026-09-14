@@ -11,8 +11,8 @@ const WeekView = ({ employees, settings }) => {
       if (stored) {
         const parsed = JSON.parse(stored);
         if (parsed.selectedWeek) {
-          // weekNum is stored, let's convert it to a date in current year
-          const year = new Date().getFullYear();
+          // Use stored year if available, otherwise current year
+          const year = parsed.selectedYear || new Date().getFullYear();
           const d = new Date(year, 0, 4);
           const day = d.getDay();
           const diff = d.getDate() - day + (day === 0 ? -6 : 1);
@@ -47,14 +47,17 @@ const WeekView = ({ employees, settings }) => {
 
   // Helper to get week number
   const getWeekNumber = (d) => {
-    const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-    date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7));
-    const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
-    return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+    const date = new Date(d.getTime());
+    date.setHours(0, 0, 0, 0);
+    date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+    const weekYear = date.getFullYear();
+    const week1 = new Date(weekYear, 0, 4);
+    const weekNum = 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+    return { weekNum, weekYear };
   };
 
   const startOfWeek = getStartOfWeek(referenceDate);
-  const currentWeekNumber = getWeekNumber(startOfWeek);
+  const { weekNum: currentWeekNumber, weekYear: currentWeekYear } = getWeekNumber(startOfWeek);
 
   // Save selected week to localStorage
   useEffect(() => {
@@ -62,6 +65,7 @@ const WeekView = ({ employees, settings }) => {
       const stored = localStorage.getItem('ok-sg-current');
       let currentData = stored ? JSON.parse(stored) : {};
       currentData.selectedWeek = currentWeekNumber;
+      currentData.selectedYear = currentWeekYear;
       localStorage.setItem('ok-sg-current', JSON.stringify(currentData));
     } catch (e) {
       console.error('Failed to save ok-sg-current to localStorage', e);
@@ -79,7 +83,7 @@ const WeekView = ({ employees, settings }) => {
     weekDays.push({
       date: formatDate(date, settings?.dateFormat),
       dayName: dayNames[i],
-      weekNumber: getWeekNumber(date)
+      weekData: getWeekNumber(date)
     });
   }
 
@@ -162,7 +166,7 @@ const WeekView = ({ employees, settings }) => {
           </select>
         </div>
         <div className="week-info">
-          Week {weekDays[0]?.weekNumber} ({weekDays[0]?.date} - {weekDays[6]?.date})
+          Week {weekDays[0]?.weekData.weekNum} ({weekDays[0]?.date} - {weekDays[6]?.date})
         </div>
       </div>
 
@@ -176,7 +180,7 @@ const WeekView = ({ employees, settings }) => {
                   <div className="day-header-content">
                     <span className="day-name">{day.dayName}</span>
                     <span className="day-date">{day.date}</span>
-                    <span className="week-num">Week {day.weekNumber}</span>
+                    <span className="week-num">Week {day.weekData.weekNum}</span>
                   </div>
                 </th>
               ))}
