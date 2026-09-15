@@ -3,7 +3,8 @@ import { Settings } from 'lucide-react';
 const SettingsTopBar = ({ onSave, onCancel, currentView }) => {
   const getHumanReadableName = (view) => {
     switch (view) {
-      case 'DateTime': return 'Date and Time';
+      case 'DateTime': return 'Date & Time';
+      case 'Omnibox': return 'Omnibox';
       default: return view;
     }
   };

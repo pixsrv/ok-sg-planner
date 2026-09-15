@@ -23,6 +23,7 @@ function App() {
     weekStart: 'Monday',
     timelineExtension: '0',
     employeeFilterImmediate: true,
+    showClearFilterButton: true,
     sidebarFolded: false,
     sidebar: [
       { id: 'Staff', name: 'Staff', visible: true, default: true },
@@ -36,6 +37,7 @@ function App() {
     weekStart: 'Monday',
     timelineExtension: '0',
     employeeFilterImmediate: true,
+    showClearFilterButton: true,
     sidebarFolded: false,
     sidebar: [
       { id: 'Staff', name: 'Staff', visible: true, default: true },

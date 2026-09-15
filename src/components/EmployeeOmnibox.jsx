@@ -1,5 +1,5 @@
 import {useState, useEffect, useRef} from 'react';
-import {Search, X} from 'lucide-react';
+import {Search, X, FilterX} from 'lucide-react';
 import {filterEmployees} from '../utils/employeeFilter';
 
 const EmployeeOmnibox = ({value, onChange, employees, settings, placeholder = "Search employees..."}) => {
@@ -87,53 +87,64 @@ const EmployeeOmnibox = ({value, onChange, employees, settings, placeholder = "S
   };
 
   return (
-    <div className="relative" ref={containerRef}>
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-light)]"/>
-      <input
-        type="text"
-        placeholder={placeholder}
-        className="pl-10 pr-10 py-2 bg-[var(--bg)] border border-[var(--border)] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] w-64"
-        value={localQuery}
-        onChange={(e) => handleSearch(e.target.value)}
-        onKeyDown={handleKeyDown}
-        onFocus={() => {
-          if (!isImmediate && localQuery.trim() && results.length > 0) {
-            setIsOpen(true);
-          }
-        }}
-      />
-      {localQuery && (
+    <div className="flex items-center gap-2">
+      <div className="relative" ref={containerRef}>
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-light)]"/>
+        <input
+          type="text"
+          placeholder={placeholder}
+          className="pl-10 pr-10 py-2 bg-[var(--bg)] border border-[var(--border)] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] w-64"
+          value={localQuery}
+          onChange={(e) => handleSearch(e.target.value)}
+          onKeyDown={handleKeyDown}
+          onFocus={() => {
+            if (!isImmediate && localQuery.trim() && results.length > 0) {
+              setIsOpen(true);
+            }
+          }}
+        />
+        {localQuery && (
+          <button
+            onClick={handleClear}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-light)] hover:text-[var(--text)] transition-colors"
+            title="Clear search"
+          >
+            <X className="w-4 h-4"/>
+          </button>
+        )}
+
+        {isOpen && !isImmediate && (
+          <div className="absolute top-full left-0 right-0 mt-1 bg-[var(--bg)] border border-[var(--border)] rounded-md shadow-lg z-50 max-h-64 overflow-y-auto">
+            {results.map((emp, index) => {
+              const [id, data] = emp;
+              return (
+                <div
+                  key={id}
+                  className={`px-4 py-2 cursor-pointer text-sm flex flex-col ${
+                    index === selectedIndex ? 'bg-[var(--accent-bg)]' : 'hover:bg-[var(--accent-bg)]'
+                  }`}
+                  onClick={() => handleSelect(emp)}
+                >
+                  <div className="font-medium text-[var(--text)]">
+                    {data.firstName} {data.lastName}
+                  </div>
+                  <div className="text-xs text-[var(--text-light)]">
+                    {id}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+      {settings?.showClearFilterButton !== false && (
         <button
           onClick={handleClear}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-light)] hover:text-[var(--text)] transition-colors"
-          title="Clear search"
+          className="p-2 bg-[var(--bg)] border border-[var(--border)] rounded-md text-[var(--text-light)] hover:text-[var(--text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-border)] transition-colors flex items-center justify-center"
+          title="Clear employee filter"
         >
-          <X className="w-4 h-4"/>
+          <FilterX className="w-4 h-4"/>
         </button>
-      )}
-
-      {isOpen && !isImmediate && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-[var(--bg)] border border-[var(--border)] rounded-md shadow-lg z-50 max-h-64 overflow-y-auto">
-          {results.map((emp, index) => {
-            const [id, data] = emp;
-            return (
-              <div
-                key={id}
-                className={`px-4 py-2 cursor-pointer text-sm flex flex-col ${
-                  index === selectedIndex ? 'bg-[var(--accent-bg)]' : 'hover:bg-[var(--accent-bg)]'
-                }`}
-                onClick={() => handleSelect(emp)}
-              >
-                <div className="font-medium text-[var(--text)]">
-                  {data.firstName} {data.lastName}
-                </div>
-                <div className="text-xs text-[var(--text-light)]">
-                  {id}
-                </div>
-              </div>
-            );
-          })}
-        </div>
       )}
     </div>
   );
