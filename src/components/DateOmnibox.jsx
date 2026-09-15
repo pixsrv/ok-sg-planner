@@ -119,6 +119,17 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => 
     setIsOpen(false);
   };
 
+  const handleClearHistory = () => {
+    setHistory({ list: [], pointer: -1 });
+    try {
+      localStorage.removeItem('ok-sg-jumps');
+    } catch (e) {
+      console.error('Failed to clear ok-sg-jumps from localStorage', e);
+    }
+    setResults([]);
+    setIsOpen(false);
+  };
+
   const handleSearch = (text) => {
     setQuery(text);
 
@@ -146,8 +157,13 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => 
           }
         });
 
-        setResults(uniqueHistory.slice(0, 8));
-        setSelectedIndex(0);
+        const finalResults = [
+          { type: 'clear-history', label: 'Clear cached items' },
+          ...uniqueHistory.slice(0, 8)
+        ];
+
+        setResults(finalResults);
+        setSelectedIndex(finalResults.length > 1 ? 1 : 0);
         setIsOpen(true);
       } else {
         setResults([]);
@@ -445,6 +461,10 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => 
   };
 
   const handleSelect = (result) => {
+    if (result.type === 'clear-history') {
+      handleClearHistory();
+      return;
+    }
     let targetDate = null;
     if (result.type === 'date') {
       targetDate = result.value;
@@ -546,12 +566,17 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => 
                   onClick={() => handleSelect(result)}
                   onMouseEnter={() => setSelectedIndex(idx)}
                 >
-                  {result.isHistory ? (
+                  {result.type === 'clear-history' ? (
+                    <>
+                      <X className="w-4 h-4 text-[var(--text-light)] flex-shrink-0" />
+                      <span className="text-[var(--text-light)] italic">{result.label}</span>
+                    </>
+                  ) : result.isHistory ? (
                     <ArrowLeftRight className="w-4 h-4 text-[var(--accent)]" />
                   ) : (
                     <Calendar className="w-4 h-4 text-[var(--text-light)]" />
                   )}
-                  <span>{result.label}</span>
+                  {result.type !== 'clear-history' && <span>{result.label}</span>}
                 </div>
               ))
             ) : (

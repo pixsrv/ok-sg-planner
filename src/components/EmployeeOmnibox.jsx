@@ -113,8 +113,13 @@ const EmployeeOmnibox = ({value, onChange, employees, settings, placeholder = "S
           }
         });
 
-        setResults(uniqueHistory.slice(0, 8));
-        setSelectedIndex(0);
+        const finalResults = [
+          { type: 'clear-history', label: 'Clear cached items' },
+          ...uniqueHistory.slice(0, 8)
+        ];
+
+        setResults(finalResults);
+        setSelectedIndex(finalResults.length > 1 ? 1 : 0);
         setIsOpen(true);
       } else {
         setResults([]);
@@ -139,7 +144,9 @@ const EmployeeOmnibox = ({value, onChange, employees, settings, placeholder = "S
   };
 
   const handleSelect = (item) => {
-    if (item.type === 'history') {
+    if (item.type === 'clear-history') {
+      handleClearHistory();
+    } else if (item.type === 'history') {
       setLocalQuery(item.value);
       onChange(item.value);
       setIsOpen(false);
@@ -195,6 +202,17 @@ const EmployeeOmnibox = ({value, onChange, employees, settings, placeholder = "S
     setIsOpen(false);
   };
 
+  const handleClearHistory = () => {
+    setHistory({ list: [], pointer: -1 });
+    try {
+      localStorage.removeItem('ok-sg-filters');
+    } catch (e) {
+      console.error('Failed to clear ok-sg-filters from localStorage', e);
+    }
+    setResults([]);
+    setIsOpen(false);
+  };
+
   return (
     <div className="flex items-center gap-2">
       <div className="relative" ref={containerRef}>
@@ -224,7 +242,7 @@ const EmployeeOmnibox = ({value, onChange, employees, settings, placeholder = "S
             {results.length > 0 ? (
               results.map((item, index) => (
                 <div
-                  key={item.type === 'history' ? `hist-${index}` : item.id}
+                  key={item.type === 'history' ? `hist-${index}` : (item.type === 'clear-history' ? 'clear-hist' : item.id)}
                   className={`px-4 py-2 cursor-pointer text-sm flex items-center gap-3 ${
                     index === selectedIndex ? 'bg-[var(--accent-bg)]' : 'hover:bg-[var(--accent-bg)]'
                   }`}
@@ -235,6 +253,11 @@ const EmployeeOmnibox = ({value, onChange, employees, settings, placeholder = "S
                     <>
                       <Search className="w-4 h-4 text-[var(--accent)] flex-shrink-0" />
                       <span className="text-[var(--text)]">{item.label}</span>
+                    </>
+                  ) : item.type === 'clear-history' ? (
+                    <>
+                      <X className="w-4 h-4 text-[var(--text-light)] flex-shrink-0" />
+                      <span className="text-[var(--text-light)] italic">{item.label}</span>
                     </>
                   ) : (
                     <div className="flex flex-col">
