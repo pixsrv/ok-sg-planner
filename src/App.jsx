@@ -24,6 +24,8 @@ function App() {
     timelineExtension: '0',
     employeeFilterImmediate: true,
     showClearFilterButton: true,
+    jumpHistoryCache: true,
+    showTodayButton: true,
     sidebarFolded: false,
     sidebar: [
       { id: 'Staff', name: 'Staff', visible: true, default: true },
@@ -38,6 +40,8 @@ function App() {
     timelineExtension: '0',
     employeeFilterImmediate: true,
     showClearFilterButton: true,
+    jumpHistoryCache: true,
+    showTodayButton: true,
     sidebarFolded: false,
     sidebar: [
       { id: 'Staff', name: 'Staff', visible: true, default: true },

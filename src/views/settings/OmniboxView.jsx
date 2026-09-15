@@ -10,6 +10,41 @@ const OmniboxView = ({ settings, onSettingChange }) => {
         <p className="text-sm text-[var(--text-muted)] mb-3">
           Configure settings for the date navigation.
         </p>
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-4">
+            <label className="switch">
+              <input
+                type="checkbox"
+                checked={settings.jumpHistoryCache !== false}
+                onChange={(e) => onSettingChange('jumpHistoryCache', e.target.checked)}
+              />
+              <span className="slider round"></span>
+            </label>
+            <div>
+              <div className="font-semibold text-[var(--text-h)]">Jump history cache</div>
+              <div className="text-sm text-[var(--text-light)]">
+                If enabled, the date omnibox will remember your navigation history and show back/forward buttons.
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <label className="switch">
+              <input
+                type="checkbox"
+                checked={settings.showTodayButton !== false}
+                onChange={(e) => onSettingChange('showTodayButton', e.target.checked)}
+              />
+              <span className="slider round"></span>
+            </label>
+            <div>
+              <div className="font-semibold text-[var(--text-h)]">Show Today button</div>
+              <div className="text-sm text-[var(--text-light)]">
+                If enabled, the today button will be shown in the date omnibox.
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="settings-panel">

@@ -1,13 +1,126 @@
 import  { useState, useEffect, useRef } from 'react';
-import { ArrowLeftRight, X, Calendar } from 'lucide-react';
+import { ArrowLeftRight, X, Calendar, ArrowLeft, ArrowRight, CalendarX2 } from 'lucide-react';
 import { getMonthName, getOrdinalSuffix, getDateFromWeek, MONTH_NAMES } from '../utils/dateUtils';
 
-const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect}) => {
+const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [results, setResults] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const containerRef = useRef(null);
+
+  const [jumps, setJumps] = useState(() => {
+    if (settings?.jumpHistoryCache === false) return [];
+    try {
+      const stored = localStorage.getItem('ok-sg-jumps');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed.list) && parsed.list.length > 0) {
+          return parsed.list.map(d => {
+            const parts = d.split('-');
+            if (parts.length === 3) {
+              return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+            }
+            return new Date(d);
+          });
+        }
+      }
+    } catch (e) {
+      console.error('Failed to parse ok-sg-jumps from localStorage', e);
+    }
+    const contextDate = getDateFromWeek(selectedWeek, selectedYear);
+    contextDate.setHours(0, 0, 0, 0);
+    return [contextDate];
+  });
+
+  const [jumpPointer, setJumpPointer] = useState(() => {
+    if (settings?.jumpHistoryCache === false) return -1;
+    try {
+      const stored = localStorage.getItem('ok-sg-jumps');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (typeof parsed.pointer === 'number' && parsed.pointer >= 0) {
+          return parsed.pointer;
+        }
+      }
+    } catch (e) { /* empty */ }
+    return 0;
+  });
+
+  const [isNavigatingHistory, setIsNavigatingHistory] = useState(false);
+
+  useEffect(() => {
+    if (settings?.jumpHistoryCache === false) {
+      localStorage.removeItem('ok-sg-jumps');
+      setJumps([]);
+      setJumpPointer(-1);
+    }
+  }, [settings?.jumpHistoryCache]);
+
+  useEffect(() => {
+    if (settings?.jumpHistoryCache === false) return;
+    try {
+      localStorage.setItem('ok-sg-jumps', JSON.stringify({
+        list: jumps.map(d => {
+          const y = d.getFullYear();
+          const m = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          return `${y}-${m}-${day}`;
+        }),
+        pointer: jumpPointer
+      }));
+    } catch (e) {
+      console.error('Failed to save ok-sg-jumps to localStorage', e);
+    }
+  }, [jumps, jumpPointer, settings?.jumpHistoryCache]);
+
+  const pushJump = (newDate) => {
+    if (settings?.jumpHistoryCache === false) return;
+    if (isNavigatingHistory) {
+      setIsNavigatingHistory(false);
+      return;
+    }
+
+    const dateToStore = new Date(newDate);
+    dateToStore.setHours(0, 0, 0, 0);
+
+    if (jumpPointer >= 0 && jumps[jumpPointer]?.getTime() === dateToStore.getTime()) {
+      return;
+    }
+
+    const newJumps = jumps.slice(0, jumpPointer + 1);
+    newJumps.push(dateToStore);
+    
+    if (newJumps.length > 50) {
+      newJumps.shift();
+    }
+    setJumps([...newJumps]);
+    setJumpPointer(newJumps.length - 1);
+  };
+
+  const handleBack = () => {
+    if (jumpPointer > 0) {
+      const newPointer = jumpPointer - 1;
+      setIsNavigatingHistory(true);
+      setJumpPointer(newPointer);
+      onDateSelect({ date: new Date(jumps[newPointer]) });
+    }
+  };
+
+  const handleForward = () => {
+    if (jumpPointer < jumps.length - 1) {
+      const newPointer = jumpPointer + 1;
+      setIsNavigatingHistory(true);
+      setJumpPointer(newPointer);
+      onDateSelect({ date: new Date(jumps[newPointer]) });
+    }
+  };
+
+  const handleTodayClick = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    onDateSelect({ date: today });
+  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -320,19 +433,24 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect}) => {
   };
 
   const handleSelect = (result) => {
+    let targetDate = null;
     if (result.type === 'date') {
-      onDateSelect({ date: result.value });
+      targetDate = result.value;
+      onDateSelect({ date: targetDate });
     } else if (result.type === 'week') {
+      targetDate = getDateFromWeek(result.weekNum, result.year);
       onDateSelect({ weekNum: result.weekNum, year: result.year });
     } else if (result.type === 'month') {
+      targetDate = new Date(result.year, result.monthIndex - 1, 1);
       onDateSelect({ monthIndex: result.monthIndex, year: result.year });
     } else if (result.type === 'year') {
+      targetDate = new Date(result.year, 0, 1);
       onDateSelect({ type: 'year', year: result.year });
     } else if (result.type === 'today') {
-      onDateSelect({ date: result.value });
+      targetDate = result.value;
+      onDateSelect({ date: targetDate });
     } else if (result.type === 'move') {
       const contextDate = getDateFromWeek(selectedWeek, selectedYear);
-      let targetDate;
       
       if (result.unit === 'days') {
         targetDate = new Date(contextDate);
@@ -352,12 +470,17 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect}) => {
         onDateSelect({ date: targetDate });
       }
     }
+
+    if (targetDate) {
+      pushJump(targetDate);
+    }
+
     setQuery('');
     setIsOpen(false);
   };
 
   return (
-    <div className="relative" ref={containerRef}>
+    <div className="flex items-center gap-2" ref={containerRef}>
       <div className="relative">
         <ArrowLeftRight className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-light)]" />
         <input
@@ -397,23 +520,56 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect}) => {
             <X className="w-4 h-4" />
           </button>
         )}
+        
+        {isOpen && (
+          <div className="absolute z-50 mt-1 w-full bg-[var(--bg)] border border-[var(--border)] rounded-md shadow-lg overflow-hidden max-h-60 overflow-y-auto">
+            {results.map((result, idx) => (
+              <div
+                key={idx}
+                className={`px-4 py-2 cursor-pointer text-sm flex items-center gap-3 ${
+                  idx === selectedIndex ? 'bg-[var(--accent-bg)]' : 'hover:bg-[var(--accent-bg)]'
+                }`}
+                onClick={() => handleSelect(result)}
+                onMouseEnter={() => setSelectedIndex(idx)}
+              >
+                <Calendar className="w-4 h-4 text-[var(--text-light)]" />
+                <span>{result.label}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
-
-      {isOpen && (
-        <div className="absolute z-50 mt-1 w-full bg-[var(--bg)] border border-[var(--border)] rounded-md shadow-lg overflow-hidden max-h-60 overflow-y-auto">
-          {results.map((result, idx) => (
-            <div
-              key={idx}
-              className={`px-4 py-2 cursor-pointer text-sm flex items-center gap-3 ${
-                idx === selectedIndex ? 'bg-[var(--accent-bg)]' : 'hover:bg-[var(--accent-bg)]'
-              }`}
-              onClick={() => handleSelect(result)}
-              onMouseEnter={() => setSelectedIndex(idx)}
+      {(settings?.jumpHistoryCache !== false || settings?.showTodayButton !== false) && (
+        <div className="flex items-center border border-[var(--border)] rounded-md overflow-hidden">
+          {settings?.jumpHistoryCache !== false && (
+            <>
+              <button
+                onClick={handleBack}
+                disabled={jumpPointer <= 0}
+                className="p-2 bg-[var(--bg)] text-[var(--text)] hover:bg-[var(--accent-bg)] disabled:opacity-30 disabled:hover:bg-[var(--bg)] transition-colors border-r border-[var(--border)]"
+                title="Go back in history"
+              >
+                <ArrowLeft className="w-4 h-4"/>
+              </button>
+              <button
+                onClick={handleForward}
+                disabled={jumpPointer >= jumps.length - 1}
+                className={`p-2 bg-[var(--bg)] text-[var(--text)] hover:bg-[var(--accent-bg)] disabled:opacity-30 disabled:hover:bg-[var(--bg)] transition-colors ${settings?.showTodayButton !== false ? 'border-r border-[var(--border)]' : ''}`}
+                title="Go forward in history"
+              >
+                <ArrowRight className="w-4 h-4"/>
+              </button>
+            </>
+          )}
+          {settings?.showTodayButton !== false && (
+            <button
+              onClick={handleTodayClick}
+              className="p-2 bg-[var(--bg)] text-[var(--text)] hover:bg-[var(--accent-bg)] transition-colors"
+              title="Go to today"
             >
-              <Calendar className="w-4 h-4 text-[var(--text-light)]" />
-              <span>{result.label}</span>
-            </div>
-          ))}
+              <CalendarX2 className="w-4 h-4 text-[var(--accent)]" />
+            </button>
+          )}
         </div>
       )}
     </div>
