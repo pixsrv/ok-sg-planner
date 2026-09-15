@@ -22,7 +22,8 @@ function App() {
     timeFormat: '24h',
     weekStart: 'Monday',
     timelineExtension: '0',
-    showOmnibox: true,
+    showDateOmnibox: true,
+    showEmployeeOmnibox: true,
     sidebarFolded: false,
     sidebar: [
       { id: 'Staff', name: 'Staff', visible: true, default: true },
@@ -35,7 +36,8 @@ function App() {
     timeFormat: '24h',
     weekStart: 'Monday',
     timelineExtension: '0',
-    showOmnibox: true,
+    showDateOmnibox: true,
+    showEmployeeOmnibox: true,
     sidebarFolded: false,
     sidebar: [
       { id: 'Staff', name: 'Staff', visible: true, default: true },
@@ -134,7 +136,8 @@ function App() {
     await saveItem('settings', 'timeFormat', draftSettings.timeFormat);
     await saveItem('settings', 'weekStart', draftSettings.weekStart);
     await saveItem('settings', 'timelineExtension', draftSettings.timelineExtension);
-    await saveItem('settings', 'showOmnibox', draftSettings.showOmnibox);
+    await saveItem('settings', 'showDateOmnibox', draftSettings.showDateOmnibox);
+    await saveItem('settings', 'showEmployeeOmnibox', draftSettings.showEmployeeOmnibox);
     await saveItem('settings', 'sidebarFolded', draftSettings.sidebarFolded);
     await saveItem('settings', 'sidebar', draftSettings.sidebar);
     setIsSettingsOpen(false);

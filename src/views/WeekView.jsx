@@ -271,8 +271,10 @@ const WeekView = ({ employees, settings }) => {
       />
       <div className="week-view-header">
         <div className="flex items-center gap-4">
-          <EmployeeOmnibox value={employeeSearchQuery} onChange={setEmployeeSearchQuery} />
-          {settings?.showOmnibox !== false && (
+          {settings?.showEmployeeOmnibox !== false && (
+            <EmployeeOmnibox value={employeeSearchQuery} onChange={setEmployeeSearchQuery} />
+          )}
+          {settings?.showDateOmnibox !== false && (
             <DateOmnibox 
               selectedWeek={currentWeekNumber}
               selectedYear={currentWeekYear}
