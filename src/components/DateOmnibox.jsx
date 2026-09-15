@@ -1,5 +1,5 @@
 import  { useState, useEffect, useRef } from 'react';
-import { ArrowLeftRight, X, Calendar, ArrowLeft, ArrowRight, CalendarX2 } from 'lucide-react';
+import { ArrowLeftRight, X, Calendar, ArrowLeft, ArrowRight, ArrowDownToDot } from 'lucide-react';
 import { getMonthName, getOrdinalSuffix, getDateFromWeek, MONTH_NAMES } from '../utils/dateUtils';
 
 const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => {
@@ -9,20 +9,22 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => 
   const [selectedIndex, setSelectedIndex] = useState(0);
   const containerRef = useRef(null);
 
-  const [jumps, setJumps] = useState(() => {
-    if (settings?.jumpHistoryCache === false) return [];
+  const [history, setHistory] = useState(() => {
+    if (settings?.jumpHistoryCache === false) return { list: [], pointer: -1 };
     try {
       const stored = localStorage.getItem('ok-sg-jumps');
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed.list) && parsed.list.length > 0) {
-          return parsed.list.map(d => {
+          const list = parsed.list.map(d => {
             const parts = d.split('-');
             if (parts.length === 3) {
               return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
             }
             return new Date(d);
           });
+          const pointer = (typeof parsed.pointer === 'number' && parsed.pointer >= 0) ? parsed.pointer : 0;
+          return { list, pointer };
         }
       }
     } catch (e) {
@@ -30,89 +32,86 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => 
     }
     const contextDate = getDateFromWeek(selectedWeek, selectedYear);
     contextDate.setHours(0, 0, 0, 0);
-    return [contextDate];
-  });
-
-  const [jumpPointer, setJumpPointer] = useState(() => {
-    if (settings?.jumpHistoryCache === false) return -1;
-    try {
-      const stored = localStorage.getItem('ok-sg-jumps');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (typeof parsed.pointer === 'number' && parsed.pointer >= 0) {
-          return parsed.pointer;
-        }
-      }
-    } catch (e) { /* empty */ }
-    return 0;
+    return { list: [contextDate], pointer: 0 };
   });
 
   const [isNavigatingHistory, setIsNavigatingHistory] = useState(false);
 
   useEffect(() => {
-    if (settings?.jumpHistoryCache === false) {
-      localStorage.removeItem('ok-sg-jumps');
-      setJumps([]);
-      setJumpPointer(-1);
+    if (settings?.jumpHistoryCache === false) return;
+    
+    // We only want to push to history if this is a "real" change,
+    // not just the initial component mount or a navigation within history.
+    const contextDate = getDateFromWeek(selectedWeek, selectedYear);
+    contextDate.setHours(0, 0, 0, 0);
+
+    if (isNavigatingHistory) {
+      setTimeout(() => setIsNavigatingHistory(false), 0);
+      return;
     }
-  }, [settings?.jumpHistoryCache]);
+
+    // Don't add if the date is the same as the current history pointer
+    if (history.pointer >= 0 && history.list[history.pointer]?.getTime() === contextDate.getTime()) {
+      return;
+    }
+
+    setTimeout(() => {
+      setHistory(prev => {
+        // Re-verify under lock/updater just in case
+        if (prev.pointer >= 0 && prev.list[prev.pointer]?.getTime() === contextDate.getTime()) {
+          return prev;
+        }
+        
+        // New entry from external source (like Timeline)
+        const newList = prev.list.slice(0, prev.pointer + 1);
+        newList.push(contextDate);
+        
+        if (newList.length > 50) {
+          newList.shift();
+        }
+        return {
+          list: newList,
+          pointer: newList.length - 1
+        };
+      });
+    }, 0);
+  }, [selectedWeek, selectedYear, settings?.jumpHistoryCache, isNavigatingHistory, history.pointer, history.list]);
 
   useEffect(() => {
     if (settings?.jumpHistoryCache === false) return;
     try {
       localStorage.setItem('ok-sg-jumps', JSON.stringify({
-        list: jumps.map(d => {
+        list: history.list.map(d => {
+          if (!d || typeof d.getFullYear !== 'function') return null;
           const y = d.getFullYear();
           const m = String(d.getMonth() + 1).padStart(2, '0');
           const day = String(d.getDate()).padStart(2, '0');
           return `${y}-${m}-${day}`;
-        }),
-        pointer: jumpPointer
+        }).filter(Boolean),
+        pointer: history.pointer
       }));
     } catch (e) {
       console.error('Failed to save ok-sg-jumps to localStorage', e);
     }
-  }, [jumps, jumpPointer, settings?.jumpHistoryCache]);
-
-  const pushJump = (newDate) => {
-    if (settings?.jumpHistoryCache === false) return;
-    if (isNavigatingHistory) {
-      setIsNavigatingHistory(false);
-      return;
-    }
-
-    const dateToStore = new Date(newDate);
-    dateToStore.setHours(0, 0, 0, 0);
-
-    if (jumpPointer >= 0 && jumps[jumpPointer]?.getTime() === dateToStore.getTime()) {
-      return;
-    }
-
-    const newJumps = jumps.slice(0, jumpPointer + 1);
-    newJumps.push(dateToStore);
-    
-    if (newJumps.length > 50) {
-      newJumps.shift();
-    }
-    setJumps([...newJumps]);
-    setJumpPointer(newJumps.length - 1);
-  };
+  }, [history, settings?.jumpHistoryCache]);
 
   const handleBack = () => {
-    if (jumpPointer > 0) {
-      const newPointer = jumpPointer - 1;
+    if (history.pointer > 0) {
+      const newPointer = history.pointer - 1;
       setIsNavigatingHistory(true);
-      setJumpPointer(newPointer);
-      onDateSelect({ date: new Date(jumps[newPointer]) });
+      const targetDate = new Date(history.list[newPointer]);
+      setHistory(prev => ({ ...prev, pointer: newPointer }));
+      onDateSelect({ date: targetDate });
     }
   };
 
   const handleForward = () => {
-    if (jumpPointer < jumps.length - 1) {
-      const newPointer = jumpPointer + 1;
+    if (history.pointer < history.list.length - 1) {
+      const newPointer = history.pointer + 1;
       setIsNavigatingHistory(true);
-      setJumpPointer(newPointer);
-      onDateSelect({ date: new Date(jumps[newPointer]) });
+      const targetDate = new Date(history.list[newPointer]);
+      setHistory(prev => ({ ...prev, pointer: newPointer }));
+      onDateSelect({ date: targetDate });
     }
   };
 
@@ -438,17 +437,13 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => 
       targetDate = result.value;
       onDateSelect({ date: targetDate });
     } else if (result.type === 'week') {
-      targetDate = getDateFromWeek(result.weekNum, result.year);
       onDateSelect({ weekNum: result.weekNum, year: result.year });
     } else if (result.type === 'month') {
-      targetDate = new Date(result.year, result.monthIndex - 1, 1);
       onDateSelect({ monthIndex: result.monthIndex, year: result.year });
     } else if (result.type === 'year') {
-      targetDate = new Date(result.year, 0, 1);
       onDateSelect({ type: 'year', year: result.year });
     } else if (result.type === 'today') {
-      targetDate = result.value;
-      onDateSelect({ date: targetDate });
+      onDateSelect({ date: result.value });
     } else if (result.type === 'move') {
       const contextDate = getDateFromWeek(selectedWeek, selectedYear);
       
@@ -469,10 +464,6 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => 
       if (targetDate) {
         onDateSelect({ date: targetDate });
       }
-    }
-
-    if (targetDate) {
-      pushJump(targetDate);
     }
 
     setQuery('');
@@ -545,7 +536,7 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => 
             <>
               <button
                 onClick={handleBack}
-                disabled={jumpPointer <= 0}
+                disabled={history.pointer <= 0}
                 className="p-2 bg-[var(--bg)] text-[var(--text)] hover:bg-[var(--accent-bg)] disabled:opacity-30 disabled:hover:bg-[var(--bg)] transition-colors border-r border-[var(--border)]"
                 title="Go back in history"
               >
@@ -553,7 +544,7 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => 
               </button>
               <button
                 onClick={handleForward}
-                disabled={jumpPointer >= jumps.length - 1}
+                disabled={history.pointer >= history.list.length - 1}
                 className={`p-2 bg-[var(--bg)] text-[var(--text)] hover:bg-[var(--accent-bg)] disabled:opacity-30 disabled:hover:bg-[var(--bg)] transition-colors ${settings?.showTodayButton !== false ? 'border-r border-[var(--border)]' : ''}`}
                 title="Go forward in history"
               >
@@ -567,7 +558,7 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => 
               className="p-2 bg-[var(--bg)] text-[var(--text)] hover:bg-[var(--accent-bg)] transition-colors"
               title="Go to today"
             >
-              <CalendarX2 className="w-4 h-4 text-[var(--accent)]" />
+              <ArrowDownToDot className="w-4 h-4 text-[var(--accent)]" />
             </button>
           )}
         </div>

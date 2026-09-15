@@ -162,6 +162,7 @@ const WeekView = ({ employees, settings }) => {
             settings={settings}
           />
           <DateOmnibox 
+            key={settings?.jumpHistoryCache}
             selectedWeek={currentWeekNumber}
             selectedYear={currentWeekYear}
             onDateSelect={handleDateSelect}
