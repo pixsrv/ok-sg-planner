@@ -10,9 +10,65 @@ const EmployeeOmnibox = ({value, onChange, employees, settings, placeholder = "S
   const containerRef = useRef(null);
   const isImmediate = settings?.employeeFilterImmediate !== false;
 
+  const [history, setHistory] = useState(() => {
+    if (settings?.employeeFilterHistoryCache === false) return { list: [], pointer: -1 };
+    try {
+      const stored = localStorage.getItem('ok-sg-filters');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed.list)) {
+          return {
+            list: parsed.list,
+            pointer: (typeof parsed.pointer === 'number') ? parsed.pointer : parsed.list.length - 1
+          };
+        }
+      }
+    } catch (e) {
+      console.error('Failed to parse ok-sg-filters from localStorage', e);
+    }
+    return { list: value ? [value] : [], pointer: value ? 0 : -1 };
+  });
+
   useEffect(() => {
     setLocalQuery(value);
-  }, [value]);
+
+    if (settings?.employeeFilterHistoryCache === false) return;
+    if (!value) return;
+
+    if (history.pointer >= 0 && history.list[history.pointer] === value) {
+      return;
+    }
+
+    setTimeout(() => {
+      setHistory(prev => {
+        if (prev.pointer >= 0 && prev.list[prev.pointer] === value) {
+          return prev;
+        }
+        const newList = prev.list.slice(0, prev.pointer + 1);
+        newList.push(value);
+        if (newList.length > 50) {
+          newList.shift();
+        }
+        return {
+          list: newList,
+          pointer: newList.length - 1
+        };
+      });
+    }, 0);
+  }, [value, settings?.employeeFilterHistoryCache]);
+
+  useEffect(() => {
+    if (settings?.employeeFilterHistoryCache === false) return;
+    try {
+      localStorage.setItem('ok-sg-filters', JSON.stringify({
+        list: history.list,
+        pointer: history.pointer
+      }));
+    } catch (e) {
+      console.error('Failed to save ok-sg-filters to localStorage', e);
+    }
+  }, [history, settings?.employeeFilterHistoryCache]);
+
 
   useEffect(() => {
     const handleClickOutside = (event) => {

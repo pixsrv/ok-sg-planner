@@ -1,5 +1,5 @@
 import  { useState, useEffect, useRef } from 'react';
-import { ArrowLeftRight, X, Calendar, ArrowLeft, ArrowRight, ArrowDownToDot } from 'lucide-react';
+import { ArrowLeftRight, X, Calendar, ArrowDownToDot } from 'lucide-react';
 import { getMonthName, getOrdinalSuffix, getDateFromWeek, MONTH_NAMES } from '../utils/dateUtils';
 
 const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => {
@@ -95,26 +95,6 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => 
     }
   }, [history, settings?.jumpHistoryCache]);
 
-  const handleBack = () => {
-    if (history.pointer > 0) {
-      const newPointer = history.pointer - 1;
-      setIsNavigatingHistory(true);
-      const targetDate = new Date(history.list[newPointer]);
-      setHistory(prev => ({ ...prev, pointer: newPointer }));
-      onDateSelect({ date: targetDate });
-    }
-  };
-
-  const handleForward = () => {
-    if (history.pointer < history.list.length - 1) {
-      const newPointer = history.pointer + 1;
-      setIsNavigatingHistory(true);
-      const targetDate = new Date(history.list[newPointer]);
-      setHistory(prev => ({ ...prev, pointer: newPointer }));
-      onDateSelect({ date: targetDate });
-    }
-  };
-
   const handleTodayClick = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -137,9 +117,36 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => 
     setQuery(text);
 
     if (!text.trim()) {
-      setResults([]);
-      setIsOpen(false);
+      if (history.list.length > 0) {
+        // Show recent jumps (reverse history, excluding current one if it's the very last jump)
+        // Actually, showing all unique recent jumps in reverse order is best
+        const recentJumps = [...history.list]
+          .reverse()
+          .map(d => ({
+            type: 'date',
+            label: `${getMonthName(d.getMonth())} ${d.getDate()}${getOrdinalSuffix(d.getDate())}, ${d.getFullYear()}`,
+            value: d,
+            isHistory: true
+          }));
 
+        // Deduplicate
+        const uniqueHistory = [];
+        const seenHistory = new Set();
+        recentJumps.forEach(mj => {
+          const key = mj.value.getTime();
+          if (!seenHistory.has(key)) {
+            uniqueHistory.push(mj);
+            seenHistory.add(key);
+          }
+        });
+
+        setResults(uniqueHistory.slice(0, 8));
+        setSelectedIndex(0);
+        setIsOpen(true);
+      } else {
+        setResults([]);
+        setIsOpen(false);
+      }
       return;
     }
 
@@ -480,11 +487,12 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => 
           className="pl-10 pr-10 py-2 bg-[var(--bg)] border border-[var(--border)] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] w-64"
           value={query}
           onChange={(e) => handleSearch(e.target.value)}
-          onFocus={() => query && results.length > 0 && setIsOpen(true)}
+          onFocus={() => handleSearch(query)}
+          onClick={() => !isOpen && handleSearch(query)}
           onKeyDown={(e) => {
             if (e.key === 'Escape') {
-              setQuery('');
-              setResults([]);
+              e.preventDefault();
+              e.stopPropagation();
               setIsOpen(false);
             }
             if (isOpen && results.length > 0) {
@@ -498,8 +506,12 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => 
                 e.preventDefault();
                 handleSelect(results[selectedIndex]);
               }
-            } else if (e.key === 'Enter' && results.length > 0) {
-              handleSelect(results[0]);
+            } else if (e.key === 'Enter') {
+              e.preventDefault();
+              handleSearch(query);
+            } else if (e.key === 'ArrowDown') {
+              e.preventDefault();
+              handleSearch(query);
             }
           }}
         />
@@ -514,53 +526,41 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => 
         
         {isOpen && (
           <div className="absolute z-50 mt-1 w-full bg-[var(--bg)] border border-[var(--border)] rounded-md shadow-lg overflow-hidden max-h-60 overflow-y-auto">
-            {results.map((result, idx) => (
-              <div
-                key={idx}
-                className={`px-4 py-2 cursor-pointer text-sm flex items-center gap-3 ${
-                  idx === selectedIndex ? 'bg-[var(--accent-bg)]' : 'hover:bg-[var(--accent-bg)]'
-                }`}
-                onClick={() => handleSelect(result)}
-                onMouseEnter={() => setSelectedIndex(idx)}
-              >
-                <Calendar className="w-4 h-4 text-[var(--text-light)]" />
-                <span>{result.label}</span>
-              </div>
-            ))}
+            {results.length > 0 ? (
+              results.map((result, idx) => (
+                <div
+                  key={idx}
+                  className={`px-4 py-2 cursor-pointer text-sm flex items-center gap-3 ${
+                    idx === selectedIndex ? 'bg-[var(--accent-bg)]' : 'hover:bg-[var(--accent-bg)]'
+                  }`}
+                  onClick={() => handleSelect(result)}
+                  onMouseEnter={() => setSelectedIndex(idx)}
+                >
+                  {result.isHistory ? (
+                    <ArrowLeftRight className="w-4 h-4 text-[var(--accent)]" />
+                  ) : (
+                    <Calendar className="w-4 h-4 text-[var(--text-light)]" />
+                  )}
+                  <span>{result.label}</span>
+                </div>
+              ))
+            ) : (
+               <div className="px-4 py-2 text-sm text-[var(--text-light)] italic">
+                 No recent jumps found
+               </div>
+            )}
           </div>
         )}
       </div>
-      {(settings?.jumpHistoryCache !== false || settings?.showTodayButton !== false) && (
+      {settings?.showTodayButton !== false && (
         <div className="flex items-center border border-[var(--border)] rounded-md overflow-hidden">
-          {settings?.jumpHistoryCache !== false && (
-            <>
-              <button
-                onClick={handleBack}
-                disabled={history.pointer <= 0}
-                className="p-2 bg-[var(--bg)] text-[var(--text)] hover:bg-[var(--accent-bg)] disabled:opacity-30 disabled:hover:bg-[var(--bg)] transition-colors border-r border-[var(--border)]"
-                title="Go back in history"
-              >
-                <ArrowLeft className="w-4 h-4"/>
-              </button>
-              <button
-                onClick={handleForward}
-                disabled={history.pointer >= history.list.length - 1}
-                className={`p-2 bg-[var(--bg)] text-[var(--text)] hover:bg-[var(--accent-bg)] disabled:opacity-30 disabled:hover:bg-[var(--bg)] transition-colors ${settings?.showTodayButton !== false ? 'border-r border-[var(--border)]' : ''}`}
-                title="Go forward in history"
-              >
-                <ArrowRight className="w-4 h-4"/>
-              </button>
-            </>
-          )}
-          {settings?.showTodayButton !== false && (
-            <button
-              onClick={handleTodayClick}
-              className="p-2 bg-[var(--bg)] text-[var(--text)] hover:bg-[var(--accent-bg)] transition-colors"
-              title="Go to today"
-            >
-              <ArrowDownToDot className="w-4 h-4 text-[var(--accent)]" />
-            </button>
-          )}
+          <button
+            onClick={handleTodayClick}
+            className="p-2 bg-[var(--bg)] text-[var(--text)] hover:bg-[var(--accent-bg)] transition-colors"
+            title="Go to today"
+          >
+            <ArrowDownToDot className="w-4 h-4 text-[var(--accent)]" />
+          </button>
         </div>
       )}
     </div>

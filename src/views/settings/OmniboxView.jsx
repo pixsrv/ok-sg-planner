@@ -23,7 +23,7 @@ const OmniboxView = ({ settings, onSettingChange }) => {
             <div>
               <div className="font-semibold text-[var(--text-h)]">Jump history cache</div>
               <div className="text-sm text-[var(--text-light)]">
-                If enabled, the date omnibox will remember your navigation history and show back/forward buttons.
+                If enabled, the date omnibox will remember your navigation history in the background.
               </div>
             </div>
           </div>
@@ -83,6 +83,23 @@ const OmniboxView = ({ settings, onSettingChange }) => {
               <div className="font-semibold text-[var(--text-h)]">Show clear filter button</div>
               <div className="text-sm text-[var(--text-light)]">
                 Show a button next to the omnibox to clear the current filter.
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <label className="switch">
+              <input
+                type="checkbox"
+                checked={settings.employeeFilterHistoryCache !== false}
+                onChange={(e) => onSettingChange('employeeFilterHistoryCache', e.target.checked)}
+              />
+              <span className="slider round"></span>
+            </label>
+            <div>
+              <div className="font-semibold text-[var(--text-h)]">Search history cache</div>
+              <div className="text-sm text-[var(--text-light)]">
+                If enabled, the employee search will remember your search history in the background.
               </div>
             </div>
           </div>

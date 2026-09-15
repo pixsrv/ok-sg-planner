@@ -24,6 +24,7 @@ function App() {
     timelineExtension: '0',
     employeeFilterImmediate: true,
     showClearFilterButton: true,
+    employeeFilterHistoryCache: true,
     jumpHistoryCache: true,
     showTodayButton: true,
     sidebarFolded: false,
@@ -40,6 +41,7 @@ function App() {
     timelineExtension: '0',
     employeeFilterImmediate: true,
     showClearFilterButton: true,
+    employeeFilterHistoryCache: true,
     jumpHistoryCache: true,
     showTodayButton: true,
     sidebarFolded: false,
@@ -152,6 +154,10 @@ function App() {
     await saveItem('settings', 'weekStart', draftSettings.weekStart);
     await saveItem('settings', 'timelineExtension', draftSettings.timelineExtension);
     await saveItem('settings', 'employeeFilterImmediate', draftSettings.employeeFilterImmediate);
+    await saveItem('settings', 'showClearFilterButton', draftSettings.showClearFilterButton);
+    await saveItem('settings', 'employeeFilterHistoryCache', draftSettings.employeeFilterHistoryCache);
+    await saveItem('settings', 'jumpHistoryCache', draftSettings.jumpHistoryCache);
+    await saveItem('settings', 'showTodayButton', draftSettings.showTodayButton);
     await saveItem('settings', 'sidebarFolded', draftSettings.sidebarFolded);
     await saveItem('settings', 'sidebar', draftSettings.sidebar);
     setIsSettingsOpen(false);
