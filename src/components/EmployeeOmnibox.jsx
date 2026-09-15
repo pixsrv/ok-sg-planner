@@ -185,12 +185,9 @@ const EmployeeOmnibox = ({value, onChange, employees, settings, placeholder = "S
       if (isOpen && results.length > 0) {
         e.preventDefault();
         handleSelect(results[selectedIndex]);
-      } else if (!isOpen && !localQuery.trim()) {
+      } else if (!isOpen) {
         e.preventDefault();
         handleSearch(localQuery);
-      } else if (localQuery.trim()) {
-        e.preventDefault();
-        handleClear();
       }
     }
   };
