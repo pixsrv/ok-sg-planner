@@ -113,6 +113,12 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => 
   }, []);
 
 
+  const handleClear = () => {
+    setQuery('');
+    setResults([]);
+    setIsOpen(false);
+  };
+
   const handleSearch = (text) => {
     setQuery(text);
 
@@ -493,7 +499,11 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => 
             if (e.key === 'Escape') {
               e.preventDefault();
               e.stopPropagation();
-              setIsOpen(false);
+              if (isOpen) {
+                setIsOpen(false);
+              } else if (query) {
+                handleClear();
+              }
             }
             if (isOpen && results.length > 0) {
               if (e.key === 'ArrowDown') {
@@ -517,7 +527,7 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => 
         />
         {query && (
           <button
-            onClick={() => { setQuery(''); setResults([]); setIsOpen(false); }}
+            onClick={handleClear}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-light)] hover:text-[var(--text)] transition-colors"
           >
             <X className="w-4 h-4" />

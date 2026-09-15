@@ -8,6 +8,12 @@ const EmployeeOmnibox = ({value, onChange, employees, settings, placeholder = "S
   const [results, setResults] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const containerRef = useRef(null);
+  const [prevValue, setPrevValue] = useState(value);
+  if (value !== prevValue) {
+    setLocalQuery(value);
+    setPrevValue(value);
+  }
+
   const isImmediate = settings?.employeeFilterImmediate !== false;
 
   const [history, setHistory] = useState(() => {
@@ -30,8 +36,6 @@ const EmployeeOmnibox = ({value, onChange, employees, settings, placeholder = "S
   });
 
   useEffect(() => {
-    setLocalQuery(value);
-
     if (settings?.employeeFilterHistoryCache === false) return;
     if (!value) return;
 
@@ -39,7 +43,7 @@ const EmployeeOmnibox = ({value, onChange, employees, settings, placeholder = "S
       return;
     }
 
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       setHistory(prev => {
         if (prev.pointer >= 0 && prev.list[prev.pointer] === value) {
           return prev;
@@ -55,7 +59,9 @@ const EmployeeOmnibox = ({value, onChange, employees, settings, placeholder = "S
         };
       });
     }, 0);
-  }, [value, settings?.employeeFilterHistoryCache]);
+
+    return () => clearTimeout(timer);
+  }, [value, settings?.employeeFilterHistoryCache, history.list, history.pointer]);
 
   useEffect(() => {
     if (settings?.employeeFilterHistoryCache === false) return;
@@ -67,7 +73,7 @@ const EmployeeOmnibox = ({value, onChange, employees, settings, placeholder = "S
     } catch (e) {
       console.error('Failed to save ok-sg-filters to localStorage', e);
     }
-  }, [history, settings?.employeeFilterHistoryCache]);
+  }, [history.list, history.pointer, settings?.employeeFilterHistoryCache]);
 
 
   useEffect(() => {
@@ -89,14 +95,42 @@ const EmployeeOmnibox = ({value, onChange, employees, settings, placeholder = "S
     }
 
     if (!text.trim()) {
-      setResults([]);
-      setIsOpen(false);
+      if (history.list.length > 0) {
+        const recentFilters = [...history.list]
+          .reverse()
+          .map(term => ({
+            type: 'history',
+            label: term,
+            value: term
+          }));
 
+        const uniqueHistory = [];
+        const seenHistory = new Set();
+        recentFilters.forEach(rf => {
+          if (!seenHistory.has(rf.value)) {
+            uniqueHistory.push(rf);
+            seenHistory.add(rf.value);
+          }
+        });
+
+        setResults(uniqueHistory.slice(0, 8));
+        setSelectedIndex(0);
+        setIsOpen(true);
+      } else {
+        setResults([]);
+        setIsOpen(false);
+      }
       return;
     }
 
     if (!isImmediate) {
-      const matches = filterEmployees(employees, text, settings);
+      const matches = filterEmployees(employees, text, settings).map(emp => ({
+        type: 'employee',
+        label: `${emp[1].firstName} ${emp[1].lastName}`,
+        id: emp[0],
+        data: emp[1],
+        original: emp
+      }));
 
       setResults(matches);
       setSelectedIndex(0);
@@ -104,33 +138,52 @@ const EmployeeOmnibox = ({value, onChange, employees, settings, placeholder = "S
     }
   };
 
-  const handleSelect = (empData) => {
-    const [, data] = empData;
-    const fullName = `${data.firstName} ${data.lastName}`;
+  const handleSelect = (item) => {
+    if (item.type === 'history') {
+      setLocalQuery(item.value);
+      onChange(item.value);
+      setIsOpen(false);
+    } else {
+      const empData = item.original;
+      const [, data] = empData;
+      const fullName = `${data.firstName} ${data.lastName}`;
 
-    setLocalQuery(fullName);
-    onChange(fullName);
-    setIsOpen(false);
+      setLocalQuery(fullName);
+      onChange(fullName);
+      setIsOpen(false);
+    }
   };
 
   const handleKeyDown = (e) => {
     if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
       if (isOpen) {
         setIsOpen(false);
-      } else {
-        setLocalQuery('');
-        onChange('');
+      } else if (localQuery) {
+        handleClear();
       }
-    } else if (e.key === 'ArrowDown' && isOpen) {
-      e.preventDefault();
-      setSelectedIndex(prev => (prev + 1) % results.length);
+    } else if (e.key === 'ArrowDown') {
+      if (isOpen && results.length > 0) {
+        e.preventDefault();
+        setSelectedIndex(prev => (prev + 1) % results.length);
+      } else if (!isOpen) {
+        e.preventDefault();
+        handleSearch(localQuery);
+      }
     } else if (e.key === 'ArrowUp' && isOpen) {
       e.preventDefault();
       setSelectedIndex(prev => (prev - 1 + results.length) % results.length);
-    } else if (e.key === 'Enter' && isOpen) {
-      e.preventDefault();
-      if (results[selectedIndex]) {
+    } else if (e.key === 'Enter') {
+      if (isOpen && results.length > 0) {
+        e.preventDefault();
         handleSelect(results[selectedIndex]);
+      } else if (!isOpen && !localQuery.trim()) {
+        e.preventDefault();
+        handleSearch(localQuery);
+      } else if (localQuery.trim()) {
+        e.preventDefault();
+        handleClear();
       }
     }
   };
@@ -153,11 +206,8 @@ const EmployeeOmnibox = ({value, onChange, employees, settings, placeholder = "S
           value={localQuery}
           onChange={(e) => handleSearch(e.target.value)}
           onKeyDown={handleKeyDown}
-          onFocus={() => {
-            if (!isImmediate && localQuery.trim() && results.length > 0) {
-              setIsOpen(true);
-            }
-          }}
+          onFocus={() => handleSearch(localQuery)}
+          onClick={() => !isOpen && handleSearch(localQuery)}
         />
         {localQuery && (
           <button
@@ -169,27 +219,40 @@ const EmployeeOmnibox = ({value, onChange, employees, settings, placeholder = "S
           </button>
         )}
 
-        {isOpen && !isImmediate && (
+        {isOpen && (
           <div className="absolute top-full left-0 right-0 mt-1 bg-[var(--bg)] border border-[var(--border)] rounded-md shadow-lg z-50 max-h-64 overflow-y-auto">
-            {results.map((emp, index) => {
-              const [id, data] = emp;
-              return (
+            {results.length > 0 ? (
+              results.map((item, index) => (
                 <div
-                  key={id}
-                  className={`px-4 py-2 cursor-pointer text-sm flex flex-col ${
+                  key={item.type === 'history' ? `hist-${index}` : item.id}
+                  className={`px-4 py-2 cursor-pointer text-sm flex items-center gap-3 ${
                     index === selectedIndex ? 'bg-[var(--accent-bg)]' : 'hover:bg-[var(--accent-bg)]'
                   }`}
-                  onClick={() => handleSelect(emp)}
+                  onClick={() => handleSelect(item)}
+                  onMouseEnter={() => setSelectedIndex(index)}
                 >
-                  <div className="font-medium text-[var(--text)]">
-                    {data.firstName} {data.lastName}
-                  </div>
-                  <div className="text-xs text-[var(--text-light)]">
-                    {id}
-                  </div>
+                  {item.type === 'history' ? (
+                    <>
+                      <Search className="w-4 h-4 text-[var(--accent)] flex-shrink-0" />
+                      <span className="text-[var(--text)]">{item.label}</span>
+                    </>
+                  ) : (
+                    <div className="flex flex-col">
+                      <div className="font-medium text-[var(--text)]">
+                        {item.data.firstName} {item.data.lastName}
+                      </div>
+                      <div className="text-xs text-[var(--text-light)]">
+                        {item.id}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              );
-            })}
+              ))
+            ) : (
+              <div className="px-4 py-2 text-sm text-[var(--text-light)] italic">
+                No results found
+              </div>
+            )}
           </div>
         )}
       </div>
