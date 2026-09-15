@@ -1,69 +1,19 @@
 import {useState} from 'react';
 import {formatDate} from '../utils/formatters';
-import {Search, X} from 'lucide-react';
+import {filterEmployees} from '../utils/employeeFilter';
+import EmployeeOmnibox from '../components/EmployeeOmnibox';
 
 const StaffView = ({employees = {}, settings}) => {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const handleClearSearch = () => {
-    setSearchQuery('');
-  };
-
-  const employeeList = Object.entries(employees);
-
-  const filteredEmployees = employeeList.filter(([id, data]) => {
-    if (!searchQuery) return true;
-
-    const terms = searchQuery.toLowerCase().split(/\s+/).filter(term => term.length > 0);
-    if (terms.length === 0) return true;
-
-    // Every term must be found in at least one field
-    return terms.every(term => {
-      // Check ID
-      if (id.toLowerCase().includes(term)) return true;
-
-      // Check top-level employee data
-      if (data.firstName?.toLowerCase().includes(term)) return true;
-      if (data.lastName?.toLowerCase().includes(term)) return true;
-
-      // Check terms
-      return data.terms?.some(t =>
-        t.position?.toLowerCase().includes(term) ||
-        t.fte?.toString().toLowerCase().includes(term) ||
-        formatDate(t.validFrom, settings?.dateFormat)?.toLowerCase().includes(term) ||
-        (t.validTo ? formatDate(t.validTo, settings?.dateFormat) : 'present').toLowerCase().includes(term),
-      );
-    });
-  });
+  const employeeList = Object.entries(employees || {});
+  const filteredEmployees = filterEmployees(employees, searchQuery, settings);
 
   return (
     <div className="view-container">
       <div className="week-view-header">
         <div className="flex items-center gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-light)]"/>
-            <input
-              type="text"
-              placeholder="Search employees..."
-              className="pl-10 pr-10 py-2 bg-[var(--bg)] border border-[var(--border)] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] w-64"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Escape') {
-                  handleClearSearch();
-                }
-              }}
-            />
-            {searchQuery && (
-              <button
-                onClick={handleClearSearch}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--text-light)] hover:text-[var(--text)] transition-colors"
-                title="Clear search"
-              >
-                <X className="w-4 h-4"/>
-              </button>
-            )}
-          </div>
+          <EmployeeOmnibox value={searchQuery} onChange={setSearchQuery} />
         </div>
         <div className="text-sm text-[var(--text-light)]">
           Total Employees: {filteredEmployees.length}

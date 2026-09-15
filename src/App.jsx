@@ -10,6 +10,7 @@ import DateTimeView from './views/settings/DateTimeView.jsx'
 import NotificationsView from './views/settings/NotificationsView.jsx'
 import SecurityView from './views/settings/SecurityView.jsx'
 import SidebarView from './views/settings/SidebarView.jsx'
+import OmniboxView from './views/settings/OmniboxView.jsx'
 import { getAllItems, saveItem, saveItems } from './utils/db'
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
     timeFormat: '24h',
     weekStart: 'Monday',
     timelineExtension: '0',
+    showOmnibox: true,
     sidebarFolded: false,
     sidebar: [
       { id: 'Staff', name: 'Staff', visible: true, default: true },
@@ -33,6 +35,7 @@ function App() {
     timeFormat: '24h',
     weekStart: 'Monday',
     timelineExtension: '0',
+    showOmnibox: true,
     sidebarFolded: false,
     sidebar: [
       { id: 'Staff', name: 'Staff', visible: true, default: true },
@@ -131,6 +134,7 @@ function App() {
     await saveItem('settings', 'timeFormat', draftSettings.timeFormat);
     await saveItem('settings', 'weekStart', draftSettings.weekStart);
     await saveItem('settings', 'timelineExtension', draftSettings.timelineExtension);
+    await saveItem('settings', 'showOmnibox', draftSettings.showOmnibox);
     await saveItem('settings', 'sidebarFolded', draftSettings.sidebarFolded);
     await saveItem('settings', 'sidebar', draftSettings.sidebar);
     setIsSettingsOpen(false);
@@ -158,6 +162,8 @@ function App() {
     switch (settingsView) {
       case 'Sidebar':
         return <SidebarView settings={draftSettings} onSettingChange={handleSettingChange} />
+      case 'Omnibox':
+        return <OmniboxView settings={draftSettings} onSettingChange={handleSettingChange} />
       case 'Profile':
         return <ProfileView />
       case 'DateTime':
