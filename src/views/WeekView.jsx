@@ -13,31 +13,39 @@ const WeekView = ({ employees, settings }) => {
     // Try to load from localStorage
     try {
       const stored = localStorage.getItem('ok-sg-current');
+
       if (stored) {
         const parsed = JSON.parse(stored);
+
         if (parsed.selectedWeek) {
           // Use stored year if available, otherwise current year
           const year = parsed.selectedYear || new Date().getFullYear();
+
           return getDateFromWeek(parsed.selectedWeek, year);
         }
       }
     } catch (e) {
       console.error('Failed to parse ok-sg-current from localStorage', e);
     }
+
     return new Date();
   });
 
   const [jumps, setJumps] = useState(() => {
     try {
       const stored = localStorage.getItem('ok-sg-jumps');
+
       if (stored) {
         const parsed = JSON.parse(stored);
+
         if (Array.isArray(parsed.list) && parsed.list.length > 0) {
           return parsed.list.map(d => {
             const parts = d.split('-');
+
             if (parts.length === 3) {
               return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
             }
+
             return new Date(d);
           });
         }
@@ -49,14 +57,17 @@ const WeekView = ({ employees, settings }) => {
     // Initialize with current reference date if history is empty
     const initialDate = new Date(referenceDate);
     initialDate.setHours(0, 0, 0, 0);
+
     return [initialDate];
   });
 
   const [jumpPointer, setJumpPointer] = useState(() => {
     try {
       const stored = localStorage.getItem('ok-sg-jumps');
+
       if (stored) {
         const parsed = JSON.parse(stored);
+
         if (typeof parsed.pointer === 'number' && parsed.pointer >= 0) {
           return parsed.pointer;
         }
@@ -76,8 +87,8 @@ const WeekView = ({ employees, settings }) => {
     const d = new Date(date);
     const day = d.getDay();
     const isSundayStart = settings?.weekStart === 'Sunday';
-    
     let diff;
+
     if (isSundayStart) {
       diff = d.getDate() - day;
     } else {
@@ -87,6 +98,7 @@ const WeekView = ({ employees, settings }) => {
     
     const newDate = new Date(d.setDate(diff));
     newDate.setHours(0, 0, 0, 0);
+
     return newDate;
   };
 
@@ -103,6 +115,7 @@ const WeekView = ({ employees, settings }) => {
     try {
       const stored = localStorage.getItem('ok-sg-current');
       let currentData = stored ? JSON.parse(stored) : {};
+
       currentData.selectedWeek = currentWeekNumber;
       currentData.selectedYear = currentWeekYear;
       localStorage.setItem('ok-sg-current', JSON.stringify(currentData));
@@ -119,6 +132,7 @@ const WeekView = ({ employees, settings }) => {
           const y = d.getFullYear();
           const m = String(d.getMonth() + 1).padStart(2, '0');
           const day = String(d.getDate()).padStart(2, '0');
+
           return `${y}-${m}-${day}`;
         }),
         pointer: jumpPointer
@@ -132,6 +146,7 @@ const WeekView = ({ employees, settings }) => {
   const pushJump = (newDate) => {
     if (isNavigatingHistory) {
       setIsNavigatingHistory(false);
+
       return;
     }
 
@@ -160,6 +175,7 @@ const WeekView = ({ employees, settings }) => {
   const handleBack = () => {
     if (jumpPointer > 0) {
       const newPointer = jumpPointer - 1;
+
       setIsNavigatingHistory(true);
       setJumpPointer(newPointer);
       setReferenceDate(new Date(jumps[newPointer]));
@@ -169,6 +185,7 @@ const WeekView = ({ employees, settings }) => {
   const handleForward = () => {
     if (jumpPointer < jumps.length - 1) {
       const newPointer = jumpPointer + 1;
+
       setIsNavigatingHistory(true);
       setJumpPointer(newPointer);
       setReferenceDate(new Date(jumps[newPointer]));
@@ -182,6 +199,7 @@ const WeekView = ({ employees, settings }) => {
 
   for (let i = 0; i < 7; i++) {
     const date = new Date(startOfWeek);
+
     date.setDate(startOfWeek.getDate() + i);
     weekDays.push({
       date: formatDate(date, settings?.dateFormat),
@@ -196,6 +214,7 @@ const WeekView = ({ employees, settings }) => {
     // If we change year, we should also update referenceDate to stay within that year
     // Try to keep the same month and day, but in the new year
     const newDate = new Date(referenceDate);
+
     newDate.setFullYear(yearNum);
     setReferenceDate(newDate);
     pushJump(newDate);
@@ -204,6 +223,7 @@ const WeekView = ({ employees, settings }) => {
   const handleWeekClick = (weekNum, weekYear) => {
     const yearToUse = weekYear || currentWeekYear;
     const newDate = getDateFromWeek(weekNum, yearToUse);
+
     setReferenceDate(newDate);
     pushJump(newDate);
   };
@@ -213,23 +233,28 @@ const WeekView = ({ employees, settings }) => {
     
     // monthIndex is 1-12
     const d = new Date(yearToUse, monthIndex - 1, 1);
+
     setReferenceDate(d);
     pushJump(d);
   };
 
   const handleDateSelect = (selection) => {
     let newDate = null;
+
     if (selection.date) {
       newDate = selection.date;
       setReferenceDate(newDate);
     } else if (selection.type === 'year') {
       handleYearChange(selection.year);
+
       return; // handleYearChange calls pushJump
     } else if (selection.weekNum) {
       handleWeekClick(selection.weekNum, selection.year);
+
       return; // handleWeekClick calls pushJump
     } else if (selection.monthIndex) {
       handleMonthClick(selection.monthIndex, selection.year);
+
       return; // handleMonthClick calls pushJump
     }
     
@@ -240,23 +265,26 @@ const WeekView = ({ employees, settings }) => {
 
   const handleTodayClick = () => {
     const today = new Date();
+
     today.setHours(0, 0, 0, 0);
     setReferenceDate(today);
     pushJump(today);
   };
 
-  const employeeList = Object.entries(employees || {});
   const filteredEmployees = filterEmployees(employees, employeeSearchQuery, settings);
 
   const getCurrentPosition = (emp) => {
     if (!emp.terms || emp.terms.length === 0) return '';
+
     const today = new Date();
     const todayStr = today.toISOString().split('T')[0];
     const currentTerm = emp.terms.find(term => {
       const from = term.validFrom;
       const to = term.validTo || '9999-12-31';
+
       return todayStr >= from && todayStr <= to;
     }) || emp.terms[emp.terms.length - 1];
+
     return currentTerm?.position || '';
   };
 
@@ -271,17 +299,18 @@ const WeekView = ({ employees, settings }) => {
       />
       <div className="week-view-header">
         <div className="flex items-center gap-4">
-          {settings?.showEmployeeOmnibox !== false && (
-            <EmployeeOmnibox value={employeeSearchQuery} onChange={setEmployeeSearchQuery} />
-          )}
-          {settings?.showDateOmnibox !== false && (
-            <DateOmnibox 
-              selectedWeek={currentWeekNumber}
-              selectedYear={currentWeekYear}
-              onDateSelect={handleDateSelect}
-              settings={settings}
-            />
-          )}
+          <EmployeeOmnibox 
+            value={employeeSearchQuery} 
+            onChange={setEmployeeSearchQuery} 
+            employees={employees}
+            settings={settings}
+          />
+          <DateOmnibox 
+            selectedWeek={currentWeekNumber}
+            selectedYear={currentWeekYear}
+            onDateSelect={handleDateSelect}
+            settings={settings}
+          />
           <div className="flex items-center border border-[var(--border)] rounded-md overflow-hidden">
             <button
               onClick={handleBack}

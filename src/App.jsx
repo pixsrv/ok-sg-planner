@@ -22,8 +22,7 @@ function App() {
     timeFormat: '24h',
     weekStart: 'Monday',
     timelineExtension: '0',
-    showDateOmnibox: true,
-    showEmployeeOmnibox: true,
+    employeeFilterImmediate: true,
     sidebarFolded: false,
     sidebar: [
       { id: 'Staff', name: 'Staff', visible: true, default: true },
@@ -36,8 +35,7 @@ function App() {
     timeFormat: '24h',
     weekStart: 'Monday',
     timelineExtension: '0',
-    showDateOmnibox: true,
-    showEmployeeOmnibox: true,
+    employeeFilterImmediate: true,
     sidebarFolded: false,
     sidebar: [
       { id: 'Staff', name: 'Staff', visible: true, default: true },
@@ -55,23 +53,30 @@ function App() {
       try {
         const storedEmployees = await getAllItems('employees').catch(() => {
           console.warn('Employees store not found, might be empty.');
+
           return {};
         });
+
         const storedMonths = await getAllItems('months').catch(() => {
           console.warn('Months store not found, might be empty.');
+
           return [];
         });
+
         const storedSettings = await getAllItems('settings').catch(() => {
           console.warn('Settings store not found, might be empty.');
+
           return {};
         });
         
         if (storedEmployees && Object.keys(storedEmployees).length > 0) {
           setEmployees(storedEmployees);
         }
+
         if (storedMonths && storedMonths.length > 0) {
           setMonths(storedMonths);
         }
+
         if (storedSettings && Object.keys(storedSettings).length > 0) {
           setAppSettings(prev => ({ ...prev, ...storedSettings }));
           setDraftSettings(prev => ({ ...prev, ...storedSettings }));
@@ -82,6 +87,7 @@ function App() {
           
           if (storedSettings.sidebar) {
             const defaultView = storedSettings.sidebar.find(item => item.default);
+
             if (defaultView) {
               setCurrentView(defaultView.id);
             }
@@ -98,10 +104,12 @@ function App() {
   const handleDataLoaded = async (data) => {
     if (data.employees) {
       setEmployees(data.employees);
+
       await saveItems('employees', data.employees);
     }
     if (data.months && data.months.length > 0) {
       const updatedMonths = [...months, ...data.months];
+
       setMonths(updatedMonths);
       // For months, we currently store them as an array in state, 
       // but let's see how they are structured. 
@@ -127,6 +135,7 @@ function App() {
     // Apply default view if it changed (matches initial load behavior)
     if (draftSettings.sidebar) {
       const defaultView = draftSettings.sidebar.find(item => item.default);
+
       if (defaultView) {
         setCurrentView(defaultView.id);
       }
@@ -136,8 +145,7 @@ function App() {
     await saveItem('settings', 'timeFormat', draftSettings.timeFormat);
     await saveItem('settings', 'weekStart', draftSettings.weekStart);
     await saveItem('settings', 'timelineExtension', draftSettings.timelineExtension);
-    await saveItem('settings', 'showDateOmnibox', draftSettings.showDateOmnibox);
-    await saveItem('settings', 'showEmployeeOmnibox', draftSettings.showEmployeeOmnibox);
+    await saveItem('settings', 'employeeFilterImmediate', draftSettings.employeeFilterImmediate);
     await saveItem('settings', 'sidebarFolded', draftSettings.sidebarFolded);
     await saveItem('settings', 'sidebar', draftSettings.sidebar);
     setIsSettingsOpen(false);

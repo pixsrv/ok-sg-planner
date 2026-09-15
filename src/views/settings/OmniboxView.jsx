@@ -1,42 +1,37 @@
 import 'react';
 
 const OmniboxView = ({ settings, onSettingChange }) => {
-  const showDateOmnibox = settings.showDateOmnibox !== false;
-  const showEmployeeOmnibox = settings.showEmployeeOmnibox !== false;
+  const employeeFilterImmediate = settings.employeeFilterImmediate !== false;
 
   return (
     <div className="view-container">
       <div className="settings-panel">
         <h3>Date Omnibox</h3>
         <p className="text-sm text-[var(--text-muted)] mb-3">
-          Configure whether the date navigation omnibox is visible in the main views.
+          Configure settings for the date navigation omnibox.
         </p>
-        <div className="checkbox-list">
-          <label className="checkbox-item flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={showDateOmnibox}
-              onChange={(e) => onSettingChange('showDateOmnibox', e.target.checked)}
-            />
-            <span>Show Date Omnibox</span>
-          </label>
-        </div>
       </div>
 
       <div className="settings-panel">
         <h3>Employee Omnibox</h3>
         <p className="text-sm text-[var(--text-muted)] mb-3">
-          Configure whether the employee search omnibox is visible in the main views.
+          Configure settings for the employee search omnibox.
         </p>
-        <div className="checkbox-list">
-          <label className="checkbox-item flex items-center gap-2 cursor-pointer">
+        <div className="flex items-center gap-4">
+          <label className="switch">
             <input
               type="checkbox"
-              checked={showEmployeeOmnibox}
-              onChange={(e) => onSettingChange('showEmployeeOmnibox', e.target.checked)}
+              checked={employeeFilterImmediate}
+              onChange={(e) => onSettingChange('employeeFilterImmediate', e.target.checked)}
             />
-            <span>Show Employee Omnibox</span>
+            <span className="slider round"></span>
           </label>
+          <div>
+            <div className="font-semibold text-[var(--text-h)]">Immediate filtering</div>
+            <div className="text-sm text-[var(--text-light)]">
+              If disabled, filtering will only occur after selecting an employee from the dropdown.
+            </div>
+          </div>
         </div>
       </div>
     </div>

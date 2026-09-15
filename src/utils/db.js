@@ -12,21 +12,25 @@ export const initDB = () => {
 const getStoreData = (storeName) => {
   const key = getStorageKey(storeName);
   const data = localStorage.getItem(key);
+
   try {
     return data ? JSON.parse(data) : {};
   } catch (e) {
     console.error(`Error parsing data from localStorage for ${key}`, e);
+
     return {};
   }
 };
 
 const setStoreData = (storeName, data) => {
   const key = getStorageKey(storeName);
+
   localStorage.setItem(key, JSON.stringify(data));
 };
 
 export const saveItem = async (storeName, key, data) => {
   const storeData = getStoreData(storeName);
+
   storeData[key] = data;
   setStoreData(storeName, storeData);
   console.log(`Saved to ${storeName}: ${key} =`, data);
@@ -34,6 +38,7 @@ export const saveItem = async (storeName, key, data) => {
 
 export const saveItems = async (storeName, itemsMap) => {
   const storeData = getStoreData(storeName);
+
   Object.entries(itemsMap).forEach(([key, value]) => {
     storeData[key] = value;
   });
@@ -43,11 +48,13 @@ export const saveItems = async (storeName, itemsMap) => {
 
 export const getItem = async (storeName, key) => {
   const storeData = getStoreData(storeName);
+
   return storeData[key];
 };
 
 export const getAllItems = async (storeName) => {
   const storeData = getStoreData(storeName);
+
   if (storeName === EMPLOYEES_STORE || storeName === SETTINGS_STORE) {
     return storeData;
   } else {

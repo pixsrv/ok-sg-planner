@@ -20,6 +20,7 @@ const TopBar = ({ onSettingsClick, onDataLoaded, currentView }) => {
 
   const handleFileChange = async (event) => {
     const files = event.target.files;
+
     if (!files || files.length === 0) return;
 
     const loadedData = {
@@ -30,6 +31,7 @@ const TopBar = ({ onSettingsClick, onDataLoaded, currentView }) => {
     try {
       for (const file of files) {
         const json = await parseJsonFile(file);
+
         if (file.name.includes('employees')) {
           loadedData.employees = json;
         } else {

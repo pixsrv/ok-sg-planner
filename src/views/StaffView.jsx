@@ -13,9 +13,12 @@ const StaffView = ({employees = {}, settings}) => {
     <div className="view-container">
       <div className="week-view-header">
         <div className="flex items-center gap-4">
-          {settings?.showEmployeeOmnibox !== false && (
-            <EmployeeOmnibox value={searchQuery} onChange={setSearchQuery} />
-          )}
+          <EmployeeOmnibox 
+            value={searchQuery} 
+            onChange={setSearchQuery} 
+            employees={employees} 
+            settings={settings}
+          />
         </div>
         <div className="text-sm text-[var(--text-light)]">
           Total Employees: {filteredEmployees.length}

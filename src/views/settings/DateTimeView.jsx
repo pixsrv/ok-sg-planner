@@ -5,6 +5,7 @@ const DateTimeView = ({ settings, onSettingChange }) => {
 
   useEffect(() => {
     const timer = setInterval(() => setNow(new Date()), 1000);
+
     return () => clearInterval(timer);
   }, []);
 
@@ -32,6 +33,7 @@ const DateTimeView = ({ settings, onSettingChange }) => {
     } else {
       const ampm = hours >= 12 ? 'PM' : 'AM';
       const hours12 = hours % 12 || 12;
+
       return `${hours12}:${minutes} ${ampm}`;
     }
   };
