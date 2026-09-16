@@ -58,6 +58,10 @@ const DateTimeView = ({ settings, onSettingChange }) => {
 
   const currentDateFormat = settings.dateFormat || 'YYYY-MM-DD';
   const currentTimeFormat = settings.timeFormat || '24h';
+  const currentTimeResolution = settings.timeResolution || 1;
+  const currentTimeInputControl = settings.timeInputControl || 'system';
+  const currentTimelineStartHour = settings.timelineStartHour ?? 0;
+  const currentTimelineEndHour = settings.timelineEndHour ?? 23;
   const currentWeekStart = settings.weekStart || 'Monday';
   const currentTimelineExtension = settings.timelineExtension || '0';
 
@@ -66,6 +70,21 @@ const DateTimeView = ({ settings, onSettingChange }) => {
     { id: '1', label: '1 Month' },
     { id: '2', label: '2 Months' },
     { id: '3', label: '3 Months' },
+  ];
+
+  const timeResolutions = [
+    { id: 1, label: '1 minute' },
+    { id: 5, label: '5 minutes' },
+    { id: 10, label: '10 minutes' },
+    { id: 15, label: '15 minutes' },
+    { id: 30, label: '30 minutes' },
+    { id: 60, label: '60 minutes' },
+  ];
+
+  const timeInputControls = [
+    { id: 'system', label: 'System' },
+    { id: 'linear', label: 'Linear' },
+    { id: 'circular', label: 'Circular' },
   ];
 
   return (
@@ -104,6 +123,75 @@ const DateTimeView = ({ settings, onSettingChange }) => {
               <span>{format.label} ({formatTime(now, format.id)})</span>
             </label>
           ))}
+        </div>
+      </div>
+
+      <div className="settings-panel">
+        <h3>Input Time Resolution</h3>
+        <p className="text-sm text-[var(--text-muted)] mb-3">Reduce visual/input noise by rounding time to the selected resolution.</p>
+        <div className="radio-list">
+          {timeResolutions.map((res) => (
+            <label key={res.id} className="radio-item">
+              <input
+                type="radio"
+                name="timeResolution"
+                value={res.id}
+                checked={currentTimeResolution === res.id}
+                onChange={(e) => onSettingChange('timeResolution', parseInt(e.target.value))}
+              />
+              <span>{res.label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className="settings-panel">
+        <h3>Time Input Control</h3>
+        <p className="text-sm text-[var(--text-muted)] mb-3">Choose the control used to input time in cells.</p>
+        <div className="radio-list">
+          {timeInputControls.map((ctrl) => (
+            <label key={ctrl.id} className="radio-item">
+              <input
+                type="radio"
+                name="timeInputControl"
+                value={ctrl.id}
+                checked={currentTimeInputControl === ctrl.id}
+                onChange={(e) => onSettingChange('timeInputControl', e.target.value)}
+              />
+              <span>{ctrl.label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className="settings-panel">
+        <h3>Hours Timeline Range</h3>
+        <p className="text-sm text-[var(--text-muted)] mb-3">Set the earliest and latest hour displayed on the linear timeline.</p>
+        <div className="flex gap-4 items-center">
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-semibold">Start Hour</span>
+            <select 
+              value={currentTimelineStartHour} 
+              onChange={(e) => onSettingChange('timelineStartHour', parseInt(e.target.value))}
+              className="bg-[var(--bg)] border border-[var(--border)] rounded px-2 py-1 text-sm text-[var(--text)]"
+            >
+              {Array.from({ length: 24 }, (_, i) => (
+                <option key={i} value={i}>{i}:00</option>
+              ))}
+            </select>
+          </div>
+          <div className="flex flex-col gap-1">
+            <span className="text-xs font-semibold">End Hour</span>
+            <select 
+              value={currentTimelineEndHour} 
+              onChange={(e) => onSettingChange('timelineEndHour', parseInt(e.target.value))}
+              className="bg-[var(--bg)] border border-[var(--border)] rounded px-2 py-1 text-sm text-[var(--text)]"
+            >
+              {Array.from({ length: 24 }, (_, i) => (
+                <option key={i} value={i}>{i}:00</option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 

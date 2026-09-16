@@ -4,6 +4,8 @@ import { getISOWeek, getDateFromWeek } from '../utils/dateUtils';
 import Timeline from '../components/Timeline';
 import DateOmnibox from '../components/DateOmnibox';
 import EmployeeOmnibox from '../components/EmployeeOmnibox';
+import SystemTimeInput from '../components/SystemTimeInput';
+import HoursTimeline from '../components/HoursTimeline';
 import { filterEmployees } from '../utils/employeeFilter';
 
 const WeekView = ({ employees, settings }) => {
@@ -182,6 +184,18 @@ const WeekView = ({ employees, settings }) => {
     const ymKey = `${year}-${month}`;
     const dayNum = parseInt(day, 10).toString();
 
+    let roundedValue = value;
+    if (value && settings?.timeResolution && settings.timeResolution > 1) {
+      const [hours, minutes] = value.split(':').map(Number);
+      const totalMinutes = hours * 60 + minutes;
+      const roundedMinutes = Math.round(totalMinutes / settings.timeResolution) * settings.timeResolution;
+      
+      const newHours = Math.floor(roundedMinutes / 60) % 24;
+      const newMinutes = roundedMinutes % 60;
+      
+      roundedValue = `${String(newHours).padStart(2, '0')}:${String(newMinutes).padStart(2, '0')}`;
+    }
+
     setWorkRecords(prev => {
       const newRecords = { ...prev };
       if (!newRecords[ymKey]) newRecords[ymKey] = {};
@@ -193,8 +207,8 @@ const WeekView = ({ employees, settings }) => {
       if (!newDayData[employeeId]) newDayData[employeeId] = ['', ''];
       
       const currentHours = [...newDayData[employeeId]];
-      if (type === 'start') currentHours[0] = value;
-      else currentHours[1] = value;
+      if (type === 'start') currentHours[0] = roundedValue;
+      else currentHours[1] = roundedValue;
       
       newDayData[employeeId] = currentHours;
       newMonthData[dayNum] = newDayData;
@@ -302,20 +316,26 @@ const WeekView = ({ employees, settings }) => {
                         onClick={() => !isEditing && handleCellClick(empId, day.date)}
                       >
                         {isEditing ? (
-                          <div className="time-inputs-edit">
-                            <input 
-                              type="time" 
-                              value={cellData?.[0] || ''} 
-                              onChange={(e) => handleTimeChange(empId, day.date, 'start', e.target.value)}
+                          settings?.timeInputControl === 'linear' ? (
+                            <HoursTimeline
+                              value={cellData}
+                              onChange={(type, value) => handleTimeChange(empId, day.date, type, value)}
+                              onDone={() => setEditingCell(null)}
+                              settings={settings}
+                            />
+                          ) : settings?.timeInputControl === 'circular' ? (
+                            <div className="time-inputs-edit p-4 bg-[var(--code-bg)] border border-[var(--border)] rounded shadow-lg">
+                              <p className="text-xs italic">Circular input not implemented yet</p>
+                              <button onClick={() => setEditingCell(null)} className="mt-2 text-xs px-2 py-1 bg-[var(--accent)] text-white rounded">Close</button>
+                            </div>
+                          ) : (
+                            <SystemTimeInput
+                              value={cellData}
+                              onChange={(type, value) => handleTimeChange(empId, day.date, type, value)}
+                              onDone={() => setEditingCell(null)}
                               autoFocus
                             />
-                            <input 
-                              type="time" 
-                              value={cellData?.[1] || ''} 
-                              onChange={(e) => handleTimeChange(empId, day.date, 'end', e.target.value)}
-                            />
-                            <button onClick={(e) => { e.stopPropagation(); setEditingCell(null); }}>Done</button>
-                          </div>
+                          )
                         ) : (
                           <div className="time-display">
                             {cellData ? (

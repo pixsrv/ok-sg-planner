@@ -20,6 +20,10 @@ function App() {
   const [appSettings, setAppSettings] = useState({
     dateFormat: 'YYYY-MM-DD',
     timeFormat: '24h',
+    timeResolution: 1,
+    timeInputControl: 'system',
+    timelineStartHour: 0,
+    timelineEndHour: 23,
     weekStart: 'Monday',
     timelineExtension: '0',
     employeeFilterImmediate: true,
@@ -37,6 +41,10 @@ function App() {
   const [draftSettings, setDraftSettings] = useState({
     dateFormat: 'YYYY-MM-DD',
     timeFormat: '24h',
+    timeResolution: 1,
+    timeInputControl: 'system',
+    timelineStartHour: 0,
+    timelineEndHour: 23,
     weekStart: 'Monday',
     timelineExtension: '0',
     employeeFilterImmediate: true,
@@ -151,6 +159,10 @@ function App() {
     
     await saveItem('settings', 'dateFormat', draftSettings.dateFormat);
     await saveItem('settings', 'timeFormat', draftSettings.timeFormat);
+    await saveItem('settings', 'timeResolution', draftSettings.timeResolution);
+    await saveItem('settings', 'timeInputControl', draftSettings.timeInputControl);
+    await saveItem('settings', 'timelineStartHour', draftSettings.timelineStartHour);
+    await saveItem('settings', 'timelineEndHour', draftSettings.timelineEndHour);
     await saveItem('settings', 'weekStart', draftSettings.weekStart);
     await saveItem('settings', 'timelineExtension', draftSettings.timelineExtension);
     await saveItem('settings', 'employeeFilterImmediate', draftSettings.employeeFilterImmediate);
