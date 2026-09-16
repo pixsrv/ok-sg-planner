@@ -127,7 +127,98 @@ const WeekView = ({ employees, settings }) => {
     }
   };
 
-  const filteredEmployees = filterEmployees(employees, employeeSearchQuery, settings);
+  const [editingCell, setEditingCell] = useState(null); // { employeeId, dateKey }
+  const [workRecords, setWorkRecords] = useState({});
+
+  useEffect(() => {
+    const loadRecords = () => {
+      const records = {};
+      const yearMonths = new Set();
+      
+      weekDays.forEach(day => {
+        const [year, month] = day.date.split('-'); // Assumes YYYY-MM-DD
+        yearMonths.add(`${year}-${month}`);
+      });
+
+      yearMonths.forEach(ym => {
+        const key = `ok-sg-${ym}`;
+        try {
+          const data = localStorage.getItem(key);
+          if (data) {
+            records[ym] = JSON.parse(data);
+          } else {
+            records[ym] = {};
+          }
+        } catch (e) {
+          console.error(`Failed to load records for ${key}`, e);
+          records[ym] = {};
+        }
+      });
+      setWorkRecords(records);
+    };
+
+    loadRecords();
+  }, [referenceDate, settings?.dateFormat, weekDays.map(d => d.date).join(',')]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && editingCell) {
+        setEditingCell(null);
+      }
+      if (e.key === 'Enter' && editingCell) {
+        setEditingCell(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [editingCell]);
+
+  const handleCellClick = (employeeId, dayDate) => {
+    setEditingCell({ employeeId, dayDate });
+  };
+
+  const handleTimeChange = (employeeId, dayDate, type, value) => {
+    const [year, month, day] = dayDate.split('-');
+    const ymKey = `${year}-${month}`;
+    const dayNum = parseInt(day, 10).toString();
+
+    setWorkRecords(prev => {
+      const newRecords = { ...prev };
+      if (!newRecords[ymKey]) newRecords[ymKey] = {};
+      
+      const newMonthData = { ...newRecords[ymKey] };
+      if (!newMonthData[dayNum]) newMonthData[dayNum] = {};
+      
+      const newDayData = { ...newMonthData[dayNum] };
+      if (!newDayData[employeeId]) newDayData[employeeId] = ['', ''];
+      
+      const currentHours = [...newDayData[employeeId]];
+      if (type === 'start') currentHours[0] = value;
+      else currentHours[1] = value;
+      
+      newDayData[employeeId] = currentHours;
+      newMonthData[dayNum] = newDayData;
+      newRecords[ymKey] = newMonthData;
+
+      // Save to localStorage
+      try {
+        localStorage.setItem(`ok-sg-${ymKey}`, JSON.stringify(newMonthData));
+      } catch (e) {
+        console.error('Failed to save record to localStorage', e);
+      }
+
+      return newRecords;
+    });
+  };
+
+  const getCellData = (employeeId, dayDate) => {
+    const [year, month, day] = dayDate.split('-');
+    const ymKey = `${year}-${month}`;
+    const dayNum = parseInt(day, 10).toString();
+    return workRecords[ymKey]?.[dayNum]?.[employeeId];
+  };
+
+  const filteredEmployeesList = filterEmployees(employees, employeeSearchQuery, settings);
 
   const getCurrentPosition = (emp) => {
     if (!emp.terms || emp.terms.length === 0) return '';
@@ -191,8 +282,8 @@ const WeekView = ({ employees, settings }) => {
             </tr>
           </thead>
           <tbody>
-            {filteredEmployees.length > 0 ? (
-              filteredEmployees.map(([, emp], idx) => (
+            {filteredEmployeesList.length > 0 ? (
+              filteredEmployeesList.map(([empId, emp], idx) => (
                 <tr key={idx} className="employee-row">
                   <td className="employee-name-cell">
                     <div className="employee-info-wrapper">
@@ -200,18 +291,50 @@ const WeekView = ({ employees, settings }) => {
                       <div className="employee-position">{getCurrentPosition(emp)}</div>
                     </div>
                   </td>
-                  {weekDays.map((_, dayIdx) => (
-                    <td key={dayIdx} className="day-cell">
-                      <div className="time-inputs">
-                        <div className="time-field">
-                          <span>{formatTime("08:00", settings?.timeFormat)}</span>
-                        </div>
-                        <div className="time-field">
-                          <span>{formatTime("16:00", settings?.timeFormat)}</span>
-                        </div>
-                      </div>
-                    </td>
-                  ))}
+                  {weekDays.map((day, dayIdx) => {
+                    const cellData = getCellData(empId, day.date);
+                    const isEditing = editingCell?.employeeId === empId && editingCell?.dayDate === day.date;
+                    
+                    return (
+                      <td 
+                        key={dayIdx} 
+                        className={`day-cell ${isEditing ? 'editing' : ''}`}
+                        onClick={() => !isEditing && handleCellClick(empId, day.date)}
+                      >
+                        {isEditing ? (
+                          <div className="time-inputs-edit">
+                            <input 
+                              type="time" 
+                              value={cellData?.[0] || ''} 
+                              onChange={(e) => handleTimeChange(empId, day.date, 'start', e.target.value)}
+                              autoFocus
+                            />
+                            <input 
+                              type="time" 
+                              value={cellData?.[1] || ''} 
+                              onChange={(e) => handleTimeChange(empId, day.date, 'end', e.target.value)}
+                            />
+                            <button onClick={(e) => { e.stopPropagation(); setEditingCell(null); }}>Done</button>
+                          </div>
+                        ) : (
+                          <div className="time-display">
+                            {cellData ? (
+                              <div className="time-values">
+                                <div className="time-field">
+                                  <span>{formatTime(cellData[0], settings?.timeFormat)}</span>
+                                </div>
+                                <div className="time-field">
+                                  <span>{formatTime(cellData[1], settings?.timeFormat)}</span>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="empty-cell-placeholder">&nbsp;</div>
+                            )}
+                          </div>
+                        )}
+                      </td>
+                    );
+                  })}
                 </tr>
               ))
             ) : (

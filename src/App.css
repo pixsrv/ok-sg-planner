@@ -513,3 +513,45 @@ input:disabled + .slider {
   opacity: 1;
   filter: none;
 }
+
+.time-values {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.time-inputs-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.time-inputs-edit input {
+  width: 80px;
+  padding: 2px;
+  font-size: 0.8rem;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+}
+
+.time-inputs-edit button {
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.day-cell.editing {
+  background-color: var(--accent-bg);
+}
+
+.empty-cell-placeholder {
+  min-height: 2.5rem;
+  width: 100%;
+  cursor: pointer;
+}
