@@ -28,6 +28,7 @@ function App() {
     timelineEndHour: 23,
     weekStart: 'Monday',
     timelineExtension: '0',
+    coordinateOrder: 'employee-date',
     employeeFilterImmediate: true,
     showClearFilterButton: true,
     employeeFilterHistoryCache: true,
@@ -51,6 +52,7 @@ function App() {
     timelineEndHour: 23,
     weekStart: 'Monday',
     timelineExtension: '0',
+    coordinateOrder: 'employee-date',
     employeeFilterImmediate: true,
     showClearFilterButton: true,
     employeeFilterHistoryCache: true,
@@ -171,6 +173,7 @@ function App() {
     await saveItem('settings', 'timelineEndHour', draftSettings.timelineEndHour);
     await saveItem('settings', 'weekStart', draftSettings.weekStart);
     await saveItem('settings', 'timelineExtension', draftSettings.timelineExtension);
+    await saveItem('settings', 'coordinateOrder', draftSettings.coordinateOrder);
     await saveItem('settings', 'employeeFilterImmediate', draftSettings.employeeFilterImmediate);
     await saveItem('settings', 'showClearFilterButton', draftSettings.showClearFilterButton);
     await saveItem('settings', 'employeeFilterHistoryCache', draftSettings.employeeFilterHistoryCache);

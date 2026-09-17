@@ -100,12 +100,19 @@ const HoursTimeline = ({ value, onChange, onDone, onClear, onUndo, onRedo, onOpe
     e.stopPropagation();
   };
 
+  const employeeName = employee ? `${employee.firstName} ${employee.lastName}` : '';
+  const coordinateOrder = settings?.coordinateOrder || 'employee-date';
+  
+  const coordinateDisplay = coordinateOrder === 'employee-date'
+    ? `${employeeName} : ${dayDate}`
+    : `${dayDate} : ${employeeName}`;
+
   return (
     <div 
       className="hours-timeline-content bg-[var(--code-bg)] p-2 w-full max-w-7xl"
       onClick={handleContainerClick}
     >
-      <div className="flex justify-between items-center mb-4 border-b border-[var(--border)] pb-2">
+      <div className="flex justify-between items-center mb-4 border-b border-[var(--border)] pb-2 relative">
         <div className="flex items-center gap-2">
           <button 
             className="p-1.5 hover:bg-[var(--accent-bg)] rounded transition-colors text-[var(--text-muted)] hover:text-red-500 flex items-center gap-1 text-xs"
@@ -130,6 +137,10 @@ const HoursTimeline = ({ value, onChange, onDone, onClear, onUndo, onRedo, onOpe
           >
             <RotateCw size={16} />
           </button>
+        </div>
+
+        <div className="absolute left-1/2 -translate-x-1/2 text-sm font-medium text-[var(--text)] px-3 py-1 bg-[var(--accent-bg)] rounded border border-[var(--border)] whitespace-nowrap">
+          {coordinateDisplay}
         </div>
 
         <div className="flex items-center gap-2">

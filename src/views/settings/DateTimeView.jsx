@@ -66,6 +66,12 @@ const DateTimeView = ({ settings, onSettingChange }) => {
   const currentTimelineEndHour = settings.timelineEndHour ?? 23;
   const currentWeekStart = settings.weekStart || 'Monday';
   const currentTimelineExtension = settings.timelineExtension || '0';
+  const currentCoordinateOrder = settings.coordinateOrder || 'employee-date';
+
+  const coordinateOrders = [
+    { id: 'employee-date', label: 'Employee (row) : Date (col)' },
+    { id: 'date-employee', label: 'Date (col) : Employee (row)' }
+  ];
 
   const timelineExtensions = [
     { id: '0', label: 'None' },
@@ -251,6 +257,25 @@ const DateTimeView = ({ settings, onSettingChange }) => {
                 onChange={(e) => onSettingChange('weekStart', e.target.value)}
               />
               <span>{day.label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className="settings-panel">
+        <h3>Coordinate Display Order</h3>
+        <p className="text-sm text-[var(--text-muted)] mb-3">Choose the order of coordinates in the bottom hours timeline panel.</p>
+        <div className="radio-list">
+          {coordinateOrders.map((order) => (
+            <label key={order.id} className="radio-item">
+              <input
+                type="radio"
+                name="coordinateOrder"
+                value={order.id}
+                checked={currentCoordinateOrder === order.id}
+                onChange={(e) => onSettingChange('coordinateOrder', e.target.value)}
+              />
+              <span>{order.label}</span>
             </label>
           ))}
         </div>

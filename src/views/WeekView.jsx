@@ -246,6 +246,24 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
     setEditingCell({ employeeId, dayDate });
   };
 
+  useEffect(() => {
+    if (editingCell) {
+      // Small timeout to ensure the 'editing' class is applied and panel animation starts
+      setTimeout(() => {
+        const cell = document.querySelector(`.day-cell.editing`);
+        if (cell) {
+          const panelHeight = 250;
+          const viewportHeight = window.innerHeight;
+          const rect = cell.getBoundingClientRect();
+          
+          if (rect.bottom > viewportHeight - panelHeight) {
+            cell.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }
+      }, 100);
+    }
+  }, [editingCell]);
+
   const handleCancelEdit = () => {
     setEditingCell(null);
   };
