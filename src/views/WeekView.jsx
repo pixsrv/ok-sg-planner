@@ -8,8 +8,9 @@ import SystemTimeInput from '../components/SystemTimeInput';
 import HoursTimeline from '../components/HoursTimeline';
 import { filterEmployees } from '../utils/employeeFilter';
 
-const WeekView = ({ employees, settings }) => {
+const WeekView = ({ employees, settings, onOpenSettingsView }) => {
   const [employeeSearchQuery, setEmployeeSearchQuery] = useState('');
+  const [initialTime, setInitialTime] = useState(null);
   const [referenceDate, setReferenceDate] = useState(() => {
     // Try to load from localStorage
     try {
@@ -165,10 +166,11 @@ const WeekView = ({ employees, settings }) => {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && editingCell) {
-        setEditingCell(null);
+        handleCancelEdit(editingCell.employeeId, editingCell.dayDate);
       }
       if (e.key === 'Enter' && editingCell) {
         setEditingCell(null);
+        setInitialTime(null);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -176,7 +178,67 @@ const WeekView = ({ employees, settings }) => {
   }, [editingCell]);
 
   const handleCellClick = (employeeId, dayDate) => {
+    setInitialTime(getCellData(employeeId, dayDate));
     setEditingCell({ employeeId, dayDate });
+  };
+
+  const handleCancelEdit = (employeeId, dayDate) => {
+    if (initialTime !== null) {
+      // Restore initial time
+      const [year, month, day] = dayDate.split('-');
+      const ymKey = `${year}-${month}`;
+      const dayNum = parseInt(day, 10).toString();
+
+      setWorkRecords(prev => {
+        const newRecords = { ...prev };
+        const newMonthData = { ...newRecords[ymKey] };
+        const newDayData = { ...newMonthData[dayNum] };
+        newDayData[employeeId] = initialTime;
+        newMonthData[dayNum] = newDayData;
+        newRecords[ymKey] = newMonthData;
+
+        // Save to localStorage
+        try {
+          localStorage.setItem(`ok-sg-${ymKey}`, JSON.stringify(newMonthData));
+        } catch (e) {
+          console.error('Failed to save record to localStorage', e);
+        }
+
+        return newRecords;
+      });
+    }
+    setEditingCell(null);
+    setInitialTime(null);
+  };
+
+  const handleClearCell = (employeeId, dayDate) => {
+    const [year, month, day] = dayDate.split('-');
+    const ymKey = `${year}-${month}`;
+    const dayNum = parseInt(day, 10).toString();
+
+    setWorkRecords(prev => {
+      const newRecords = { ...prev };
+      if (!newRecords[ymKey] || !newRecords[ymKey][dayNum]) return prev;
+
+      const newMonthData = { ...newRecords[ymKey] };
+      const newDayData = { ...newMonthData[dayNum] };
+      
+      delete newDayData[employeeId];
+      
+      newMonthData[dayNum] = newDayData;
+      newRecords[ymKey] = newMonthData;
+
+      // Save to localStorage
+      try {
+        localStorage.setItem(`ok-sg-${ymKey}`, JSON.stringify(newMonthData));
+      } catch (e) {
+        console.error('Failed to save record to localStorage', e);
+      }
+
+      return newRecords;
+    });
+    setEditingCell(null);
+    setInitialTime(null);
   };
 
   const handleTimeChange = (employeeId, dayDate, type, value) => {
@@ -321,7 +383,12 @@ const WeekView = ({ employees, settings }) => {
                               value={cellData}
                               onChange={(type, value) => handleTimeChange(empId, day.date, type, value)}
                               onDone={() => setEditingCell(null)}
+                              onClear={() => handleClearCell(empId, day.date)}
+                              onCancel={() => handleCancelEdit(empId, day.date)}
+                              onOpenSettings={() => onOpenSettingsView?.('DateTime')}
                               settings={settings}
+                              employee={emp}
+                              dayDate={day.date}
                             />
                           ) : settings?.timeInputControl === 'circular' ? (
                             <div className="time-inputs-edit p-4 bg-[var(--code-bg)] border border-[var(--border)] rounded shadow-lg">

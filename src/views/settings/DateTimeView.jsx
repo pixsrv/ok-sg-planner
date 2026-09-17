@@ -60,6 +60,8 @@ const DateTimeView = ({ settings, onSettingChange }) => {
   const currentTimeFormat = settings.timeFormat || '24h';
   const currentTimeResolution = settings.timeResolution || 1;
   const currentTimeInputControl = settings.timeInputControl || 'system';
+  const currentWorkDayLength = settings.workDayLength || '08:00';
+  const currentAutoSetEndHourMode = settings.autoSetEndHourMode || 'none';
   const currentTimelineStartHour = settings.timelineStartHour ?? 0;
   const currentTimelineEndHour = settings.timelineEndHour ?? 23;
   const currentWeekStart = settings.weekStart || 'Monday';
@@ -85,6 +87,12 @@ const DateTimeView = ({ settings, onSettingChange }) => {
     { id: 'system', label: 'System' },
     { id: 'linear', label: 'Linear' },
     { id: 'circular', label: 'Circular' },
+  ];
+
+  const autoSetModes = [
+    { id: 'none', label: 'None' },
+    { id: 'fixed', label: 'Fixed Workday Length' },
+    { id: 'calculated', label: 'Calculated (from FTE)' },
   ];
 
   return (
@@ -161,6 +169,41 @@ const DateTimeView = ({ settings, onSettingChange }) => {
               <span>{ctrl.label}</span>
             </label>
           ))}
+        </div>
+      </div>
+
+      <div className="settings-panel border-t border-[var(--border)] pt-6">
+        <h3 className="mb-2">Hours Timeline Auto-Set</h3>
+        <p className="text-sm text-[var(--text-muted)] mb-6">Configure how the end hour is automatically set when you select a start hour.</p>
+        
+        <div className="space-y-6">
+          <div className="flex flex-col gap-2">
+            <span className="text-xs font-semibold uppercase text-[var(--text-muted)]">Work Day Length (Etat)</span>
+            <input 
+              type="time" 
+              value={currentWorkDayLength}
+              onChange={(e) => onSettingChange('workDayLength', e.target.value)}
+              className="w-32 bg-[var(--bg)] border border-[var(--border)] rounded px-2 py-1 text-sm text-[var(--text)] focus:ring-1 focus:ring-[var(--accent)] outline-none"
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <span className="text-xs font-semibold uppercase text-[var(--text-muted)]">Auto Set End Hour Mode</span>
+            <div className="radio-list">
+              {autoSetModes.map((mode) => (
+                <label key={mode.id} className="radio-item">
+                  <input
+                    type="radio"
+                    name="autoSetEndHourMode"
+                    value={mode.id}
+                    checked={currentAutoSetEndHourMode === mode.id}
+                    onChange={(e) => onSettingChange('autoSetEndHourMode', e.target.value)}
+                  />
+                  <span>{mode.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 

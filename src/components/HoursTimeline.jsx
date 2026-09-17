@@ -1,6 +1,7 @@
-import  { useMemo, useRef } from 'react';
+import { useMemo, useRef } from 'react';
+import { Settings } from 'lucide-react';
 
-const HoursTimeline = ({ value, onChange, onDone, settings }) => {
+const HoursTimeline = ({ value, onChange, onDone, onClear, onCancel, onOpenSettings, settings, employee, dayDate }) => {
   const scrollContainerRef = useRef(null);
   const timeResolution = settings?.timeResolution || 1;
 
@@ -41,6 +42,41 @@ const HoursTimeline = ({ value, onChange, onDone, settings }) => {
   const handleTimeClick = (type, h, m) => {
     const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
     onChange(type, timeStr);
+
+    // Auto-set end time logic
+    if (type === 'start' && settings?.autoSetEndHourMode && settings.autoSetEndHourMode !== 'none') {
+      let durationMinutes = 0;
+
+      if (settings.autoSetEndHourMode === 'fixed') {
+        const [workH, workM] = (settings.workDayLength || '08:00').split(':').map(Number);
+        durationMinutes = workH * 60 + workM;
+      } else if (settings.autoSetEndHourMode === 'calculated' && employee?.terms && dayDate) {
+        const term = employee.terms.find(t => {
+          const from = t.validFrom;
+          const to = t.validTo || '9999-12-31';
+          return dayDate >= from && dayDate <= to;
+        }) || employee.terms[employee.terms.length - 1];
+
+        const fte = term?.fte ?? 1.0;
+        // Standard full time is 8 hours (480 minutes)
+        durationMinutes = Math.round(fte * 480);
+      }
+
+      if (durationMinutes > 0) {
+        const totalStartMinutes = h * 60 + m;
+        const totalEndMinutes = (totalStartMinutes + durationMinutes) % (24 * 60);
+        const endH = Math.floor(totalEndMinutes / 60);
+        const endM = totalEndMinutes % 60;
+        
+        // Round end minutes to resolution
+        const roundedEndTotalMinutes = Math.round(totalEndMinutes / timeResolution) * timeResolution;
+        const finalEndH = Math.floor(roundedEndTotalMinutes / 60) % 24;
+        const finalEndM = roundedEndTotalMinutes % 60;
+
+        const endTimeStr = `${String(finalEndH).padStart(2, '0')}:${String(finalEndM).padStart(2, '0')}`;
+        onChange('end', endTimeStr);
+      }
+    }
   };
 
   const ensureHourInRange = (h) => {
@@ -63,10 +99,11 @@ const HoursTimeline = ({ value, onChange, onDone, settings }) => {
       <div className="flex justify-between items-center mb-4">
         <h4 className="text-sm font-bold text-[var(--text-h)]">Select Time</h4>
         <button 
-          className="text-xs px-2 py-1 bg-[var(--accent)] text-white rounded hover:opacity-90"
-          onClick={onDone}
+          className="p-1 hover:bg-[var(--accent-bg)] rounded-full transition-colors text-[var(--text-muted)] hover:text-[var(--accent)]"
+          onClick={onOpenSettings}
+          title="Settings"
         >
-          Done
+          <Settings size={18} />
         </button>
       </div>
 
@@ -97,7 +134,7 @@ const HoursTimeline = ({ value, onChange, onDone, settings }) => {
                     ))}
                   </div>
                   {/* Minutes Ribbon */}
-                  <div className="flex gap-1">
+                  <div className="flex gap-1 justify-center">
                     {minutes.map(m => (
                       <div
                         key={m}
@@ -116,6 +153,27 @@ const HoursTimeline = ({ value, onChange, onDone, settings }) => {
             </div>
           );
         })}
+      </div>
+
+      <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-[var(--border)]">
+        <button 
+          className="text-xs px-3 py-1.5 border border-red-500/50 text-red-500 rounded hover:bg-red-500/10 transition-colors mr-auto"
+          onClick={onClear}
+        >
+          Clear
+        </button>
+        <button 
+          className="text-xs px-3 py-1.5 border border-[var(--border)] text-[var(--text)] rounded hover:bg-[var(--accent-bg)] transition-colors"
+          onClick={onCancel}
+        >
+          Cancel
+        </button>
+        <button 
+          className="text-xs px-3 py-1.5 bg-[var(--accent)] text-white rounded hover:opacity-90 transition-colors font-medium"
+          onClick={onDone}
+        >
+          OK
+        </button>
       </div>
     </div>
   );

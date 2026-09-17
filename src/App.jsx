@@ -22,6 +22,8 @@ function App() {
     timeFormat: '24h',
     timeResolution: 1,
     timeInputControl: 'system',
+    workDayLength: '08:00',
+    autoSetEndHourMode: 'none',
     timelineStartHour: 0,
     timelineEndHour: 23,
     weekStart: 'Monday',
@@ -43,6 +45,8 @@ function App() {
     timeFormat: '24h',
     timeResolution: 1,
     timeInputControl: 'system',
+    workDayLength: '08:00',
+    autoSetEndHourMode: 'none',
     timelineStartHour: 0,
     timelineEndHour: 23,
     weekStart: 'Monday',
@@ -161,6 +165,8 @@ function App() {
     await saveItem('settings', 'timeFormat', draftSettings.timeFormat);
     await saveItem('settings', 'timeResolution', draftSettings.timeResolution);
     await saveItem('settings', 'timeInputControl', draftSettings.timeInputControl);
+    await saveItem('settings', 'workDayLength', draftSettings.workDayLength);
+    await saveItem('settings', 'autoSetEndHourMode', draftSettings.autoSetEndHourMode);
     await saveItem('settings', 'timelineStartHour', draftSettings.timelineStartHour);
     await saveItem('settings', 'timelineEndHour', draftSettings.timelineEndHour);
     await saveItem('settings', 'weekStart', draftSettings.weekStart);
@@ -187,7 +193,17 @@ function App() {
       case 'Month':
         return <MonthView months={months} />
       case 'Week':
-        return <WeekView employees={employees} settings={appSettings} />
+        return (
+          <WeekView 
+            employees={employees} 
+            settings={appSettings} 
+            onOpenSettingsView={(view) => {
+              setSettingsView(view);
+              setDraftSettings(appSettings);
+              setIsSettingsOpen(true);
+            }}
+          />
+        )
       default:
         return <StaffView employees={employees} settings={appSettings} />
     }
