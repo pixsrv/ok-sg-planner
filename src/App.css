@@ -440,6 +440,10 @@
   transform: translateY(0);
 }
 
+.view-container.has-panel {
+  padding-bottom: 250px;
+}
+
 .scrollbar-thin::-webkit-scrollbar {
   height: 6px;
 }

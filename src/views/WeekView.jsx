@@ -374,7 +374,7 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
   };
 
   return (
-    <div className="view-container">
+    <div className={`view-container ${editingCell ? 'has-panel' : ''}`}>
       <Timeline 
         year={currentWeekYear} 
         selectedWeek={currentWeekNumber}
