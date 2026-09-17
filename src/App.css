@@ -417,17 +417,27 @@
   cursor: grabbing;
 }
 
-/* Hours Timeline Popup */
-.hours-timeline-popup {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+/* Hours Timeline Panel (Slide-in) */
+.hours-timeline-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
   background: var(--code-bg);
-  border: 1px solid var(--border);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-  z-index: 1000;
-  max-width: 90vw;
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -4px 15px rgba(0,0,0,0.1);
+  z-index: 2000;
+  transform: translateY(100%);
+  transition: transform 0.3s ease-in-out;
+  padding: 0.75rem 1rem;
+  display: flex;
+  justify-content: center;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.hours-timeline-panel.visible {
+  transform: translateY(0);
 }
 
 .scrollbar-thin::-webkit-scrollbar {
@@ -445,6 +455,11 @@
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: var(--accent);
+}
+
+.hours-timeline-content {
+  width: 100%;
+  max-width: 1200px;
 }
 
 /* Toggle Switch Styles */

@@ -10,7 +10,6 @@ import { filterEmployees } from '../utils/employeeFilter';
 
 const WeekView = ({ employees, settings, onOpenSettingsView }) => {
   const [employeeSearchQuery, setEmployeeSearchQuery] = useState('');
-  const [initialTime, setInitialTime] = useState(null);
   const [referenceDate, setReferenceDate] = useState(() => {
     // Try to load from localStorage
     try {
@@ -130,7 +129,7 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
     }
   };
 
-  const [editingCell, setEditingCell] = useState(null); // { employeeId, dateKey }
+  const [editingCell, setEditingCell] = useState(null); // { employeeId, dayDate }
   const [workRecords, setWorkRecords] = useState({});
 
   useEffect(() => {
@@ -170,7 +169,6 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
       }
       if (e.key === 'Enter' && editingCell) {
         setEditingCell(null);
-        setInitialTime(null);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -178,37 +176,11 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
   }, [editingCell]);
 
   const handleCellClick = (employeeId, dayDate) => {
-    setInitialTime(getCellData(employeeId, dayDate));
     setEditingCell({ employeeId, dayDate });
   };
 
   const handleCancelEdit = (employeeId, dayDate) => {
-    if (initialTime !== null) {
-      // Restore initial time
-      const [year, month, day] = dayDate.split('-');
-      const ymKey = `${year}-${month}`;
-      const dayNum = parseInt(day, 10).toString();
-
-      setWorkRecords(prev => {
-        const newRecords = { ...prev };
-        const newMonthData = { ...newRecords[ymKey] };
-        const newDayData = { ...newMonthData[dayNum] };
-        newDayData[employeeId] = initialTime;
-        newMonthData[dayNum] = newDayData;
-        newRecords[ymKey] = newMonthData;
-
-        // Save to localStorage
-        try {
-          localStorage.setItem(`ok-sg-${ymKey}`, JSON.stringify(newMonthData));
-        } catch (e) {
-          console.error('Failed to save record to localStorage', e);
-        }
-
-        return newRecords;
-      });
-    }
     setEditingCell(null);
-    setInitialTime(null);
   };
 
   const handleClearCell = (employeeId, dayDate) => {
@@ -237,8 +209,6 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
 
       return newRecords;
     });
-    setEditingCell(null);
-    setInitialTime(null);
   };
 
   const handleTimeChange = (employeeId, dayDate, type, value) => {
@@ -375,50 +345,22 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
                       <td 
                         key={dayIdx} 
                         className={`day-cell ${isEditing ? 'editing' : ''}`}
-                        onClick={() => !isEditing && handleCellClick(empId, day.date)}
+                        onClick={() => handleCellClick(empId, day.date)}
                       >
-                        {isEditing ? (
-                          settings?.timeInputControl === 'linear' ? (
-                            <HoursTimeline
-                              value={cellData}
-                              onChange={(type, value) => handleTimeChange(empId, day.date, type, value)}
-                              onDone={() => setEditingCell(null)}
-                              onClear={() => handleClearCell(empId, day.date)}
-                              onCancel={() => handleCancelEdit(empId, day.date)}
-                              onOpenSettings={() => onOpenSettingsView?.('DateTime')}
-                              settings={settings}
-                              employee={emp}
-                              dayDate={day.date}
-                            />
-                          ) : settings?.timeInputControl === 'circular' ? (
-                            <div className="time-inputs-edit p-4 bg-[var(--code-bg)] border border-[var(--border)] rounded shadow-lg">
-                              <p className="text-xs italic">Circular input not implemented yet</p>
-                              <button onClick={() => setEditingCell(null)} className="mt-2 text-xs px-2 py-1 bg-[var(--accent)] text-white rounded">Close</button>
+                        <div className="time-display">
+                          {cellData ? (
+                            <div className="time-values">
+                              <div className="time-field">
+                                <span>{formatTime(cellData[0], settings?.timeFormat)}</span>
+                              </div>
+                              <div className="time-field">
+                                <span>{formatTime(cellData[1], settings?.timeFormat)}</span>
+                              </div>
                             </div>
                           ) : (
-                            <SystemTimeInput
-                              value={cellData}
-                              onChange={(type, value) => handleTimeChange(empId, day.date, type, value)}
-                              onDone={() => setEditingCell(null)}
-                              autoFocus
-                            />
-                          )
-                        ) : (
-                          <div className="time-display">
-                            {cellData ? (
-                              <div className="time-values">
-                                <div className="time-field">
-                                  <span>{formatTime(cellData[0], settings?.timeFormat)}</span>
-                                </div>
-                                <div className="time-field">
-                                  <span>{formatTime(cellData[1], settings?.timeFormat)}</span>
-                                </div>
-                              </div>
-                            ) : (
-                              <div className="empty-cell-placeholder">&nbsp;</div>
-                            )}
-                          </div>
-                        )}
+                            <div className="empty-cell-placeholder">&nbsp;</div>
+                          )}
+                        </div>
                       </td>
                     );
                   })}
@@ -431,6 +373,23 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
             )}
           </tbody>
         </table>
+      </div>
+      <div className={`hours-timeline-panel ${editingCell ? 'visible' : ''}`}>
+        {editingCell && (
+          <HoursTimeline
+            value={getCellData(editingCell.employeeId, editingCell.dayDate)}
+            onChange={(type, value) => handleTimeChange(editingCell.employeeId, editingCell.dayDate, type, value)}
+            onDone={() => setEditingCell(null)}
+            onClear={() => handleClearCell(editingCell.employeeId, editingCell.dayDate)}
+            onCancel={() => handleCancelEdit(editingCell.employeeId, editingCell.dayDate)}
+            onUndo={() => console.log('Undo not implemented')}
+            onRedo={() => console.log('Redo not implemented')}
+            onOpenSettings={() => onOpenSettingsView?.('DateTime')}
+            settings={settings}
+            employee={employees[editingCell.employeeId]}
+            dayDate={editingCell.dayDate}
+          />
+        )}
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import { useMemo, useRef } from 'react';
-import { Settings } from 'lucide-react';
+import { Settings, X, RotateCcw, RotateCw, Trash2 } from 'lucide-react';
 
-const HoursTimeline = ({ value, onChange, onDone, onClear, onCancel, onOpenSettings, settings, employee, dayDate }) => {
+const HoursTimeline = ({ value, onChange, onDone, onClear, onCancel, onUndo, onRedo, onOpenSettings, settings, employee, dayDate }) => {
   const scrollContainerRef = useRef(null);
   const timeResolution = settings?.timeResolution || 1;
 
@@ -93,87 +93,108 @@ const HoursTimeline = ({ value, onChange, onDone, onClear, onCancel, onOpenSetti
 
   return (
     <div 
-      className="hours-timeline-popup bg-[var(--code-bg)] border border-[var(--border)] rounded-lg shadow-xl p-4 z-50 min-w-[300px]"
+      className="hours-timeline-content bg-[var(--code-bg)] p-2 w-full max-w-7xl"
       onClick={handleContainerClick}
     >
-      <div className="flex justify-between items-center mb-4">
-        <h4 className="text-sm font-bold text-[var(--text-h)]">Select Time</h4>
-        <button 
-          className="p-1 hover:bg-[var(--accent-bg)] rounded-full transition-colors text-[var(--text-muted)] hover:text-[var(--accent)]"
-          onClick={onOpenSettings}
-          title="Settings"
-        >
-          <Settings size={18} />
-        </button>
+      <div className="flex justify-between items-center mb-4 border-b border-[var(--border)] pb-2">
+        <div className="flex items-center gap-2">
+          <button 
+            className="p-1.5 hover:bg-[var(--accent-bg)] rounded transition-colors text-[var(--text-muted)] hover:text-red-500 flex items-center gap-1 text-xs"
+            onClick={onClear}
+            title="Clear"
+          >
+            <Trash2 size={16} />
+            <span>Clear</span>
+          </button>
+          <div className="w-px h-4 bg-[var(--border)] mx-1" />
+          <button 
+            className="p-1.5 hover:bg-[var(--accent-bg)] rounded transition-colors text-[var(--text-muted)] hover:text-[var(--accent)]"
+            onClick={onUndo}
+            title="Undo"
+          >
+            <RotateCcw size={16} />
+          </button>
+          <button 
+            className="p-1.5 hover:bg-[var(--accent-bg)] rounded transition-colors text-[var(--text-muted)] hover:text-[var(--accent)]"
+            onClick={onRedo}
+            title="Redo"
+          >
+            <RotateCw size={16} />
+          </button>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button 
+            className="p-1.5 hover:bg-[var(--accent-bg)] rounded transition-colors text-[var(--text-muted)] hover:text-[var(--accent)]"
+            onClick={onOpenSettings}
+            title="Settings"
+          >
+            <Settings size={18} />
+          </button>
+          <button 
+            className="p-1.5 hover:bg-[var(--accent-bg)] rounded transition-colors text-[var(--text-muted)] hover:text-red-500"
+            onClick={onDone}
+            title="Close"
+          >
+            <X size={20} />
+          </button>
+        </div>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         {['start', 'end'].map((type) => {
           const currentTime = type === 'start' ? start : end;
           const currentH = ensureHourInRange(currentTime?.h);
           return (
-            <div key={type} className="time-selector-section">
-              <div className="text-xs font-semibold mb-2 uppercase text-[var(--text-muted)]">
-                {type === 'start' ? 'Start Time' : 'End Time'}: {type === 'start' ? startTime : endTime}
+            <div key={type} className="flex items-start gap-4">
+              <div className="w-24 flex-shrink-0 pt-2">
+                <div className="text-[10px] font-bold uppercase text-[var(--text-muted)] leading-tight">
+                  {type === 'start' ? 'Start Time' : 'End Time'}
+                </div>
+                <div className="text-sm font-mono text-[var(--accent)] font-bold">
+                  {type === 'start' ? startTime || '--:--' : endTime || '--:--'}
+                </div>
               </div>
-              <div className="overflow-x-auto pb-2 scrollbar-thin">
-                <div className="flex flex-col gap-1">
-                  {/* Hours Ribbon */}
-                  <div className="flex gap-1">
-                    {hours.map(h => (
-                      <div
-                        key={h}
-                        onClick={() => handleTimeClick(type, h, currentTime?.m || 0)}
-                        className={`flex-shrink-0 w-8 h-8 flex items-center justify-center text-xs border rounded cursor-pointer transition-colors
-                          ${currentTime?.h === h 
-                            ? 'bg-[var(--accent)] text-white border-[var(--accent)]' 
-                            : 'bg-[var(--bg)] border-[var(--border)] hover:bg-[var(--accent-bg)] hover:text-[var(--accent)]'}`}
-                      >
-                        {h}
-                      </div>
-                    ))}
-                  </div>
-                  {/* Minutes Ribbon */}
-                  <div className="flex gap-1 justify-center">
-                    {minutes.map(m => (
-                      <div
-                        key={m}
-                        onClick={() => handleTimeClick(type, currentH, m)}
-                        className={`flex-shrink-0 w-8 h-6 flex items-center justify-center text-[10px] border rounded cursor-pointer transition-colors
-                          ${currentTime?.m === m 
-                            ? 'bg-[var(--accent-light)] text-[var(--accent)] border-[var(--accent)]' 
-                            : 'bg-[var(--bg)] border-[var(--border)] hover:bg-[var(--accent-bg)] hover:text-[var(--accent)]'}`}
-                      >
-                        {String(m).padStart(2, '0')}
-                      </div>
-                    ))}
+              
+              <div className="flex-grow overflow-hidden">
+                <div className="overflow-x-auto pb-2 scrollbar-thin">
+                  <div className="flex flex-col gap-1">
+                    {/* Hours Ribbon */}
+                    <div className="flex gap-1">
+                      {hours.map(h => (
+                        <div
+                          key={h}
+                          onClick={() => handleTimeClick(type, h, currentTime?.m || 0)}
+                          className={`flex-shrink-0 w-8 h-8 flex items-center justify-center text-xs border rounded cursor-pointer transition-colors
+                            ${currentTime?.h === h 
+                              ? 'bg-[var(--accent)] text-white border-[var(--accent)]' 
+                              : 'bg-[var(--bg)] border-[var(--border)] hover:bg-[var(--accent-bg)] hover:text-[var(--accent)]'}`}
+                        >
+                          {h}
+                        </div>
+                      ))}
+                    </div>
+                    {/* Minutes Ribbon */}
+                    <div className="flex gap-1">
+                      {minutes.map(m => (
+                        <div
+                          key={m}
+                          onClick={() => handleTimeClick(type, currentH, m)}
+                          className={`flex-shrink-0 w-8 h-6 flex items-center justify-center text-[10px] border rounded cursor-pointer transition-colors
+                            ${currentTime?.m === m 
+                              ? 'bg-[var(--accent-light)] text-[var(--accent)] border-[var(--accent)]' 
+                              : 'bg-[var(--bg)] border-[var(--border)] hover:bg-[var(--accent-bg)] hover:text-[var(--accent)]'}`}
+                        >
+                          {String(m).padStart(2, '0')}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           );
         })}
-      </div>
-
-      <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-[var(--border)]">
-        <button 
-          className="text-xs px-3 py-1.5 border border-red-500/50 text-red-500 rounded hover:bg-red-500/10 transition-colors mr-auto"
-          onClick={onClear}
-        >
-          Clear
-        </button>
-        <button 
-          className="text-xs px-3 py-1.5 border border-[var(--border)] text-[var(--text)] rounded hover:bg-[var(--accent-bg)] transition-colors"
-          onClick={onCancel}
-        >
-          Cancel
-        </button>
-        <button 
-          className="text-xs px-3 py-1.5 bg-[var(--accent)] text-white rounded hover:opacity-90 transition-colors font-medium"
-          onClick={onDone}
-        >
-          OK
-        </button>
       </div>
     </div>
   );
