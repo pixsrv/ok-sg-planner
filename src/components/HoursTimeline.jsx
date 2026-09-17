@@ -1,8 +1,15 @@
-import { useMemo, useRef } from 'react';
+import { useMemo } from 'react';
 import { Settings, X, RotateCcw, RotateCw, Trash2 } from 'lucide-react';
 
-const HoursTimeline = ({ value, onChange, onDone, onClear, onCancel, onUndo, onRedo, onOpenSettings, settings, employee, dayDate }) => {
-  const scrollContainerRef = useRef(null);
+/**
+ * @typedef {Object} Term
+ * @property {string} validFrom
+ * @property {string|null} validTo
+ * @property {number} fte
+ * @property {string} position
+ */
+
+const HoursTimeline = ({ value, onChange, onDone, onClear, onUndo, onRedo, onOpenSettings, settings, employee, dayDate }) => {
   const timeResolution = settings?.timeResolution || 1;
 
   // value is [start, end] where each is 'HH:mm'
@@ -41,8 +48,7 @@ const HoursTimeline = ({ value, onChange, onDone, onClear, onCancel, onUndo, onR
 
   const handleTimeClick = (type, h, m) => {
     const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-    onChange(type, timeStr);
-
+    
     // Auto-set end time logic
     if (type === 'start' && settings?.autoSetEndHourMode && settings.autoSetEndHourMode !== 'none') {
       let durationMinutes = 0;
@@ -65,8 +71,6 @@ const HoursTimeline = ({ value, onChange, onDone, onClear, onCancel, onUndo, onR
       if (durationMinutes > 0) {
         const totalStartMinutes = h * 60 + m;
         const totalEndMinutes = (totalStartMinutes + durationMinutes) % (24 * 60);
-        const endH = Math.floor(totalEndMinutes / 60);
-        const endM = totalEndMinutes % 60;
         
         // Round end minutes to resolution
         const roundedEndTotalMinutes = Math.round(totalEndMinutes / timeResolution) * timeResolution;
@@ -74,9 +78,14 @@ const HoursTimeline = ({ value, onChange, onDone, onClear, onCancel, onUndo, onR
         const finalEndM = roundedEndTotalMinutes % 60;
 
         const endTimeStr = `${String(finalEndH).padStart(2, '0')}:${String(finalEndM).padStart(2, '0')}`;
-        onChange('end', endTimeStr);
+        
+        // Use a special 'both' type to update both times at once
+        onChange('both', [timeStr, endTimeStr]);
+        return;
       }
     }
+
+    onChange(type, timeStr);
   };
 
   const ensureHourInRange = (h) => {

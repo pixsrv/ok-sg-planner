@@ -1,13 +1,34 @@
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useCallback, useMemo} from 'react';
 import {formatDate, formatTime} from '../utils/formatters';
 import { getISOWeek, getDateFromWeek } from '../utils/dateUtils';
+import { getUndoHistory, saveUndoHistory, pushAction } from '../utils/undoUtils';
 import Timeline from '../components/Timeline';
 import DateOmnibox from '../components/DateOmnibox';
 import EmployeeOmnibox from '../components/EmployeeOmnibox';
-import SystemTimeInput from '../components/SystemTimeInput';
 import HoursTimeline from '../components/HoursTimeline';
 import { filterEmployees } from '../utils/employeeFilter';
 
+/**
+ * @typedef {Object} Term
+ * @property {string} validFrom
+ * @property {string|null} validTo
+ * @property {number} fte
+ * @property {string} position
+ */
+
+/**
+ * @typedef {Object} Employee
+ * @property {string} firstName
+ * @property {string} lastName
+ * @property {Term[]} terms
+ */
+
+/**
+ * @param {Object} props
+ * @param {Object.<string, Employee>} props.employees
+ * @param {Object} props.settings
+ * @param {Function} props.onOpenSettingsView
+ */
 const WeekView = ({ employees, settings, onOpenSettingsView }) => {
   const [employeeSearchQuery, setEmployeeSearchQuery] = useState('');
   const [referenceDate, setReferenceDate] = useState(() => {
@@ -33,7 +54,7 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
   });
 
   // Helper to get start of current week
-  const getStartOfWeek = (date) => {
+  const getStartOfWeek = useCallback((date) => {
     const d = new Date(date);
     const day = d.getDay();
     const isSundayStart = settings?.weekStart === 'Sunday';
@@ -50,14 +71,16 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
     newDate.setHours(0, 0, 0, 0);
 
     return newDate;
-  };
+  }, [settings?.weekStart]);
 
   // Helper to get week number
   const getWeekNumber = (d) => {
     return getISOWeek(d);
   };
 
-  const startOfWeek = getStartOfWeek(referenceDate);
+  const startOfWeek = useMemo(() => {
+    return getStartOfWeek(referenceDate);
+  }, [referenceDate, getStartOfWeek]);
   const { weekNum: currentWeekNumber, weekYear: currentWeekYear } = getWeekNumber(startOfWeek);
 
   // Save selected week to localStorage
@@ -74,21 +97,24 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
     }
   }, [currentWeekNumber, currentWeekYear]);
 
-  const weekDays = [];
-  const dayNames = settings?.weekStart === 'Sunday' 
-    ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-    : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const weekDays = useMemo(() => {
+    const days = [];
+    const dayNames = settings?.weekStart === 'Sunday'
+      ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+      : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-  for (let i = 0; i < 7; i++) {
-    const date = new Date(startOfWeek);
+    for (let i = 0; i < 7; i++) {
+      const date = new Date(startOfWeek);
 
-    date.setDate(startOfWeek.getDate() + i);
-    weekDays.push({
-      date: formatDate(date, settings?.dateFormat),
-      dayName: dayNames[i],
-      weekData: getWeekNumber(date)
-    });
-  }
+      date.setDate(startOfWeek.getDate() + i);
+      days.push({
+        date: formatDate(date, settings?.dateFormat),
+        dayName: dayNames[i],
+        weekData: getWeekNumber(date)
+      });
+    }
+    return days;
+  }, [startOfWeek, settings?.weekStart, settings?.dateFormat]);
 
   const handleYearChange = (year) => {
     const yearNum = parseInt(year, 10);
@@ -132,6 +158,148 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
   const [editingCell, setEditingCell] = useState(null); // { employeeId, dayDate }
   const [workRecords, setWorkRecords] = useState({});
 
+  const updateWorkRecord = useCallback((ymKey, dayNum, employeeId, newValueOrUpdater, shouldPushHistory = true, oldVal = null) => {
+    setWorkRecords(prev => {
+      const newRecords = { ...prev };
+      const currentMonthData = newRecords[ymKey] || {};
+      const currentDayData = currentMonthData[dayNum] || {};
+      
+      const currentValue = currentDayData[employeeId] || null;
+      const finalOldValue = oldVal !== null ? oldVal : currentValue;
+      let finalNewValue;
+
+      if (typeof newValueOrUpdater === 'function') {
+        finalNewValue = newValueOrUpdater(currentValue);
+      } else {
+        finalNewValue = newValueOrUpdater;
+      }
+
+      const newMonthData = { ...currentMonthData };
+      const newDayData = { ...currentDayData };
+
+      if (finalNewValue === null) {
+        delete newDayData[employeeId];
+      } else {
+        newDayData[employeeId] = finalNewValue;
+      }
+
+      newMonthData[dayNum] = newDayData;
+      newRecords[ymKey] = newMonthData;
+
+      // Save to localStorage
+      try {
+        localStorage.setItem(`ok-sg-${ymKey}`, JSON.stringify(newMonthData));
+      } catch (e) {
+        console.error('Failed to save record to localStorage', e);
+      }
+
+      if (shouldPushHistory) {
+        // Use a timeout to move side effect out of the render/updater phase
+        // and reduce risk of double-pushing during React StrictMode re-renders
+        setTimeout(() => {
+          pushAction({
+            coordinate: { yearMonth: ymKey, day: parseInt(dayNum, 10), employeeId },
+            oldValue: finalOldValue,
+            newValue: finalNewValue
+          });
+        }, 0);
+      }
+
+      return newRecords;
+    });
+  }, []);
+
+  const handleUndo = useCallback(() => {
+    const history = getUndoHistory();
+    if (history.pointer < 0) return;
+
+    const action = history.list[history.pointer];
+    const { coordinate, oldValue } = action;
+    const { yearMonth, day, employeeId } = coordinate;
+
+    updateWorkRecord(yearMonth, day.toString(), employeeId, oldValue, false);
+    
+    saveUndoHistory({
+      ...history,
+      pointer: history.pointer - 1
+    });
+  }, [updateWorkRecord]);
+
+  const handleRedo = useCallback(() => {
+    const history = getUndoHistory();
+    if (history.pointer >= history.list.length - 1) return;
+
+    const newPointer = history.pointer + 1;
+    const action = history.list[newPointer];
+    const { coordinate, newValue } = action;
+    const { yearMonth, day, employeeId } = coordinate;
+
+    updateWorkRecord(yearMonth, day.toString(), employeeId, newValue, false);
+
+    saveUndoHistory({
+      ...history,
+      pointer: newPointer
+    });
+  }, [updateWorkRecord]);
+
+  const handleCellClick = (employeeId, dayDate) => {
+    setEditingCell({ employeeId, dayDate });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCell(null);
+  };
+
+  const handleTimeChange = (employeeId, dayDate, type, value) => {
+    const [year, month, day] = dayDate.split('-');
+    const ymKey = `${year}-${month}`;
+    const dayNum = parseInt(day, 10).toString();
+
+    const roundValue = (val) => {
+      if (val && settings?.timeResolution && settings.timeResolution > 1) {
+        const [hours, minutes] = val.split(':').map(Number);
+        const totalMinutes = hours * 60 + minutes;
+        const roundedMinutes = Math.round(totalMinutes / settings.timeResolution) * settings.timeResolution;
+        
+        const newHours = Math.floor(roundedMinutes / 60) % 24;
+        const newMinutes = roundedMinutes % 60;
+        
+        return `${String(newHours).padStart(2, '0')}:${String(newMinutes).padStart(2, '0')}`;
+      }
+      return val;
+    };
+
+    if (type === 'both') {
+      const roundedStart = roundValue(value[0]);
+      const roundedEnd = roundValue(value[1]);
+      updateWorkRecord(ymKey, dayNum, employeeId, [roundedStart, roundedEnd]);
+    } else {
+      const roundedValue = roundValue(value);
+      
+      updateWorkRecord(ymKey, dayNum, employeeId, (current) => {
+        const newData = [...(current || ['', ''])];
+        if (type === 'start') newData[0] = roundedValue;
+        else newData[1] = roundedValue;
+        return newData;
+      });
+    }
+  };
+
+  const handleClearCell = (employeeId, dayDate) => {
+    const [year, month, day] = dayDate.split('-');
+    const ymKey = `${year}-${month}`;
+    const dayNum = parseInt(day, 10).toString();
+
+    updateWorkRecord(ymKey, dayNum, employeeId, null);
+  };
+
+  const getCellData = (employeeId, dayDate) => {
+    const [year, month, day] = dayDate.split('-');
+    const ymKey = `${year}-${month}`;
+    const dayNum = parseInt(day, 10).toString();
+    return workRecords[ymKey]?.[dayNum]?.[employeeId];
+  };
+
   useEffect(() => {
     const loadRecords = () => {
       const records = {};
@@ -160,112 +328,36 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
     };
 
     loadRecords();
-  }, [referenceDate, settings?.dateFormat, weekDays.map(d => d.date).join(',')]);
+  }, [weekDays]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape' && editingCell) {
-        handleCancelEdit(editingCell.employeeId, editingCell.dayDate);
+        handleCancelEdit();
       }
       if (e.key === 'Enter' && editingCell) {
         setEditingCell(null);
       }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+        if (e.shiftKey) {
+          handleRedo();
+        } else {
+          handleUndo();
+        }
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'y') {
+        handleRedo();
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [editingCell]);
-
-  const handleCellClick = (employeeId, dayDate) => {
-    setEditingCell({ employeeId, dayDate });
-  };
-
-  const handleCancelEdit = (employeeId, dayDate) => {
-    setEditingCell(null);
-  };
-
-  const handleClearCell = (employeeId, dayDate) => {
-    const [year, month, day] = dayDate.split('-');
-    const ymKey = `${year}-${month}`;
-    const dayNum = parseInt(day, 10).toString();
-
-    setWorkRecords(prev => {
-      const newRecords = { ...prev };
-      if (!newRecords[ymKey] || !newRecords[ymKey][dayNum]) return prev;
-
-      const newMonthData = { ...newRecords[ymKey] };
-      const newDayData = { ...newMonthData[dayNum] };
-      
-      delete newDayData[employeeId];
-      
-      newMonthData[dayNum] = newDayData;
-      newRecords[ymKey] = newMonthData;
-
-      // Save to localStorage
-      try {
-        localStorage.setItem(`ok-sg-${ymKey}`, JSON.stringify(newMonthData));
-      } catch (e) {
-        console.error('Failed to save record to localStorage', e);
-      }
-
-      return newRecords;
-    });
-  };
-
-  const handleTimeChange = (employeeId, dayDate, type, value) => {
-    const [year, month, day] = dayDate.split('-');
-    const ymKey = `${year}-${month}`;
-    const dayNum = parseInt(day, 10).toString();
-
-    let roundedValue = value;
-    if (value && settings?.timeResolution && settings.timeResolution > 1) {
-      const [hours, minutes] = value.split(':').map(Number);
-      const totalMinutes = hours * 60 + minutes;
-      const roundedMinutes = Math.round(totalMinutes / settings.timeResolution) * settings.timeResolution;
-      
-      const newHours = Math.floor(roundedMinutes / 60) % 24;
-      const newMinutes = roundedMinutes % 60;
-      
-      roundedValue = `${String(newHours).padStart(2, '0')}:${String(newMinutes).padStart(2, '0')}`;
-    }
-
-    setWorkRecords(prev => {
-      const newRecords = { ...prev };
-      if (!newRecords[ymKey]) newRecords[ymKey] = {};
-      
-      const newMonthData = { ...newRecords[ymKey] };
-      if (!newMonthData[dayNum]) newMonthData[dayNum] = {};
-      
-      const newDayData = { ...newMonthData[dayNum] };
-      if (!newDayData[employeeId]) newDayData[employeeId] = ['', ''];
-      
-      const currentHours = [...newDayData[employeeId]];
-      if (type === 'start') currentHours[0] = roundedValue;
-      else currentHours[1] = roundedValue;
-      
-      newDayData[employeeId] = currentHours;
-      newMonthData[dayNum] = newDayData;
-      newRecords[ymKey] = newMonthData;
-
-      // Save to localStorage
-      try {
-        localStorage.setItem(`ok-sg-${ymKey}`, JSON.stringify(newMonthData));
-      } catch (e) {
-        console.error('Failed to save record to localStorage', e);
-      }
-
-      return newRecords;
-    });
-  };
-
-  const getCellData = (employeeId, dayDate) => {
-    const [year, month, day] = dayDate.split('-');
-    const ymKey = `${year}-${month}`;
-    const dayNum = parseInt(day, 10).toString();
-    return workRecords[ymKey]?.[dayNum]?.[employeeId];
-  };
+  }, [editingCell, handleUndo, handleRedo]);
 
   const filteredEmployeesList = filterEmployees(employees, employeeSearchQuery, settings);
 
+  /**
+   * @param {Employee} emp
+   */
   const getCurrentPosition = (emp) => {
     if (!emp.terms || emp.terms.length === 0) return '';
 
@@ -381,9 +473,9 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
             onChange={(type, value) => handleTimeChange(editingCell.employeeId, editingCell.dayDate, type, value)}
             onDone={() => setEditingCell(null)}
             onClear={() => handleClearCell(editingCell.employeeId, editingCell.dayDate)}
-            onCancel={() => handleCancelEdit(editingCell.employeeId, editingCell.dayDate)}
-            onUndo={() => console.log('Undo not implemented')}
-            onRedo={() => console.log('Redo not implemented')}
+            onCancel={() => handleCancelEdit()}
+            onUndo={handleUndo}
+            onRedo={handleRedo}
             onOpenSettings={() => onOpenSettingsView?.('DateTime')}
             settings={settings}
             employee={employees[editingCell.employeeId]}
