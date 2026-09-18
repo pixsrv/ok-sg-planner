@@ -9,7 +9,7 @@ import { Settings, X, RotateCcw, RotateCw, Trash2 } from 'lucide-react';
  * @property {string} position
  */
 
-const HoursTimeline = ({ value, onChange, onDone, onClear, onUndo, onRedo, onOpenSettings, settings, employee, dayDate }) => {
+const HoursTimeline = ({ value, onChange, onDone, onClear, onUndo, onRedo, onOpenSettings, onCoordinateDoubleClick, settings, employee, dayDate }) => {
   const timeResolution = settings?.timeResolution || 1;
 
   // value is [start, end] where each is 'HH:mm'
@@ -139,7 +139,11 @@ const HoursTimeline = ({ value, onChange, onDone, onClear, onUndo, onRedo, onOpe
           </button>
         </div>
 
-        <div className="absolute left-1/2 -translate-x-1/2 text-sm font-medium text-[var(--text)] px-3 py-1 bg-[var(--accent-bg)] rounded border border-[var(--border)] whitespace-nowrap">
+        <div 
+          className="absolute left-1/2 -translate-x-1/2 text-sm font-medium text-[var(--text)] px-3 py-1 bg-[var(--accent-bg)] rounded border border-[var(--border)] whitespace-nowrap cursor-pointer select-none"
+          onDoubleClick={onCoordinateDoubleClick}
+          title="Double click to go to this cell"
+        >
           {coordinateDisplay}
         </div>
 

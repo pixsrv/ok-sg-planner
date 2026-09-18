@@ -259,6 +259,30 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
     });
   }, [updateWorkRecord]);
 
+  const handleCoordinateDoubleClick = useCallback(() => {
+    if (!editingCell) return;
+    
+    // 1. Select proper week
+    const dateObj = new Date(editingCell.dayDate);
+    if (!isNaN(dateObj.getTime())) {
+      setReferenceDate(dateObj);
+    }
+
+    // 2. Ensure visible
+    setTimeout(() => {
+      const cell = document.querySelector(
+        `[data-employee-id="${editingCell.employeeId}"][data-date="${editingCell.dayDate}"]`
+      );
+      if (cell) {
+        cell.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+        
+        // Brief highlight effect
+        cell.classList.add('highlight-flash');
+        setTimeout(() => cell.classList.remove('highlight-flash'), 2000);
+      }
+    }, 50);
+  }, [editingCell]);
+
   const handleCellClick = (employeeId, dayDate) => {
     setEditingCell({ employeeId, dayDate });
   };
@@ -473,6 +497,8 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
                         key={dayIdx} 
                         className={`day-cell ${isEditing ? 'editing' : ''}`}
                         onClick={() => handleCellClick(empId, day.date)}
+                        data-employee-id={empId}
+                        data-date={day.date}
                       >
                         <div className="time-display">
                           {cellData ? (
@@ -512,6 +538,7 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
             onUndo={handleUndo}
             onRedo={handleRedo}
             onOpenSettings={() => onOpenSettingsView?.('DateTime')}
+            onCoordinateDoubleClick={handleCoordinateDoubleClick}
             settings={settings}
             employee={employees[editingCell.employeeId]}
             dayDate={editingCell.dayDate}

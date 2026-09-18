@@ -604,3 +604,12 @@ input:disabled + .slider {
   width: 100%;
   cursor: pointer;
 }
+
+@keyframes flash {
+  0% { background-color: var(--accent-light); }
+  100% { background-color: transparent; }
+}
+
+.highlight-flash {
+  animation: flash 2s ease-out;
+}
