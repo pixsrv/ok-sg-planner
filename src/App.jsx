@@ -35,6 +35,8 @@ function App() {
     jumpHistoryCache: true,
     showTodayButton: true,
     sidebarFolded: false,
+    startOnMode: 'recent',
+    fixedStartDate: new Date().toISOString().split('T')[0],
     sidebar: [
       { id: 'Staff', name: 'Staff', visible: true, default: true },
       { id: 'Month', name: 'Month', visible: true, default: false },
@@ -59,6 +61,8 @@ function App() {
     jumpHistoryCache: true,
     showTodayButton: true,
     sidebarFolded: false,
+    startOnMode: 'recent',
+    fixedStartDate: new Date().toISOString().split('T')[0],
     sidebar: [
       { id: 'Staff', name: 'Staff', visible: true, default: true },
       { id: 'Month', name: 'Month', visible: true, default: false },
@@ -71,6 +75,11 @@ function App() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
 
   useEffect(() => {
+    // Session identification
+    if (!sessionStorage.getItem('ok-sg-session-active')) {
+      sessionStorage.setItem('ok-sg-session-active', 'true');
+    }
+
     const loadFromDB = async () => {
       try {
         const storedEmployees = await getAllItems('employees').catch(() => {
@@ -102,6 +111,11 @@ function App() {
         if (storedSettings && Object.keys(storedSettings).length > 0) {
           setAppSettings(prev => ({ ...prev, ...storedSettings }));
           setDraftSettings(prev => ({ ...prev, ...storedSettings }));
+          
+          if (storedSettings.startOnMode === undefined) {
+             setAppSettings(prev => ({ ...prev, startOnMode: 'recent', fixedStartDate: new Date().toISOString().split('T')[0] }));
+             setDraftSettings(prev => ({ ...prev, startOnMode: 'recent', fixedStartDate: new Date().toISOString().split('T')[0] }));
+          }
           
           if (storedSettings.sidebarFolded !== undefined) {
             setIsSidebarCollapsed(storedSettings.sidebarFolded);
@@ -180,6 +194,8 @@ function App() {
     await saveItem('settings', 'jumpHistoryCache', draftSettings.jumpHistoryCache);
     await saveItem('settings', 'showTodayButton', draftSettings.showTodayButton);
     await saveItem('settings', 'sidebarFolded', draftSettings.sidebarFolded);
+    await saveItem('settings', 'startOnMode', draftSettings.startOnMode);
+    await saveItem('settings', 'fixedStartDate', draftSettings.fixedStartDate);
     await saveItem('settings', 'sidebar', draftSettings.sidebar);
     setIsSettingsOpen(false);
   };

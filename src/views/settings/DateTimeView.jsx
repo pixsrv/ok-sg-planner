@@ -67,6 +67,8 @@ const DateTimeView = ({ settings, onSettingChange }) => {
   const currentWeekStart = settings.weekStart || 'Monday';
   const currentTimelineExtension = settings.timelineExtension || '0';
   const currentCoordinateOrder = settings.coordinateOrder || 'employee-date';
+  const currentStartOnMode = settings.startOnMode || 'recent';
+  const currentFixedStartDate = settings.fixedStartDate || new Date().toISOString().split('T')[0];
 
   const coordinateOrders = [
     { id: 'employee-date', label: 'Employee (row) : Date (col)' },
@@ -101,9 +103,45 @@ const DateTimeView = ({ settings, onSettingChange }) => {
     { id: 'calculated', label: 'Calculated (from FTE)' },
   ];
 
+  const startOnModes = [
+    { id: 'recent', label: 'Recent Date' },
+    { id: 'today', label: 'Today' },
+    { id: 'fixed', label: 'Fixed Date' },
+  ];
+
   return (
     <div className="view-container">
       
+      <div className="settings-panel">
+        <h3>Start On (New Session)</h3>
+        <p className="text-sm text-[var(--text-muted)] mb-3">Choose which date will be shown by default when starting a new session.</p>
+        <div className="radio-list mb-4">
+          {startOnModes.map((mode) => (
+            <label key={mode.id} className="radio-item">
+              <input
+                type="radio"
+                name="startOnMode"
+                value={mode.id}
+                checked={currentStartOnMode === mode.id}
+                onChange={(e) => onSettingChange('startOnMode', e.target.value)}
+              />
+              <span>{mode.label}</span>
+            </label>
+          ))}
+        </div>
+        {currentStartOnMode === 'fixed' && (
+          <div className="flex flex-col gap-2 pl-6 border-l-2 border-[var(--accent)]">
+            <span className="text-xs font-semibold uppercase text-[var(--text-muted)]">Select Fixed Date</span>
+            <input 
+              type="date" 
+              value={currentFixedStartDate}
+              onChange={(e) => onSettingChange('fixedStartDate', e.target.value)}
+              className="w-48 bg-[var(--bg)] border border-[var(--border)] rounded px-2 py-1 text-sm text-[var(--text)] focus:ring-1 focus:ring-[var(--accent)] outline-none"
+            />
+          </div>
+        )}
+      </div>
+
       <div className="settings-panel">
         <h3>Date Format</h3>
         <div className="radio-list">

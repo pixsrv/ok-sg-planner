@@ -32,17 +32,34 @@ import { filterEmployees } from '../utils/employeeFilter';
 const WeekView = ({ employees, settings, onOpenSettingsView }) => {
   const [employeeSearchQuery, setEmployeeSearchQuery] = useState('');
   const [referenceDate, setReferenceDate] = useState(() => {
-    // Try to load from localStorage
+    // Check if this is a fresh start or a refresh
+    const isRefresh = sessionStorage.getItem('ok-sg-session-initialized') === 'true';
+
+    if (!isRefresh) {
+      // Mark as initialized so refresh won't trigger this again
+      sessionStorage.setItem('ok-sg-session-initialized', 'true');
+
+      // Use settings to determine start date
+      const mode = settings?.startOnMode || 'recent';
+
+      if (mode === 'today') {
+        return new Date();
+      } else if (mode === 'fixed' && settings?.fixedStartDate) {
+        const d = new Date(settings.fixedStartDate);
+        if (!isNaN(d.getTime())) {
+          return d;
+        }
+      }
+      // 'recent' mode falls through to legacy logic below
+    }
+
+    // Legacy logic for 'recent' mode or refresh
     try {
       const stored = localStorage.getItem('ok-sg-current');
-
       if (stored) {
         const parsed = JSON.parse(stored);
-
         if (parsed.selectedWeek) {
-          // Use stored year if available, otherwise current year
           const year = parsed.selectedYear || new Date().getFullYear();
-
           return getDateFromWeek(parsed.selectedWeek, year);
         }
       }
