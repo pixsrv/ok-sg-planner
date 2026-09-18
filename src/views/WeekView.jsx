@@ -1,11 +1,18 @@
 import {useState, useEffect, useCallback, useMemo} from 'react';
 import {formatDate, formatTime} from '../utils/formatters';
-import { getISOWeek, getDateFromWeek } from '../utils/dateUtils';
+import { getISOWeek, getDateFromWeek, DAY_NAMES_SHORT } from '../utils/dateUtils';
 import { getUndoHistory, saveUndoHistory, pushAction } from '../utils/undoUtils';
 import Timeline from '../components/Timeline';
 import DateOmnibox from '../components/DateOmnibox';
 import EmployeeOmnibox from '../components/EmployeeOmnibox';
 import HoursTimeline from '../components/HoursTimeline';
+import {
+  WEEK_START_SUNDAY,
+  START_ON_MODE_RECENT,
+  START_ON_MODE_TODAY,
+  START_ON_MODE_FIXED,
+  TIME_RESOLUTION_1MIN
+} from '../constants/settings';
 import { filterEmployees } from '../utils/employeeFilter';
 
 /**
@@ -40,11 +47,11 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
       sessionStorage.setItem('ok-sg-session-initialized', 'true');
 
       // Use settings to determine start date
-      const mode = settings?.startOnMode || 'recent';
+      const mode = settings?.startOnMode || START_ON_MODE_RECENT;
 
-      if (mode === 'today') {
+      if (mode === START_ON_MODE_TODAY) {
         return new Date();
-      } else if (mode === 'fixed' && settings?.fixedStartDate) {
+      } else if (mode === START_ON_MODE_FIXED && settings?.fixedStartDate) {
         const d = new Date(settings.fixedStartDate);
         if (!isNaN(d.getTime())) {
           return d;
@@ -74,7 +81,7 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
   const getStartOfWeek = useCallback((date) => {
     const d = new Date(date);
     const day = d.getDay();
-    const isSundayStart = settings?.weekStart === 'Sunday';
+    const isSundayStart = settings?.weekStart === WEEK_START_SUNDAY;
     let diff;
 
     if (isSundayStart) {
@@ -116,9 +123,9 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
 
   const weekDays = useMemo(() => {
     const days = [];
-    const dayNames = settings?.weekStart === 'Sunday'
-      ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-      : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const dayNames = settings?.weekStart === WEEK_START_SUNDAY
+      ? [...DAY_NAMES_SHORT]
+      : [...DAY_NAMES_SHORT.slice(1), DAY_NAMES_SHORT[0]];
 
     for (let i = 0; i < 7; i++) {
       const date = new Date(startOfWeek);
@@ -315,7 +322,7 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
     const dayNum = parseInt(day, 10).toString();
 
     const roundValue = (val) => {
-      if (val && settings?.timeResolution && settings.timeResolution > 1) {
+      if (val && settings?.timeResolution && settings.timeResolution > TIME_RESOLUTION_1MIN) {
         const [hours, minutes] = val.split(':').map(Number);
         const totalMinutes = hours * 60 + minutes;
         const roundedMinutes = Math.round(totalMinutes / settings.timeResolution) * settings.timeResolution;

@@ -1,5 +1,10 @@
 import {useEffect, useMemo, useRef, useState} from 'react';
 import { getISOWeek, MONTH_NAMES } from '../utils/dateUtils';
+import { formatDate } from '../utils/formatters';
+import {
+  DATE_FORMAT_YYYY_MM_DD_ISO,
+  TIMELINE_EXTENSION_NONE
+} from '../constants/settings';
 
 
 const Timeline = ({
@@ -25,48 +30,14 @@ const Timeline = ({
     const end = new Date(d);
     end.setDate(end.getDate() + 6);
 
-    const format = settings?.dateFormat || 'YYYY-MM-DD';
+    const format = settings?.dateFormat || DATE_FORMAT_YYYY_MM_DD_ISO;
     const showYear = start.getFullYear() !== end.getFullYear();
 
-    const formatDateCustom = (date) => {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-
-      let result;
-      switch (format) {
-        case 'YYYY-MM-DD':
-          result = showYear ? `${year}-${month}-${day}` : `${month}-${day}`;
-          break;
-        case 'YYYY/MM/DD':
-          result = showYear ? `${year}/${month}/${day}` : `${month}/${day}`;
-          break;
-        case 'DD-MM-YYYY':
-          result = showYear ? `${day}-${month}-${year}` : `${day}-${month}`;
-          break;
-        case 'MM/DD/YYYY':
-          result = showYear ? `${month}/${day}/${year}` : `${month}/${day}`;
-          break;
-        case 'DD.MM.YYYY':
-          result = showYear ? `${day}.${month}.${year}` : `${day}.${month}`;
-          break;
-        default:
-          if (format.startsWith('YYYY')) {
-            const separator = format.charAt(4);
-            result = showYear ? `${year}${separator}${month}${separator}${day}` : `${month}${separator}${day}`;
-          } else {
-            // Assume format like DD-MM-YYYY
-            result = showYear ? `${day}-${month}-${year}` : `${day}-${month}`;
-          }
-      }
-      return result;
-    };
-
-    return `${formatDateCustom(start)} - ${formatDateCustom(end)}`;
+    return `${formatDate(start, format, { showYear })} - ${formatDate(end, format, { showYear })}`;
   };
 
   const {months, weeks, totalDays} = useMemo(() => {
-    const extMonths = parseInt(settings?.timelineExtension || '0', 10);
+    const extMonths = parseInt(settings?.timelineExtension || TIMELINE_EXTENSION_NONE, 10);
     
     // We want to calculate the full range of dates to display
     const startDate = new Date(year, -extMonths, 1);

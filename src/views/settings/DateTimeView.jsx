@@ -1,4 +1,26 @@
 import { useState, useEffect } from 'react';
+import { formatDate, formatTime } from '../../utils/formatters';
+import {
+  DATE_FORMATS,
+  DATE_FORMAT_YYYY_MM_DD_ISO,
+  TIME_FORMATS,
+  TIME_FORMAT_24H,
+  WEEK_START_DAYS,
+  WEEK_START_MONDAY,
+  COORDINATE_ORDERS,
+  COORDINATE_ORDER_EMPLOYEE_DATE,
+  TIMELINE_EXTENSIONS,
+  TIMELINE_EXTENSION_NONE,
+  TIME_RESOLUTIONS,
+  TIME_RESOLUTION_1MIN,
+  TIME_INPUT_CONTROLS,
+  TIME_INPUT_CONTROL_SYSTEM,
+  AUTO_SET_MODES,
+  AUTO_SET_MODE_NONE,
+  START_ON_MODES,
+  START_ON_MODE_RECENT,
+  START_ON_MODE_FIXED
+} from '../../constants/settings';
 
 const DateTimeView = ({ settings, onSettingChange }) => {
   const [now, setNow] = useState(new Date());
@@ -9,105 +31,19 @@ const DateTimeView = ({ settings, onSettingChange }) => {
     return () => clearInterval(timer);
   }, []);
 
-  const formatDate = (date, format) => {
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-
-    switch (format) {
-      case 'YYYY-MM-DD': return `${year}-${month}-${day}`;
-      case 'DD-MM-YYYY': return `${day}-${month}-${year}`;
-      case 'MM/DD/YYYY': return `${month}/${day}/${year}`;
-      case 'YYYY/MM/DD': return `${year}/${month}/${day}`;
-      case 'DD.MM.YYYY': return `${day}.${month}.${year}`;
-      default: return format;
-    }
-  };
-
-  const formatTime = (date, format) => {
-    const hours = date.getHours();
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-
-    if (format === '24h') {
-      return `${String(hours).padStart(2, '0')}:${minutes}`;
-    } else {
-      const ampm = hours >= 12 ? 'PM' : 'AM';
-      const hours12 = hours % 12 || 12;
-
-      return `${hours12}:${minutes} ${ampm}`;
-    }
-  };
-
-  const dateFormats = [
-    { id: 'YYYY-MM-DD', label: 'YYYY-MM-DD (ISO)' },
-    { id: 'DD-MM-YYYY', label: 'DD-MM-YYYY' },
-    { id: 'MM/DD/YYYY', label: 'MM/DD/YYYY' },
-    { id: 'YYYY/MM/DD', label: 'YYYY/MM/DD' },
-    { id: 'DD.MM.YYYY', label: 'DD.MM.YYYY' }
-  ];
-
-  const timeFormats = [
-    { id: '24h', label: '24 Hours' },
-    { id: '12h', label: '12 Hours (AM/PM)' }
-  ];
-
-  const weekStartDays = [
-    { id: 'Monday', label: 'Monday (ISO)' },
-    { id: 'Sunday', label: 'Sunday' }
-  ];
-
-  const currentDateFormat = settings.dateFormat || 'YYYY-MM-DD';
-  const currentTimeFormat = settings.timeFormat || '24h';
-  const currentTimeResolution = settings.timeResolution || 1;
-  const currentTimeInputControl = settings.timeInputControl || 'system';
+  const currentDateFormat = settings.dateFormat || DATE_FORMAT_YYYY_MM_DD_ISO;
+  const currentTimeFormat = settings.timeFormat || TIME_FORMAT_24H;
+  const currentTimeResolution = settings.timeResolution || TIME_RESOLUTION_1MIN;
+  const currentTimeInputControl = settings.timeInputControl || TIME_INPUT_CONTROL_SYSTEM;
   const currentWorkDayLength = settings.workDayLength || '08:00';
-  const currentAutoSetEndHourMode = settings.autoSetEndHourMode || 'none';
+  const currentAutoSetEndHourMode = settings.autoSetEndHourMode || AUTO_SET_MODE_NONE;
   const currentTimelineStartHour = settings.timelineStartHour ?? 0;
   const currentTimelineEndHour = settings.timelineEndHour ?? 23;
-  const currentWeekStart = settings.weekStart || 'Monday';
-  const currentTimelineExtension = settings.timelineExtension || '0';
-  const currentCoordinateOrder = settings.coordinateOrder || 'employee-date';
-  const currentStartOnMode = settings.startOnMode || 'recent';
+  const currentWeekStart = settings.weekStart || WEEK_START_MONDAY;
+  const currentTimelineExtension = settings.timelineExtension || TIMELINE_EXTENSION_NONE;
+  const currentCoordinateOrder = settings.coordinateOrder || COORDINATE_ORDER_EMPLOYEE_DATE;
+  const currentStartOnMode = settings.startOnMode || START_ON_MODE_RECENT;
   const currentFixedStartDate = settings.fixedStartDate || new Date().toISOString().split('T')[0];
-
-  const coordinateOrders = [
-    { id: 'employee-date', label: 'Employee (row) : Date (col)' },
-    { id: 'date-employee', label: 'Date (col) : Employee (row)' }
-  ];
-
-  const timelineExtensions = [
-    { id: '0', label: 'None' },
-    { id: '1', label: '1 Month' },
-    { id: '2', label: '2 Months' },
-    { id: '3', label: '3 Months' },
-  ];
-
-  const timeResolutions = [
-    { id: 1, label: '1 minute' },
-    { id: 5, label: '5 minutes' },
-    { id: 10, label: '10 minutes' },
-    { id: 15, label: '15 minutes' },
-    { id: 30, label: '30 minutes' },
-    { id: 60, label: '60 minutes' },
-  ];
-
-  const timeInputControls = [
-    { id: 'system', label: 'System' },
-    { id: 'linear', label: 'Linear' },
-    { id: 'circular', label: 'Circular' },
-  ];
-
-  const autoSetModes = [
-    { id: 'none', label: 'None' },
-    { id: 'fixed', label: 'Fixed Workday Length' },
-    { id: 'calculated', label: 'Calculated (from FTE)' },
-  ];
-
-  const startOnModes = [
-    { id: 'recent', label: 'Recent Date' },
-    { id: 'today', label: 'Today' },
-    { id: 'fixed', label: 'Fixed Date' },
-  ];
 
   return (
     <div className="view-container">
@@ -116,7 +52,7 @@ const DateTimeView = ({ settings, onSettingChange }) => {
         <h3>Start On (New Session)</h3>
         <p className="text-sm text-[var(--text-muted)] mb-3">Choose which date will be shown by default when starting a new session.</p>
         <div className="radio-list mb-4">
-          {startOnModes.map((mode) => (
+          {START_ON_MODES.map((mode) => (
             <label key={mode.id} className="radio-item">
               <input
                 type="radio"
@@ -129,7 +65,7 @@ const DateTimeView = ({ settings, onSettingChange }) => {
             </label>
           ))}
         </div>
-        {currentStartOnMode === 'fixed' && (
+        {currentStartOnMode === START_ON_MODE_FIXED && (
           <div className="flex flex-col gap-2 pl-6 border-l-2 border-[var(--accent)]">
             <span className="text-xs font-semibold uppercase text-[var(--text-muted)]">Select Fixed Date</span>
             <input 
@@ -145,7 +81,7 @@ const DateTimeView = ({ settings, onSettingChange }) => {
       <div className="settings-panel">
         <h3>Date Format</h3>
         <div className="radio-list">
-          {dateFormats.map((format) => (
+          {DATE_FORMATS.map((format) => (
             <label key={format.id} className="radio-item">
               <input
                 type="radio"
@@ -163,7 +99,7 @@ const DateTimeView = ({ settings, onSettingChange }) => {
       <div className="settings-panel">
         <h3>Time Format</h3>
         <div className="radio-list">
-          {timeFormats.map((format) => (
+          {TIME_FORMATS.map((format) => (
             <label key={format.id} className="radio-item">
               <input
                 type="radio"
@@ -182,7 +118,7 @@ const DateTimeView = ({ settings, onSettingChange }) => {
         <h3>Input Time Resolution</h3>
         <p className="text-sm text-[var(--text-muted)] mb-3">Reduce visual/input noise by rounding time to the selected resolution.</p>
         <div className="radio-list">
-          {timeResolutions.map((res) => (
+          {TIME_RESOLUTIONS.map((res) => (
             <label key={res.id} className="radio-item">
               <input
                 type="radio"
@@ -201,7 +137,7 @@ const DateTimeView = ({ settings, onSettingChange }) => {
         <h3>Time Input Control</h3>
         <p className="text-sm text-[var(--text-muted)] mb-3">Choose the control used to input time in cells.</p>
         <div className="radio-list">
-          {timeInputControls.map((ctrl) => (
+          {TIME_INPUT_CONTROLS.map((ctrl) => (
             <label key={ctrl.id} className="radio-item">
               <input
                 type="radio"
@@ -234,7 +170,7 @@ const DateTimeView = ({ settings, onSettingChange }) => {
           <div className="flex flex-col gap-2">
             <span className="text-xs font-semibold uppercase text-[var(--text-muted)]">Auto Set End Hour Mode</span>
             <div className="radio-list">
-              {autoSetModes.map((mode) => (
+              {AUTO_SET_MODES.map((mode) => (
                 <label key={mode.id} className="radio-item">
                   <input
                     type="radio"
@@ -285,7 +221,7 @@ const DateTimeView = ({ settings, onSettingChange }) => {
       <div className="settings-panel">
         <h3>Week Start</h3>
         <div className="radio-list">
-          {weekStartDays.map((day) => (
+          {WEEK_START_DAYS.map((day) => (
             <label key={day.id} className="radio-item">
               <input
                 type="radio"
@@ -304,7 +240,7 @@ const DateTimeView = ({ settings, onSettingChange }) => {
         <h3>Coordinate Display Order</h3>
         <p className="text-sm text-[var(--text-muted)] mb-3">Choose the order of coordinates in the bottom hours timeline panel.</p>
         <div className="radio-list">
-          {coordinateOrders.map((order) => (
+          {COORDINATE_ORDERS.map((order) => (
             <label key={order.id} className="radio-item">
               <input
                 type="radio"
@@ -323,7 +259,7 @@ const DateTimeView = ({ settings, onSettingChange }) => {
         <h3>Timeline Extension</h3>
         <p className="text-sm text-[var(--text-muted)] mb-3">Show additional months before and after currently displayed year.</p>
         <div className="radio-list">
-          {timelineExtensions.map((ext) => (
+          {TIMELINE_EXTENSIONS.map((ext) => (
             <label key={ext.id} className="radio-item">
               <input
                 type="radio"

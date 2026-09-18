@@ -11,6 +11,17 @@ import NotificationsView from './views/settings/NotificationsView.jsx'
 import SecurityView from './views/settings/SecurityView.jsx'
 import SidebarView from './views/settings/SidebarView.jsx'
 import OmniboxView from './views/settings/OmniboxView.jsx'
+import {
+  DATE_FORMAT_YYYY_MM_DD_ISO,
+  TIME_FORMAT_24H,
+  WEEK_START_MONDAY,
+  TIMELINE_EXTENSION_NONE,
+  COORDINATE_ORDER_EMPLOYEE_DATE,
+  TIME_INPUT_CONTROL_SYSTEM,
+  AUTO_SET_MODE_NONE,
+  START_ON_MODE_RECENT,
+  TIME_RESOLUTION_1MIN
+} from './constants/settings'
 import { getAllItems, saveItem, saveItems } from './utils/db'
 
 function App() {
@@ -18,24 +29,24 @@ function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [settingsView, setSettingsView] = useState('Sidebar')
   const [appSettings, setAppSettings] = useState({
-    dateFormat: 'YYYY-MM-DD',
-    timeFormat: '24h',
-    timeResolution: 1,
-    timeInputControl: 'system',
+    dateFormat: DATE_FORMAT_YYYY_MM_DD_ISO,
+    timeFormat: TIME_FORMAT_24H,
+    timeResolution: TIME_RESOLUTION_1MIN,
+    timeInputControl: TIME_INPUT_CONTROL_SYSTEM,
     workDayLength: '08:00',
-    autoSetEndHourMode: 'none',
+    autoSetEndHourMode: AUTO_SET_MODE_NONE,
     timelineStartHour: 0,
     timelineEndHour: 23,
-    weekStart: 'Monday',
-    timelineExtension: '0',
-    coordinateOrder: 'employee-date',
+    weekStart: WEEK_START_MONDAY,
+    timelineExtension: TIMELINE_EXTENSION_NONE,
+    coordinateOrder: COORDINATE_ORDER_EMPLOYEE_DATE,
     employeeFilterImmediate: true,
     showClearFilterButton: true,
     employeeFilterHistoryCache: true,
     jumpHistoryCache: true,
     showTodayButton: true,
     sidebarFolded: false,
-    startOnMode: 'recent',
+    startOnMode: START_ON_MODE_RECENT,
     fixedStartDate: new Date().toISOString().split('T')[0],
     sidebar: [
       { id: 'Staff', name: 'Staff', visible: true, default: true },
@@ -44,24 +55,24 @@ function App() {
     ]
   })
   const [draftSettings, setDraftSettings] = useState({
-    dateFormat: 'YYYY-MM-DD',
-    timeFormat: '24h',
-    timeResolution: 1,
-    timeInputControl: 'system',
+    dateFormat: DATE_FORMAT_YYYY_MM_DD_ISO,
+    timeFormat: TIME_FORMAT_24H,
+    timeResolution: TIME_RESOLUTION_1MIN,
+    timeInputControl: TIME_INPUT_CONTROL_SYSTEM,
     workDayLength: '08:00',
-    autoSetEndHourMode: 'none',
+    autoSetEndHourMode: AUTO_SET_MODE_NONE,
     timelineStartHour: 0,
     timelineEndHour: 23,
-    weekStart: 'Monday',
-    timelineExtension: '0',
-    coordinateOrder: 'employee-date',
+    weekStart: WEEK_START_MONDAY,
+    timelineExtension: TIMELINE_EXTENSION_NONE,
+    coordinateOrder: COORDINATE_ORDER_EMPLOYEE_DATE,
     employeeFilterImmediate: true,
     showClearFilterButton: true,
     employeeFilterHistoryCache: true,
     jumpHistoryCache: true,
     showTodayButton: true,
     sidebarFolded: false,
-    startOnMode: 'recent',
+    startOnMode: START_ON_MODE_RECENT,
     fixedStartDate: new Date().toISOString().split('T')[0],
     sidebar: [
       { id: 'Staff', name: 'Staff', visible: true, default: true },
@@ -113,8 +124,8 @@ function App() {
           setDraftSettings(prev => ({ ...prev, ...storedSettings }));
           
           if (storedSettings.startOnMode === undefined) {
-             setAppSettings(prev => ({ ...prev, startOnMode: 'recent', fixedStartDate: new Date().toISOString().split('T')[0] }));
-             setDraftSettings(prev => ({ ...prev, startOnMode: 'recent', fixedStartDate: new Date().toISOString().split('T')[0] }));
+             setAppSettings(prev => ({ ...prev, startOnMode: START_ON_MODE_RECENT, fixedStartDate: new Date().toISOString().split('T')[0] }));
+             setDraftSettings(prev => ({ ...prev, startOnMode: START_ON_MODE_RECENT, fixedStartDate: new Date().toISOString().split('T')[0] }));
           }
           
           if (storedSettings.sidebarFolded !== undefined) {

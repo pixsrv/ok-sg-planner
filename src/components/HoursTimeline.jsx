@@ -1,5 +1,12 @@
 import { useMemo } from 'react';
 import { Settings, X, RotateCcw, RotateCw, Trash2 } from 'lucide-react';
+import {
+  AUTO_SET_MODE_NONE,
+  AUTO_SET_MODE_FIXED,
+  AUTO_SET_MODE_CALCULATED,
+  COORDINATE_ORDER_EMPLOYEE_DATE,
+  TIME_RESOLUTION_1MIN
+} from '../constants/settings';
 
 /**
  * @typedef {Object} Term
@@ -10,7 +17,7 @@ import { Settings, X, RotateCcw, RotateCw, Trash2 } from 'lucide-react';
  */
 
 const HoursTimeline = ({ value, onChange, onDone, onClear, onUndo, onRedo, onOpenSettings, onCoordinateDoubleClick, settings, employee, dayDate }) => {
-  const timeResolution = settings?.timeResolution || 1;
+  const timeResolution = settings?.timeResolution || TIME_RESOLUTION_1MIN;
 
   // value is [start, end] where each is 'HH:mm'
   const startTime = value?.[0] || '';
@@ -50,13 +57,13 @@ const HoursTimeline = ({ value, onChange, onDone, onClear, onUndo, onRedo, onOpe
     const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
     
     // Auto-set end time logic
-    if (type === 'start' && settings?.autoSetEndHourMode && settings.autoSetEndHourMode !== 'none') {
+    if (type === 'start' && settings?.autoSetEndHourMode && settings.autoSetEndHourMode !== AUTO_SET_MODE_NONE) {
       let durationMinutes = 0;
 
-      if (settings.autoSetEndHourMode === 'fixed') {
+      if (settings.autoSetEndHourMode === AUTO_SET_MODE_FIXED) {
         const [workH, workM] = (settings.workDayLength || '08:00').split(':').map(Number);
         durationMinutes = workH * 60 + workM;
-      } else if (settings.autoSetEndHourMode === 'calculated' && employee?.terms && dayDate) {
+      } else if (settings.autoSetEndHourMode === AUTO_SET_MODE_CALCULATED && employee?.terms && dayDate) {
         const term = employee.terms.find(t => {
           const from = t.validFrom;
           const to = t.validTo || '9999-12-31';
@@ -101,9 +108,9 @@ const HoursTimeline = ({ value, onChange, onDone, onClear, onUndo, onRedo, onOpe
   };
 
   const employeeName = employee ? `${employee.firstName} ${employee.lastName}` : '';
-  const coordinateOrder = settings?.coordinateOrder || 'employee-date';
+  const coordinateOrder = settings?.coordinateOrder || COORDINATE_ORDER_EMPLOYEE_DATE;
   
-  const coordinateDisplay = coordinateOrder === 'employee-date'
+  const coordinateDisplay = coordinateOrder === COORDINATE_ORDER_EMPLOYEE_DATE
     ? `${employeeName} : ${dayDate}`
     : `${dayDate} : ${employeeName}`;
 
