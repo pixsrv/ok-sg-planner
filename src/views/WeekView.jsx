@@ -6,6 +6,7 @@ import Timeline from '../components/Timeline';
 import DateOmnibox from '../components/DateOmnibox';
 import EmployeeOmnibox from '../components/EmployeeOmnibox';
 import HoursTimeline from '../components/HoursTimeline';
+import WorkHoursGrid from '../components/WorkHoursGrid.jsx';
 import {
   WEEK_START_SUNDAY,
   START_ON_MODE_RECENT,
@@ -298,7 +299,7 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
     if (editingCell) {
       // Small timeout to ensure the 'editing' class is applied and panel animation starts
       setTimeout(() => {
-        const cell = document.querySelector(`.day-cell.editing`);
+        const cell = document.querySelector(`.work-hours-cell.editing`);
         if (cell) {
           const panelHeight = 250;
           const viewportHeight = window.innerHeight;
@@ -421,24 +422,6 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
 
   const filteredEmployeesList = filterEmployees(employees, employeeSearchQuery, settings);
 
-  /**
-   * @param {Employee} emp
-   */
-  const getCurrentPosition = (emp) => {
-    if (!emp.terms || emp.terms.length === 0) return '';
-
-    const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
-    const currentTerm = emp.terms.find(term => {
-      const from = term.validFrom;
-      const to = term.validTo || '9999-12-31';
-
-      return todayStr >= from && todayStr <= to;
-    }) || emp.terms[emp.terms.length - 1];
-
-    return currentTerm?.position || '';
-  };
-
   return (
     <div className={`view-container ${editingCell ? 'has-panel' : ''}`}>
       <Timeline 
@@ -469,71 +452,14 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
         </div>
       </div>
 
-      <div className="week-grid-wrapper">
-        <table className="week-grid">
-          <thead>
-            <tr>
-              <th className="employee-col-header">Employee</th>
-              {weekDays.map((day, index) => (
-                <th key={index} className="day-col-header">
-                  <div className="day-header-content">
-                    <span className="day-name">{day.dayName}</span>
-                    <span className="day-date">{day.date}</span>
-                    <span className="week-num">Week {day.weekData.weekNum}</span>
-                  </div>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {filteredEmployeesList.length > 0 ? (
-              filteredEmployeesList.map(([empId, emp], idx) => (
-                <tr key={idx} className="employee-row">
-                  <td className="employee-name-cell">
-                    <div className="employee-info-wrapper">
-                      <div className="employee-full-name">{emp.firstName} {emp.lastName}</div>
-                      <div className="employee-position">{getCurrentPosition(emp)}</div>
-                    </div>
-                  </td>
-                  {weekDays.map((day, dayIdx) => {
-                    const cellData = getCellData(empId, day.date);
-                    const isEditing = editingCell?.employeeId === empId && editingCell?.dayDate === day.date;
-                    
-                    return (
-                      <td 
-                        key={dayIdx} 
-                        className={`day-cell ${isEditing ? 'editing' : ''}`}
-                        onClick={() => handleCellClick(empId, day.date)}
-                        data-employee-id={empId}
-                        data-date={day.date}
-                      >
-                        <div className="time-display">
-                          {cellData ? (
-                            <div className="time-values">
-                              <div className="time-field">
-                                <span>{formatTime(cellData[0], settings?.timeFormat)}</span>
-                              </div>
-                              <div className="time-field">
-                                <span>{formatTime(cellData[1], settings?.timeFormat)}</span>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="empty-cell-placeholder">&nbsp;</div>
-                          )}
-                        </div>
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="8" className="empty-state">No employees available</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <WorkHoursGrid
+        weekDays={weekDays}
+        employeesList={filteredEmployeesList}
+        editingCell={editingCell}
+        onCellClick={handleCellClick}
+        getCellData={getCellData}
+        settings={settings}
+      />
       <div className={`hours-timeline-panel ${editingCell ? 'visible' : ''}`}>
         {editingCell && (
           <HoursTimeline

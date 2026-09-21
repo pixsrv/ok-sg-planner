@@ -196,7 +196,7 @@
   color: var(--text-light);
 }
 
-.week-grid-wrapper {
+.work-hours-grid-wrapper {
   overflow-x: auto;
   background: var(--bg);
   border-radius: 8px;
@@ -204,19 +204,19 @@
   border: 1px solid var(--border);
 }
 
-.week-grid {
+.work-hours-grid {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
 }
 
-.week-grid th, 
-.week-grid td {
+.work-hours-grid th, 
+.work-hours-grid td {
   border: 1px solid var(--border);
   padding: 0.75rem;
 }
 
-.day-cell {
+.work-hours-cell {
   text-align: center;
 }
 
@@ -292,7 +292,7 @@
   gap: 0.5rem;
 }
 
-.time-field input {
+.work-hours-field input {
   width: 100%;
   padding: 0.25rem;
   border: 1px solid var(--border);
@@ -303,7 +303,7 @@
   font-size: 0.85rem;
 }
 
-.time-field input:focus {
+.work-hours-field input:focus {
   outline: none;
   border-color: var(--accent);
 }
@@ -563,7 +563,7 @@ input:disabled + .slider {
   filter: none;
 }
 
-.time-values {
+.work-hours-values {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -595,7 +595,7 @@ input:disabled + .slider {
   cursor: pointer;
 }
 
-.day-cell.editing {
+.work-hours-cell.editing {
   background-color: var(--accent-bg);
 }
 
