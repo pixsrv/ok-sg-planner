@@ -318,10 +318,6 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
   };
 
   const handleTimeChange = (employeeId, dayDate, type, value) => {
-    const [year, month, day] = dayDate.split('-');
-    const ymKey = `${year}-${month}`;
-    const dayNum = parseInt(day, 10).toString();
-
     const roundValue = (val) => {
       if (val && settings?.timeResolution && settings.timeResolution > TIME_RESOLUTION_1MI) {
         const [hours, minutes] = val.split(':').map(Number);
@@ -336,28 +332,61 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
       return val;
     };
 
-    if (type === 'both') {
-      const roundedStart = roundValue(value[0]);
-      const roundedEnd = roundValue(value[1]);
-      updateWorkRecord(ymKey, dayNum, employeeId, [roundedStart, roundedEnd]);
-    } else {
-      const roundedValue = roundValue(value);
-      
-      updateWorkRecord(ymKey, dayNum, employeeId, (current) => {
-        const newData = [...(current || ['', ''])];
-        if (type === 'start') newData[0] = roundedValue;
-        else newData[1] = roundedValue;
-        return newData;
+    const processUpdate = (empId, date) => {
+      const [year, month, day] = date.split('-');
+      const ymKey = `${year}-${month}`;
+      const dayNum = parseInt(day, 10).toString();
+
+      if (type === 'both') {
+        const roundedStart = roundValue(value[0]);
+        const roundedEnd = roundValue(value[1]);
+        updateWorkRecord(ymKey, dayNum, empId, [roundedStart, roundedEnd]);
+      } else {
+        const roundedValue = roundValue(value);
+        updateWorkRecord(ymKey, dayNum, empId, (current) => {
+          const newData = [...(current || ['', ''])];
+          if (type === 'start') newData[0] = roundedValue;
+          else newData[1] = roundedValue;
+          return newData;
+        });
+      }
+    };
+
+    if (employeeId === 'ALL' && dayDate !== 'ALL') {
+      // All employees for a specific day
+      Object.keys(employees).forEach(empId => {
+        processUpdate(empId, dayDate);
       });
+    } else if (dayDate === 'ALL' && employeeId !== 'ALL') {
+      // All days for a specific employee
+      weekDays.forEach(day => {
+        processUpdate(employeeId, day.date);
+      });
+    } else if (employeeId !== 'ALL' && dayDate !== 'ALL') {
+      // Single cell
+      processUpdate(employeeId, dayDate);
     }
   };
 
   const handleClearCell = (employeeId, dayDate) => {
-    const [year, month, day] = dayDate.split('-');
-    const ymKey = `${year}-${month}`;
-    const dayNum = parseInt(day, 10).toString();
+    const processClear = (empId, date) => {
+      const [year, month, day] = date.split('-');
+      const ymKey = `${year}-${month}`;
+      const dayNum = parseInt(day, 10).toString();
+      updateWorkRecord(ymKey, dayNum, empId, null);
+    };
 
-    updateWorkRecord(ymKey, dayNum, employeeId, null);
+    if (employeeId === 'ALL' && dayDate !== 'ALL') {
+      Object.keys(employees).forEach(empId => {
+        processClear(empId, dayDate);
+      });
+    } else if (dayDate === 'ALL' && employeeId !== 'ALL') {
+      weekDays.forEach(day => {
+        processClear(employeeId, day.date);
+      });
+    } else if (employeeId !== 'ALL' && dayDate !== 'ALL') {
+      processClear(employeeId, dayDate);
+    }
   };
 
   const getCellData = (employeeId, dayDate) => {
@@ -463,7 +492,9 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
       <div className={`hours-timeline-panel ${editingCell ? 'visible' : ''}`}>
         {editingCell && (
           <HoursTimeline
-            value={getCellData(editingCell.employeeId, editingCell.dayDate)}
+            value={editingCell.employeeId === 'ALL' || editingCell.dayDate === 'ALL' 
+              ? null 
+              : getCellData(editingCell.employeeId, editingCell.dayDate)}
             onChange={(type, value) => handleTimeChange(editingCell.employeeId, editingCell.dayDate, type, value)}
             onDone={() => setEditingCell(null)}
             onClear={() => handleClearCell(editingCell.employeeId, editingCell.dayDate)}
@@ -473,8 +504,9 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
             onOpenSettings={() => onOpenSettingsView?.('DateTime')}
             onCoordinateDoubleClick={handleCoordinateDoubleClick}
             settings={settings}
-            employee={employees[editingCell.employeeId]}
+            employee={editingCell.employeeId === 'ALL' ? null : employees[editingCell.employeeId]}
             dayDate={editingCell.dayDate}
+            weekRange={weekDays.length > 0 ? `${weekDays[0].date} - ${weekDays[weekDays.length - 1].date}` : ''}
           />
         )}
       </div>

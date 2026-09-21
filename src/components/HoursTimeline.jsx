@@ -16,7 +16,8 @@ import {
  * @property {string} position
  */
 
-const HoursTimeline = ({ value, onChange, onDone, onClear, onUndo, onRedo, onOpenSettings, onCoordinateDoubleClick, settings, employee, dayDate }) => {
+const HoursTimeline = ({ value, onChange, onDone, onClear, onUndo, onRedo, onOpenSettings, onCoordinateDoubleClick, settings, employee, dayDate, weekRange }) => {
+  const employeeId = employee ? null : (dayDate && !employee ? 'ALL' : null); // This is a bit hacky, but WeekView passes null employee for 'ALL'
   const timeResolution = settings?.timeResolution || TIME_RESOLUTION_1MI;
 
   // value is [start, end] where each is 'HH:mm'
@@ -107,12 +108,13 @@ const HoursTimeline = ({ value, onChange, onDone, onClear, onUndo, onRedo, onOpe
     e.stopPropagation();
   };
 
-  const employeeName = employee ? `${employee.firstName} ${employee.lastName}` : '';
+  const employeeName = employee ? `${employee.firstName} ${employee.lastName}` : (employeeId === 'ALL' ? '(All Employees)' : '');
+  const displayDate = dayDate === 'ALL' ? weekRange : dayDate;
   const coordinateOrder = settings?.coordinateOrder || COORDINATE_ORDER_EMPLOYEE_DATE;
   
   const coordinateDisplay = coordinateOrder === COORDINATE_ORDER_EMPLOYEE_DATE
-    ? `${employeeName} : ${dayDate}`
-    : `${dayDate} : ${employeeName}`;
+    ? `${employeeName} : ${displayDate}`
+    : `${displayDate} : ${employeeName}`;
 
   return (
     <div 
