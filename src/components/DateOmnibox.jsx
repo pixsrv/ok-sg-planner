@@ -1,6 +1,7 @@
 import  { useState, useEffect, useRef } from 'react';
 import { ArrowLeftRight, X, Calendar, ArrowDownToDot } from 'lucide-react';
 import { getMonthName, getOrdinalSuffix, getDateFromWeek, MONTH_NAMES } from '../utils/dateUtils';
+import { getStorageItem, setStorageItem, STORES } from '../utils/db';
 
 const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => {
   const [query, setQuery] = useState('');
@@ -11,24 +12,20 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => 
 
   const [history, setHistory] = useState(() => {
     if (settings?.jumpHistoryCache === false) return { list: [], pointer: -1 };
-    try {
-      const stored = localStorage.getItem('ok-sg-jumps');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed.list) && parsed.list.length > 0) {
-          const list = parsed.list.map(d => {
-            const parts = d.split('-');
-            if (parts.length === 3) {
-              return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
-            }
-            return new Date(d);
-          });
-          const pointer = (typeof parsed.pointer === 'number' && parsed.pointer >= 0) ? parsed.pointer : 0;
-          return { list, pointer };
-        }
+    
+    const stored = getStorageItem(STORES.JUMPS);
+    if (stored) {
+      if (Array.isArray(stored.list) && stored.list.length > 0) {
+        const list = stored.list.map(d => {
+          const parts = d.split('-');
+          if (parts.length === 3) {
+            return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+          }
+          return new Date(d);
+        });
+        const pointer = (typeof stored.pointer === 'number' && stored.pointer >= 0) ? stored.pointer : 0;
+        return { list, pointer };
       }
-    } catch (e) {
-      console.error('Failed to parse ok-sg-jumps from localStorage', e);
     }
     const contextDate = getDateFromWeek(selectedWeek, selectedYear);
     contextDate.setHours(0, 0, 0, 0);
@@ -79,20 +76,17 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => 
 
   useEffect(() => {
     if (settings?.jumpHistoryCache === false) return;
-    try {
-      localStorage.setItem('ok-sg-jumps', JSON.stringify({
-        list: history.list.map(d => {
-          if (!d || typeof d.getFullYear !== 'function') return null;
-          const y = d.getFullYear();
-          const m = String(d.getMonth() + 1).padStart(2, '0');
-          const day = String(d.getDate()).padStart(2, '0');
-          return `${y}-${m}-${day}`;
-        }).filter(Boolean),
-        pointer: history.pointer
-      }));
-    } catch (e) {
-      console.error('Failed to save ok-sg-jumps to localStorage', e);
-    }
+    
+    setStorageItem(STORES.JUMPS, {
+      list: history.list.map(d => {
+        if (!d || typeof d.getFullYear !== 'function') return null;
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      }).filter(Boolean),
+      pointer: history.pointer
+    });
   }, [history, settings?.jumpHistoryCache]);
 
   const handleTodayClick = () => {

@@ -22,7 +22,7 @@ import {
   START_ON_MODE_RECENT,
   TIME_RESOLUTION_1MI
 } from './constants/settings'
-import { getAllItems, saveItem, saveItems } from './utils/db'
+import { getAllItems, saveItem, saveItems, STORES } from './utils/db'
 
 function App() {
   const [currentView, setCurrentView] = useState('Staff')
@@ -93,19 +93,19 @@ function App() {
 
     const loadFromDB = async () => {
       try {
-        const storedEmployees = await getAllItems('employees').catch(() => {
+        const storedEmployees = await getAllItems(STORES.EMPLOYEES).catch(() => {
           console.warn('Employees store not found, might be empty.');
 
           return {};
         });
 
-        const storedMonths = await getAllItems('months').catch(() => {
+        const storedMonths = await getAllItems(STORES.MONTHS).catch(() => {
           console.warn('Months store not found, might be empty.');
 
           return [];
         });
 
-        const storedSettings = await getAllItems('settings').catch(() => {
+        const storedSettings = await getAllItems(STORES.SETTINGS).catch(() => {
           console.warn('Settings store not found, might be empty.');
 
           return {};
@@ -152,7 +152,7 @@ function App() {
     if (data.employees) {
       setEmployees(data.employees);
 
-      await saveItems('employees', data.employees);
+      await saveItems(STORES.EMPLOYEES, data.employees);
     }
     if (data.months && data.months.length > 0) {
       const updatedMonths = [...months, ...data.months];
@@ -163,7 +163,7 @@ function App() {
       // TopBar.jsx pushes { name: file.name, data: json } to months array.
       // We'll save them as individual items using their name as key.
       for (const month of data.months) {
-        await saveItem('months', month.name, month);
+        await saveItem(STORES.MONTHS, month.name, month);
       }
     }
     console.log('Data loaded and saved to localStorage:', data);
@@ -188,26 +188,26 @@ function App() {
       }
     }
     
-    await saveItem('settings', 'dateFormat', draftSettings.dateFormat);
-    await saveItem('settings', 'timeFormat', draftSettings.timeFormat);
-    await saveItem('settings', 'timeResolution', draftSettings.timeResolution);
-    await saveItem('settings', 'timeInputControl', draftSettings.timeInputControl);
-    await saveItem('settings', 'workDayLength', draftSettings.workDayLength);
-    await saveItem('settings', 'autoSetEndHourMode', draftSettings.autoSetEndHourMode);
-    await saveItem('settings', 'timelineStartHour', draftSettings.timelineStartHour);
-    await saveItem('settings', 'timelineEndHour', draftSettings.timelineEndHour);
-    await saveItem('settings', 'weekStart', draftSettings.weekStart);
-    await saveItem('settings', 'timelineExtension', draftSettings.timelineExtension);
-    await saveItem('settings', 'coordinateOrder', draftSettings.coordinateOrder);
-    await saveItem('settings', 'employeeFilterImmediate', draftSettings.employeeFilterImmediate);
-    await saveItem('settings', 'showClearFilterButton', draftSettings.showClearFilterButton);
-    await saveItem('settings', 'employeeFilterHistoryCache', draftSettings.employeeFilterHistoryCache);
-    await saveItem('settings', 'jumpHistoryCache', draftSettings.jumpHistoryCache);
-    await saveItem('settings', 'showTodayButton', draftSettings.showTodayButton);
-    await saveItem('settings', 'sidebarFolded', draftSettings.sidebarFolded);
-    await saveItem('settings', 'startOnMode', draftSettings.startOnMode);
-    await saveItem('settings', 'fixedStartDate', draftSettings.fixedStartDate);
-    await saveItem('settings', 'sidebar', draftSettings.sidebar);
+    await saveItem(STORES.SETTINGS, 'dateFormat', draftSettings.dateFormat);
+    await saveItem(STORES.SETTINGS, 'timeFormat', draftSettings.timeFormat);
+    await saveItem(STORES.SETTINGS, 'timeResolution', draftSettings.timeResolution);
+    await saveItem(STORES.SETTINGS, 'timeInputControl', draftSettings.timeInputControl);
+    await saveItem(STORES.SETTINGS, 'workDayLength', draftSettings.workDayLength);
+    await saveItem(STORES.SETTINGS, 'autoSetEndHourMode', draftSettings.autoSetEndHourMode);
+    await saveItem(STORES.SETTINGS, 'timelineStartHour', draftSettings.timelineStartHour);
+    await saveItem(STORES.SETTINGS, 'timelineEndHour', draftSettings.timelineEndHour);
+    await saveItem(STORES.SETTINGS, 'weekStart', draftSettings.weekStart);
+    await saveItem(STORES.SETTINGS, 'timelineExtension', draftSettings.timelineExtension);
+    await saveItem(STORES.SETTINGS, 'coordinateOrder', draftSettings.coordinateOrder);
+    await saveItem(STORES.SETTINGS, 'employeeFilterImmediate', draftSettings.employeeFilterImmediate);
+    await saveItem(STORES.SETTINGS, 'showClearFilterButton', draftSettings.showClearFilterButton);
+    await saveItem(STORES.SETTINGS, 'employeeFilterHistoryCache', draftSettings.employeeFilterHistoryCache);
+    await saveItem(STORES.SETTINGS, 'jumpHistoryCache', draftSettings.jumpHistoryCache);
+    await saveItem(STORES.SETTINGS, 'showTodayButton', draftSettings.showTodayButton);
+    await saveItem(STORES.SETTINGS, 'sidebarFolded', draftSettings.sidebarFolded);
+    await saveItem(STORES.SETTINGS, 'startOnMode', draftSettings.startOnMode);
+    await saveItem(STORES.SETTINGS, 'fixedStartDate', draftSettings.fixedStartDate);
+    await saveItem(STORES.SETTINGS, 'sidebar', draftSettings.sidebar);
     setIsSettingsOpen(false);
   };
 

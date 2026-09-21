@@ -1,31 +1,66 @@
 const PREFIX = 'ok-sg-';
-const EMPLOYEES_STORE = 'employees';
-const MONTHS_STORE = 'months';
-const SETTINGS_STORE = 'settings';
+
+// Store Names / Keys
+export const STORES = {
+  EMPLOYEES: 'employees',
+  MONTHS: 'months',
+  SETTINGS: 'settings',
+  CURRENT_STATE: 'current',
+  UNDO: 'undo',
+  JUMPS: 'jumps',
+  FILTERS: 'filters'
+};
 
 const getStorageKey = (storeName) => `${PREFIX}${storeName}`;
+
+/**
+ * Generic JSON getter from localStorage with error handling
+ */
+export const getStorageItem = (key, defaultValue = null) => {
+  try {
+    const fullKey = key.startsWith(PREFIX) ? key : getStorageKey(key);
+    const data = localStorage.getItem(fullKey);
+    return data ? JSON.parse(data) : defaultValue;
+  } catch (e) {
+    console.error(`Error reading ${key} from localStorage`, e);
+    return defaultValue;
+  }
+};
+
+/**
+ * Generic JSON setter for localStorage with error handling
+ */
+export const setStorageItem = (key, value) => {
+  try {
+    const fullKey = key.startsWith(PREFIX) ? key : getStorageKey(key);
+    localStorage.setItem(fullKey, JSON.stringify(value));
+  } catch (e) {
+    console.error(`Error saving ${key} to localStorage`, e);
+  }
+};
+
+/**
+ * Generic remover for localStorage
+ */
+export const removeStorageItem = (key) => {
+  try {
+    const fullKey = key.startsWith(PREFIX) ? key : getStorageKey(key);
+    localStorage.removeItem(fullKey);
+  } catch (e) {
+    console.error(`Error removing ${key} from localStorage`, e);
+  }
+};
 
 export const initDB = () => {
   return Promise.resolve(true);
 };
 
 const getStoreData = (storeName) => {
-  const key = getStorageKey(storeName);
-  const data = localStorage.getItem(key);
-
-  try {
-    return data ? JSON.parse(data) : {};
-  } catch (e) {
-    console.error(`Error parsing data from localStorage for ${key}`, e);
-
-    return {};
-  }
+  return getStorageItem(storeName, {});
 };
 
 const setStoreData = (storeName, data) => {
-  const key = getStorageKey(storeName);
-
-  localStorage.setItem(key, JSON.stringify(data));
+  setStorageItem(storeName, data);
 };
 
 export const saveItem = async (storeName, key, data) => {
@@ -55,7 +90,7 @@ export const getItem = async (storeName, key) => {
 export const getAllItems = async (storeName) => {
   const storeData = getStoreData(storeName);
 
-  if (storeName === EMPLOYEES_STORE || storeName === SETTINGS_STORE) {
+  if (storeName === STORES.EMPLOYEES || storeName === STORES.SETTINGS) {
     return storeData;
   } else {
     return Object.values(storeData);

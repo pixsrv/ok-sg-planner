@@ -1,31 +1,21 @@
-const UNDO_KEY = 'ok-sg-undo';
+import { getStorageItem, setStorageItem, removeStorageItem, STORES } from './db';
+
 const MAX_HISTORY = 50;
 
 export const getUndoHistory = () => {
-  try {
-    const stored = localStorage.getItem(UNDO_KEY);
-    if (stored) {
-      const parsed = JSON.parse(stored);
-      if (Array.isArray(parsed.list)) {
-        return {
-          list: parsed.list,
-          pointer: typeof parsed.pointer === 'number' ? parsed.pointer : parsed.list.length - 1
-        };
-      }
-    }
-  } catch (e) {
-    console.error('Failed to parse ok-sg-undo from localStorage', e);
+  const stored = getStorageItem(STORES.UNDO, { list: [], pointer: -1 });
+  
+  if (Array.isArray(stored.list)) {
+    return {
+      list: stored.list,
+      pointer: typeof stored.pointer === 'number' ? stored.pointer : stored.list.length - 1
+    };
   }
+  
   return { list: [], pointer: -1 };
 };
 
-export const saveUndoHistory = (history) => {
-  try {
-    localStorage.setItem(UNDO_KEY, JSON.stringify(history));
-  } catch (e) {
-    console.error('Failed to save ok-sg-undo to localStorage', e);
-  }
-};
+export const saveUndoHistory = (history) => setStorageItem(STORES.UNDO, history);
 
 export const pushAction = (action) => {
   const history = getUndoHistory();
@@ -56,5 +46,5 @@ export const pushAction = (action) => {
 };
 
 export const clearUndoHistory = () => {
-  localStorage.removeItem(UNDO_KEY);
+  removeStorageItem(STORES.UNDO);
 };

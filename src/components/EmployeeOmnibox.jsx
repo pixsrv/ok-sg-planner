@@ -1,6 +1,7 @@
 import {useState, useEffect, useRef} from 'react';
 import {Search, X, FilterX} from 'lucide-react';
 import {filterEmployees} from '../utils/employeeFilter';
+import { getStorageItem, setStorageItem, STORES } from '../utils/db';
 
 const EmployeeOmnibox = ({value, onChange, employees, settings, placeholder = "Search employees..."}) => {
   const [localQuery, setLocalQuery] = useState(value);
@@ -18,19 +19,15 @@ const EmployeeOmnibox = ({value, onChange, employees, settings, placeholder = "S
 
   const [history, setHistory] = useState(() => {
     if (settings?.employeeFilterHistoryCache === false) return { list: [], pointer: -1 };
-    try {
-      const stored = localStorage.getItem('ok-sg-filters');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed.list)) {
-          return {
-            list: parsed.list,
-            pointer: (typeof parsed.pointer === 'number') ? parsed.pointer : parsed.list.length - 1
-          };
-        }
+    
+    const stored = getStorageItem(STORES.FILTERS);
+    if (stored) {
+      if (Array.isArray(stored.list)) {
+        return {
+          list: stored.list,
+          pointer: (typeof stored.pointer === 'number') ? stored.pointer : stored.list.length - 1
+        };
       }
-    } catch (e) {
-      console.error('Failed to parse ok-sg-filters from localStorage', e);
     }
     return { list: value ? [value] : [], pointer: value ? 0 : -1 };
   });
@@ -65,14 +62,11 @@ const EmployeeOmnibox = ({value, onChange, employees, settings, placeholder = "S
 
   useEffect(() => {
     if (settings?.employeeFilterHistoryCache === false) return;
-    try {
-      localStorage.setItem('ok-sg-filters', JSON.stringify({
-        list: history.list,
-        pointer: history.pointer
-      }));
-    } catch (e) {
-      console.error('Failed to save ok-sg-filters to localStorage', e);
-    }
+    
+    setStorageItem(STORES.FILTERS, {
+      list: history.list,
+      pointer: history.pointer
+    });
   }, [history.list, history.pointer, settings?.employeeFilterHistoryCache]);
 
 

@@ -1,6 +1,7 @@
 import {useState, useEffect, useCallback, useMemo} from 'react';
 import {formatDate} from '../utils/formatters';
 import { getISOWeek, getDateFromWeek, DAY_NAMES_SHORT } from '../utils/dateUtils';
+import { getStorageItem, setStorageItem, STORES } from '../utils/db';
 import { getUndoHistory, saveUndoHistory, pushAction } from '../utils/undoUtils';
 import Timeline from '../components/Timeline';
 import DateOmnibox from '../components/DateOmnibox';
@@ -62,17 +63,10 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
     }
 
     // Legacy logic for 'recent' mode or refresh
-    try {
-      const stored = localStorage.getItem('ok-sg-current');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed.selectedWeek) {
-          const year = parsed.selectedYear || new Date().getFullYear();
-          return getDateFromWeek(parsed.selectedWeek, year);
-        }
-      }
-    } catch (e) {
-      console.error('Failed to parse ok-sg-current from localStorage', e);
+    const stored = getStorageItem(STORES.CURRENT_STATE);
+    if (stored?.selectedWeek) {
+      const year = stored.selectedYear || new Date().getFullYear();
+      return getDateFromWeek(stored.selectedWeek, year);
     }
 
     return new Date();
@@ -110,16 +104,10 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
 
   // Save selected week to localStorage
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem('ok-sg-current');
-      let currentData = stored ? JSON.parse(stored) : {};
-
-      currentData.selectedWeek = currentWeekNumber;
-      currentData.selectedYear = currentWeekYear;
-      localStorage.setItem('ok-sg-current', JSON.stringify(currentData));
-    } catch (e) {
-      console.error('Failed to save ok-sg-current to localStorage', e);
-    }
+    const currentData = getStorageItem(STORES.CURRENT_STATE, {});
+    currentData.selectedWeek = currentWeekNumber;
+    currentData.selectedYear = currentWeekYear;
+    setStorageItem(STORES.CURRENT_STATE, currentData);
   }, [currentWeekNumber, currentWeekYear]);
 
   const weekDays = useMemo(() => {
@@ -256,11 +244,7 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
       newRecords[ymKey] = newMonthData;
 
       // Save to localStorage
-      try {
-        localStorage.setItem(`ok-sg-${ymKey}`, JSON.stringify(newMonthData));
-      } catch (e) {
-        console.error('Failed to save record to localStorage', e);
-      }
+      setStorageItem(ymKey, newMonthData);
 
       if (shouldPushHistory) {
         // Use a timeout to move side effect out of the render/updater phase
@@ -501,18 +485,7 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
       });
 
       yearMonths.forEach(ym => {
-        const key = `ok-sg-${ym}`;
-        try {
-          const data = localStorage.getItem(key);
-          if (data) {
-            records[ym] = JSON.parse(data);
-          } else {
-            records[ym] = {};
-          }
-        } catch (e) {
-          console.error(`Failed to load records for ${key}`, e);
-          records[ym] = {};
-        }
+        records[ym] = getStorageItem(ym, {});
       });
       setWorkRecords(records);
     };
