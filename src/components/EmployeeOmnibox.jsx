@@ -1,15 +1,21 @@
 import {useState, useEffect, useRef} from 'react';
 import {Search, X, FilterX} from 'lucide-react';
 import {filterEmployees} from '../utils/employeeFilter';
-import { getStorageItem, setStorageItem, STORES } from '../utils/db';
+import useOmniboxHistory from '../hooks/useOmniboxHistory';
+import useDropdownKeyboard from '../hooks/useDropdownKeyboard';
+import OmniboxDropdownItem from './OmniboxDropdownItem';
 
 const EmployeeOmnibox = ({value, onChange, employees, settings, placeholder = "Search employees..."}) => {
   const [localQuery, setLocalQuery] = useState(value);
+  const [prevValue, setPrevValue] = useState(value);
   const [isOpen, setIsOpen] = useState(false);
   const [results, setResults] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const containerRef = useRef(null);
-  const [prevValue, setPrevValue] = useState(value);
+
+  // Synchronize localQuery when the value prop changes from the outside.
+  // Using the "update state during render" pattern instead of useEffect to avoid
+  // cascading renders and satisfy the react-hooks/set-state-in-effect lint rule.
   if (value !== prevValue) {
     setLocalQuery(value);
     setPrevValue(value);
@@ -17,57 +23,7 @@ const EmployeeOmnibox = ({value, onChange, employees, settings, placeholder = "S
 
   const isImmediate = settings?.employeeFilterImmediate !== false;
 
-  const [history, setHistory] = useState(() => {
-    if (settings?.employeeFilterHistoryCache === false) return { list: [], pointer: -1 };
-    
-    const stored = getStorageItem(STORES.FILTERS);
-    if (stored) {
-      if (Array.isArray(stored.list)) {
-        return {
-          list: stored.list,
-          pointer: (typeof stored.pointer === 'number') ? stored.pointer : stored.list.length - 1
-        };
-      }
-    }
-    return { list: value ? [value] : [], pointer: value ? 0 : -1 };
-  });
-
-  useEffect(() => {
-    if (settings?.employeeFilterHistoryCache === false) return;
-    if (!value) return;
-
-    if (history.pointer >= 0 && history.list[history.pointer] === value) {
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      setHistory(prev => {
-        if (prev.pointer >= 0 && prev.list[prev.pointer] === value) {
-          return prev;
-        }
-        const newList = prev.list.slice(0, prev.pointer + 1);
-        newList.push(value);
-        if (newList.length > 50) {
-          newList.shift();
-        }
-        return {
-          list: newList,
-          pointer: newList.length - 1
-        };
-      });
-    }, 0);
-
-    return () => clearTimeout(timer);
-  }, [value, settings?.employeeFilterHistoryCache, history.list, history.pointer]);
-
-  useEffect(() => {
-    if (settings?.employeeFilterHistoryCache === false) return;
-    
-    setStorageItem(STORES.FILTERS, {
-      list: history.list,
-      pointer: history.pointer
-    });
-  }, [history.list, history.pointer, settings?.employeeFilterHistoryCache]);
+  const { historyList, addTermToHistory, clearHistory } = useOmniboxHistory(settings);
 
 
   useEffect(() => {
@@ -81,16 +37,32 @@ const EmployeeOmnibox = ({value, onChange, employees, settings, placeholder = "S
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const handleClear = () => {
+    setLocalQuery('');
+    onChange('');
+    setResults([]);
+    setIsOpen(false);
+  };
+
+  const handleClearHistory = () => {
+    clearHistory();
+    setResults([]);
+    setIsOpen(false);
+  };
+
   const handleSearch = (text) => {
     setLocalQuery(text);
 
     if (isImmediate) {
       onChange(text);
+      if (text.trim()) {
+        addTermToHistory(text);
+      }
     }
 
     if (!text.trim()) {
-      if (history.list.length > 0) {
-        const recentFilters = [...history.list]
+      if (historyList.length > 0) {
+        const recentFilters = [...historyList]
           .reverse()
           .map(term => ({
             type: 'history',
@@ -143,6 +115,7 @@ const EmployeeOmnibox = ({value, onChange, employees, settings, placeholder = "S
     } else if (item.type === 'history') {
       setLocalQuery(item.value);
       onChange(item.value);
+      addTermToHistory(item.value);
       setIsOpen(false);
     } else {
       const empData = item.original;
@@ -151,58 +124,27 @@ const EmployeeOmnibox = ({value, onChange, employees, settings, placeholder = "S
 
       setLocalQuery(fullName);
       onChange(fullName);
+      addTermToHistory(fullName);
       setIsOpen(false);
     }
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Escape') {
-      e.preventDefault();
-      e.stopPropagation();
-      if (isOpen) {
-        setIsOpen(false);
-      } else if (localQuery) {
-        handleClear();
-      }
-    } else if (e.key === 'ArrowDown') {
-      if (isOpen && results.length > 0) {
-        e.preventDefault();
-        setSelectedIndex(prev => (prev + 1) % results.length);
-      } else if (!isOpen) {
-        e.preventDefault();
-        handleSearch(localQuery);
-      }
-    } else if (e.key === 'ArrowUp' && isOpen) {
-      e.preventDefault();
-      setSelectedIndex(prev => (prev - 1 + results.length) % results.length);
-    } else if (e.key === 'Enter') {
-      if (isOpen && results.length > 0) {
-        e.preventDefault();
-        handleSelect(results[selectedIndex]);
-      } else if (!isOpen) {
-        e.preventDefault();
-        handleSearch(localQuery);
-      }
-    }
-  };
+  const handleKeyDown = useDropdownKeyboard({
+    isOpen,
+    results,
+    selectedIndex,
+    setSelectedIndex,
+    setIsOpen,
+    handleSelect,
+    handleSearch,
+    handleClear,
+    localQuery,
+    addTermToHistory
+  });
 
-  const handleClear = () => {
-    setLocalQuery('');
-    onChange('');
-    setResults([]);
-    setIsOpen(false);
-  };
-
-  const handleClearHistory = () => {
-    setHistory({ list: [], pointer: -1 });
-    try {
-      localStorage.removeItem('ok-sg-filters');
-    } catch (e) {
-      console.error('Failed to clear ok-sg-filters from localStorage', e);
-    }
-    setResults([]);
-    setIsOpen(false);
-  };
+  const handleInputChange = (e) => handleSearch(e.target.value);
+  const handleInputFocus = () => handleSearch(localQuery);
+  const handleInputClick = () => !isOpen && handleSearch(localQuery);
 
   return (
     <div className="flex items-center gap-2">
@@ -213,10 +155,10 @@ const EmployeeOmnibox = ({value, onChange, employees, settings, placeholder = "S
           placeholder={placeholder}
           className="pl-10 pr-10 py-2 bg-[var(--bg)] border border-[var(--border)] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] w-64"
           value={localQuery}
-          onChange={(e) => handleSearch(e.target.value)}
+          onChange={handleInputChange}
           onKeyDown={handleKeyDown}
-          onFocus={() => handleSearch(localQuery)}
-          onClick={() => !isOpen && handleSearch(localQuery)}
+          onFocus={handleInputFocus}
+          onClick={handleInputClick}
         />
         {localQuery && (
           <button
@@ -232,35 +174,14 @@ const EmployeeOmnibox = ({value, onChange, employees, settings, placeholder = "S
           <div className="absolute top-full left-0 right-0 mt-1 bg-[var(--bg)] border border-[var(--border)] rounded-md shadow-lg z-50 max-h-64 overflow-y-auto">
             {results.length > 0 ? (
               results.map((item, index) => (
-                <div
+                <OmniboxDropdownItem
                   key={item.type === 'history' ? `hist-${index}` : (item.type === 'clear-history' ? 'clear-hist' : item.id)}
-                  className={`px-4 py-2 cursor-pointer text-sm flex items-center gap-3 ${
-                    index === selectedIndex ? 'bg-[var(--accent-bg)]' : 'hover:bg-[var(--accent-bg)]'
-                  }`}
-                  onClick={() => handleSelect(item)}
-                  onMouseEnter={() => setSelectedIndex(index)}
-                >
-                  {item.type === 'history' ? (
-                    <>
-                      <Search className="w-4 h-4 text-[var(--accent)] flex-shrink-0" />
-                      <span className="text-[var(--text)]">{item.label}</span>
-                    </>
-                  ) : item.type === 'clear-history' ? (
-                    <>
-                      <X className="w-4 h-4 text-[var(--text-light)] flex-shrink-0" />
-                      <span className="text-[var(--text-light)] italic">{item.label}</span>
-                    </>
-                  ) : (
-                    <div className="flex flex-col">
-                      <div className="font-medium text-[var(--text)]">
-                        {item.data.firstName} {item.data.lastName}
-                      </div>
-                      <div className="text-xs text-[var(--text-light)]">
-                        {item.id}
-                      </div>
-                    </div>
-                  )}
-                </div>
+                  item={item}
+                  index={index}
+                  isSelected={index === selectedIndex}
+                  onSelect={handleSelect}
+                  onMouseEnter={setSelectedIndex}
+                />
               ))
             ) : (
               <div className="px-4 py-2 text-sm text-[var(--text-light)] italic">
