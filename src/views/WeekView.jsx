@@ -11,7 +11,7 @@ import {
   START_ON_MODE_RECENT,
   START_ON_MODE_TODAY,
   START_ON_MODE_FIXED,
-  TIME_RESOLUTION_1MIN
+  TIME_RESOLUTION_1MI
 } from '../constants/settings';
 import { filterEmployees } from '../utils/employeeFilter';
 
@@ -322,7 +322,7 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
     const dayNum = parseInt(day, 10).toString();
 
     const roundValue = (val) => {
-      if (val && settings?.timeResolution && settings.timeResolution > TIME_RESOLUTION_1MIN) {
+      if (val && settings?.timeResolution && settings.timeResolution > TIME_RESOLUTION_1MI) {
         const [hours, minutes] = val.split(':').map(Number);
         const totalMinutes = hours * 60 + minutes;
         const roundedMinutes = Math.round(totalMinutes / settings.timeResolution) * settings.timeResolution;

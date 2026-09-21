@@ -37,31 +37,31 @@ export const COORDINATE_ORDERS = [
 ];
 
 export const TIMELINE_EXTENSION_NONE = '0';
-export const TIMELINE_EXTENSION_1M = '1';
-export const TIMELINE_EXTENSION_2M = '2';
-export const TIMELINE_EXTENSION_3M = '3';
+export const TIMELINE_EXTENSION_1MO = '1';
+export const TIMELINE_EXTENSION_2MO = '2';
+export const TIMELINE_EXTENSION_3MO = '3';
 
 export const TIMELINE_EXTENSIONS = [
   { id: TIMELINE_EXTENSION_NONE, label: 'None' },
-  { id: TIMELINE_EXTENSION_1M, label: '1 Month' },
-  { id: TIMELINE_EXTENSION_2M, label: '2 Months' },
-  { id: TIMELINE_EXTENSION_3M, label: '3 Months' }
+  { id: TIMELINE_EXTENSION_1MO, label: '1 Month' },
+  { id: TIMELINE_EXTENSION_2MO, label: '2 Months' },
+  { id: TIMELINE_EXTENSION_3MO, label: '3 Months' }
 ];
 
-export const TIME_RESOLUTION_1MIN = 1;
-export const TIME_RESOLUTION_5MIN = 5;
-export const TIME_RESOLUTION_10MIN = 10;
-export const TIME_RESOLUTION_15MIN = 15;
-export const TIME_RESOLUTION_30MIN = 30;
-export const TIME_RESOLUTION_60MIN = 60;
+export const TIME_RESOLUTION_1MI = 1;
+export const TIME_RESOLUTION_5MI = 5;
+export const TIME_RESOLUTION_10MI = 10;
+export const TIME_RESOLUTION_15MI = 15;
+export const TIME_RESOLUTION_30MI = 30;
+export const TIME_RESOLUTION_60MI = 60;
 
 export const TIME_RESOLUTIONS = [
-  { id: TIME_RESOLUTION_1MIN, label: '1 minute' },
-  { id: TIME_RESOLUTION_5MIN, label: '5 minutes' },
-  { id: TIME_RESOLUTION_10MIN, label: '10 minutes' },
-  { id: TIME_RESOLUTION_15MIN, label: '15 minutes' },
-  { id: TIME_RESOLUTION_30MIN, label: '30 minutes' },
-  { id: TIME_RESOLUTION_60MIN, label: '60 minutes' }
+  { id: TIME_RESOLUTION_1MI, label: '1 minute' },
+  { id: TIME_RESOLUTION_5MI, label: '5 minutes' },
+  { id: TIME_RESOLUTION_10MI, label: '10 minutes' },
+  { id: TIME_RESOLUTION_15MI, label: '15 minutes' },
+  { id: TIME_RESOLUTION_30MI, label: '30 minutes' },
+  { id: TIME_RESOLUTION_60MI, label: '60 minutes' }
 ];
 
 export const TIME_INPUT_CONTROL_SYSTEM = 'system';

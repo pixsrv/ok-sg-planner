@@ -12,7 +12,7 @@ import {
   TIMELINE_EXTENSIONS,
   TIMELINE_EXTENSION_NONE,
   TIME_RESOLUTIONS,
-  TIME_RESOLUTION_1MIN,
+  TIME_RESOLUTION_1MI,
   TIME_INPUT_CONTROLS,
   TIME_INPUT_CONTROL_SYSTEM,
   AUTO_SET_MODES,
@@ -33,7 +33,7 @@ const DateTimeView = ({ settings, onSettingChange }) => {
 
   const currentDateFormat = settings.dateFormat || DATE_FORMAT_YYYY_MM_DD_ISO;
   const currentTimeFormat = settings.timeFormat || TIME_FORMAT_24H;
-  const currentTimeResolution = settings.timeResolution || TIME_RESOLUTION_1MIN;
+  const currentTimeResolution = settings.timeResolution || TIME_RESOLUTION_1MI;
   const currentTimeInputControl = settings.timeInputControl || TIME_INPUT_CONTROL_SYSTEM;
   const currentWorkDayLength = settings.workDayLength || '08:00';
   const currentAutoSetEndHourMode = settings.autoSetEndHourMode || AUTO_SET_MODE_NONE;

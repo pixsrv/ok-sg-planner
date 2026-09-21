@@ -20,7 +20,7 @@ import {
   TIME_INPUT_CONTROL_SYSTEM,
   AUTO_SET_MODE_NONE,
   START_ON_MODE_RECENT,
-  TIME_RESOLUTION_1MIN
+  TIME_RESOLUTION_1MI
 } from './constants/settings'
 import { getAllItems, saveItem, saveItems } from './utils/db'
 
@@ -31,7 +31,7 @@ function App() {
   const [appSettings, setAppSettings] = useState({
     dateFormat: DATE_FORMAT_YYYY_MM_DD_ISO,
     timeFormat: TIME_FORMAT_24H,
-    timeResolution: TIME_RESOLUTION_1MIN,
+    timeResolution: TIME_RESOLUTION_1MI,
     timeInputControl: TIME_INPUT_CONTROL_SYSTEM,
     workDayLength: '08:00',
     autoSetEndHourMode: AUTO_SET_MODE_NONE,
@@ -57,7 +57,7 @@ function App() {
   const [draftSettings, setDraftSettings] = useState({
     dateFormat: DATE_FORMAT_YYYY_MM_DD_ISO,
     timeFormat: TIME_FORMAT_24H,
-    timeResolution: TIME_RESOLUTION_1MIN,
+    timeResolution: TIME_RESOLUTION_1MI,
     timeInputControl: TIME_INPUT_CONTROL_SYSTEM,
     workDayLength: '08:00',
     autoSetEndHourMode: AUTO_SET_MODE_NONE,

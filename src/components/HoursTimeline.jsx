@@ -5,7 +5,7 @@ import {
   AUTO_SET_MODE_FIXED,
   AUTO_SET_MODE_CALCULATED,
   COORDINATE_ORDER_EMPLOYEE_DATE,
-  TIME_RESOLUTION_1MIN
+  TIME_RESOLUTION_1MI
 } from '../constants/settings';
 
 /**
@@ -17,7 +17,7 @@ import {
  */
 
 const HoursTimeline = ({ value, onChange, onDone, onClear, onUndo, onRedo, onOpenSettings, onCoordinateDoubleClick, settings, employee, dayDate }) => {
-  const timeResolution = settings?.timeResolution || TIME_RESOLUTION_1MIN;
+  const timeResolution = settings?.timeResolution || TIME_RESOLUTION_1MI;
 
   // value is [start, end] where each is 'HH:mm'
   const startTime = value?.[0] || '';
