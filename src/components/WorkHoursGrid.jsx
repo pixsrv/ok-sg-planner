@@ -88,10 +88,17 @@ const WorkHoursGrid = ({
               const isHeaderHovered = isDirectHover || isEditingCol;
               const isDirectHeaderHovered = hoveredCell?.dayDate === day.date && hoveredCell?.employeeId === 'ALL';
               
+              const classes = ['day-col-header'];
+              if (isDirectHeaderHovered) classes.push('hovered');
+              else if (isHeaderHovered) classes.push('hovered');
+              else if (isCrossHover) classes.push('hover-highlight');
+              
+              if (isSelected) classes.push('selected');
+
               return (
                 <th 
                   key={index} 
-                  className={`day-col-header ${isDirectHeaderHovered ? 'hovered' : (isSelected ? 'selected' : (isHeaderHovered ? 'hovered' : (isCrossHover ? 'hover-highlight' : '')))}`}
+                  className={classes.join(' ')}
                   onClick={() => onCellClick('ALL', day.date)}
                   onMouseEnter={() => setHoveredCell({ employeeId: 'ALL', dayDate: day.date })}
                   onMouseLeave={() => setHoveredCell(null)}
@@ -117,10 +124,17 @@ const WorkHoursGrid = ({
               const isNameCellHovered = isDirectRowHov || isEditingRow;
               const isDirectNameHovered = hoveredCell?.employeeId === empId && hoveredCell?.dayDate === 'ALL';
               
+              const classes = ['employee-name-cell'];
+              if (isDirectNameHovered) classes.push('hovered');
+              else if (isNameCellHovered) classes.push('hovered');
+              else if (isCrossRowHov) classes.push('hover-highlight');
+              
+              if (isRowSel) classes.push('selected');
+
               return (
                 <tr key={idx} className={`employee-row ${isRowSel ? 'selected' : ''}`}>
                   <td 
-                    className={`employee-name-cell ${isDirectNameHovered ? 'hovered' : (isRowSel ? 'selected' : (isNameCellHovered ? 'hovered' : (isCrossRowHov ? 'hover-highlight' : '')))}`}
+                    className={classes.join(' ')}
                     onClick={() => onCellClick(empId, 'ALL')}
                     onMouseEnter={() => setHoveredCell({ employeeId: empId, dayDate: 'ALL' })}
                     onMouseLeave={() => setHoveredCell(null)}
@@ -141,12 +155,18 @@ const WorkHoursGrid = ({
                     
                     const isHovered = hoveredCell?.employeeId === empId || hoveredCell?.dayDate === day.date;
                     const isDirectHover = hoveredCell?.employeeId === empId && hoveredCell?.dayDate === day.date;
-                    const isCellHighlight = isDirectHover ? 'focused-cell' : (isHovered ? 'hover-highlight' : (isSelected ? 'editing' : (isEditingCross ? 'cross-highlight' : '')));
+
+                    const classes = ['work-hours-cell'];
+                    if (isDirectHover) classes.push('focused-cell');
+                    else if (isHovered) classes.push('hover-highlight');
+                    
+                    if (isSelected) classes.push('editing');
+                    else if (isEditingCross) classes.push('cross-highlight');
                     
                     return (
                       <td 
                         key={dayIdx} 
-                        className={`work-hours-cell ${isCellHighlight}`}
+                        className={classes.join(' ')}
                         onClick={() => onCellClick(empId, day.date)}
                         onMouseEnter={() => setHoveredCell({ employeeId: empId, dayDate: day.date })}
                         onMouseLeave={() => setHoveredCell(null)}

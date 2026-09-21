@@ -239,6 +239,11 @@
   background-color: var(--accent-light);
 }
 
+.day-col-header.selected.hovered,
+.day-col-header.selected.hover-highlight {
+  box-shadow: inset 0 -2px 0 0 var(--accent-border);
+}
+
 .employee-name-cell {
   position: sticky;
   left: 0;
@@ -264,6 +269,11 @@
   background-color: var(--accent-light);
 }
 
+.employee-name-cell.selected.hovered,
+.employee-name-cell.selected.hover-highlight {
+  box-shadow: inset -2px 0 0 0 var(--accent-border);
+}
+
 .work-hours-cell {
   text-align: center;
   cursor: pointer;
@@ -283,9 +293,18 @@
   outline-offset: -2px;
 }
 
+.work-hours-cell.editing.focused-cell {
+  outline-color: var(--accent-border);
+}
+
 .work-hours-cell.editing {
   background-color: var(--accent-light);
   box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+.work-hours-cell.editing.focused-cell,
+.work-hours-cell.editing.hover-highlight {
+  box-shadow: inset 0 0 0 2px var(--accent-border);
 }
 
 .employee-row.selected {
