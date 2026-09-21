@@ -8,6 +8,7 @@
     --border: #e5e4e7;
     --code-bg: #f4f3ec;
     --accent: #aa3bff;
+    --accent-rgb: 170, 59, 255;
     --accent-bg: rgba(170, 59, 255, 0.05);
     --accent-hover: rgba(170, 59, 255, 0.3);
     --accent-light: rgba(170, 59, 255, 0.1);
@@ -43,6 +44,7 @@
         --border: #2e303a;
         --code-bg: #1f2028;
         --accent: #c084fc;
+        --accent-rgb: 192, 132, 252;
         --accent-bg: rgba(192, 132, 252, 0.07);
         --accent-hover: rgba(192, 132, 252, 0.15);
         --accent-light: rgba(192, 132, 252, 0.1);

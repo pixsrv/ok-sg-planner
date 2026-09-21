@@ -1,5 +1,5 @@
 import {useState, useEffect, useCallback, useMemo} from 'react';
-import {formatDate, formatTime} from '../utils/formatters';
+import {formatDate} from '../utils/formatters';
 import { getISOWeek, getDateFromWeek, DAY_NAMES_SHORT } from '../utils/dateUtils';
 import { getUndoHistory, saveUndoHistory, pushAction } from '../utils/undoUtils';
 import Timeline from '../components/Timeline';
@@ -182,8 +182,50 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
 
   const [editingCell, setEditingCell] = useState(null); // { employeeId, dayDate }
   const [allowOverwrite, setAllowOverwrite] = useState(false);
-  const [overwritableCells, setOverwritableCells] = useState(new Set());
   const [workRecords, setWorkRecords] = useState({});
+
+  const getCellData = useCallback((employeeId, dayDate) => {
+    const [year, month, day] = dayDate.split('-');
+    const ymKey = `${year}-${month}`;
+    const dayNum = parseInt(day, 10).toString();
+    return workRecords[ymKey]?.[dayNum]?.[employeeId];
+  }, [workRecords]);
+
+  // Track overwritable cells
+  const overwritableCells = useMemo(() => {
+    if (!editingCell) {
+      return new Set();
+    }
+
+    const newOverwritable = new Set();
+    const { employeeId, dayDate } = editingCell;
+
+    if (employeeId === 'ALL' && dayDate !== 'ALL') {
+      // Column selection
+      Object.keys(employees).forEach(empId => {
+        const data = getCellData(empId, dayDate);
+        const isEmpty = data === undefined || data === null;
+        if (allowOverwrite || isEmpty) {
+          newOverwritable.add(`${empId}|${dayDate}`);
+        }
+      });
+    } else if (dayDate === 'ALL' && employeeId !== 'ALL') {
+      // Row selection
+      weekDays.forEach(day => {
+        const data = getCellData(employeeId, day.date);
+        const isEmpty = data === undefined || data === null;
+        if (allowOverwrite || isEmpty) {
+          newOverwritable.add(`${employeeId}|${day.date}`);
+        }
+      });
+    } else if (employeeId !== 'ALL' && dayDate !== 'ALL') {
+      // Single cell - always overwritable if selected
+      newOverwritable.add(`${employeeId}|${dayDate}`);
+    }
+
+    return newOverwritable;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editingCell, allowOverwrite, weekDays, employees]); // Removed getCellData to keep cells remembered during data changes
 
   const updateWorkRecord = useCallback((ymKey, dayNum, employeeId, newValueOrUpdater, shouldPushHistory = true, oldVal = null) => {
     setWorkRecords(prev => {
@@ -399,49 +441,6 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
       processClear(employeeId, dayDate);
     }
   };
-
-  const getCellData = useCallback((employeeId, dayDate) => {
-    const [year, month, day] = dayDate.split('-');
-    const ymKey = `${year}-${month}`;
-    const dayNum = parseInt(day, 10).toString();
-    return workRecords[ymKey]?.[dayNum]?.[employeeId];
-  }, [workRecords]);
-
-  // Track overwritable cells
-  useEffect(() => {
-    if (!editingCell) {
-      setOverwritableCells(new Set());
-      return;
-    }
-
-    const newOverwritable = new Set();
-    const { employeeId, dayDate } = editingCell;
-
-    if (employeeId === 'ALL' && dayDate !== 'ALL') {
-      // Column selection
-      Object.keys(employees).forEach(empId => {
-        const data = getCellData(empId, dayDate);
-        const isEmpty = data === undefined || data === null;
-        if (allowOverwrite || isEmpty) {
-          newOverwritable.add(`${empId}|${dayDate}`);
-        }
-      });
-    } else if (dayDate === 'ALL' && employeeId !== 'ALL') {
-      // Row selection
-      weekDays.forEach(day => {
-        const data = getCellData(employeeId, day.date);
-        const isEmpty = data === undefined || data === null;
-        if (allowOverwrite || isEmpty) {
-          newOverwritable.add(`${employeeId}|${day.date}`);
-        }
-      });
-    } else if (employeeId !== 'ALL' && dayDate !== 'ALL') {
-      // Single cell - always overwritable if selected
-      newOverwritable.add(`${employeeId}|${dayDate}`);
-    }
-
-    setOverwritableCells(newOverwritable);
-  }, [editingCell, allowOverwrite, weekDays, employees]); // Removed getCellData to keep cells remembered during data changes
 
   const hasSelectedData = useMemo(() => {
     if (!editingCell) return false;

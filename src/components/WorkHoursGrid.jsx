@@ -68,10 +68,6 @@ const WorkHoursGrid = ({
     return editingCell?.dayDate === dayDate && editingCell?.employeeId === 'ALL';
   };
 
-  const isCellHovered = (empId, dayDate) => {
-    if (!hoveredCell) return false;
-    return hoveredCell.employeeId === empId || hoveredCell.dayDate === dayDate;
-  };
 
   return (
     <div className="work-hours-grid-wrapper">
