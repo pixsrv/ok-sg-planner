@@ -16,7 +16,23 @@ import {
  * @property {string} position
  */
 
-const HoursTimeline = ({ value, onChange, onDone, onClear, onUndo, onRedo, onOpenSettings, onCoordinateDoubleClick, settings, employee, dayDate, weekRange }) => {
+const HoursTimeline = ({ 
+  value, 
+  onChange, 
+  onDone, 
+  onClear, 
+  onUndo, 
+  onRedo, 
+  onOpenSettings, 
+  onCoordinateDoubleClick, 
+  settings, 
+  employee, 
+  dayDate, 
+  weekRange,
+  allowOverwrite,
+  onAllowOverwriteChange,
+  hasSelectedData
+}) => {
   const employeeId = employee ? null : (dayDate && !employee ? 'ALL' : null); // This is a bit hacky, but WeekView passes null employee for 'ALL'
   const timeResolution = settings?.timeResolution || TIME_RESOLUTION_1MI;
 
@@ -122,30 +138,46 @@ const HoursTimeline = ({ value, onChange, onDone, onClear, onUndo, onRedo, onOpe
       onClick={handleContainerClick}
     >
       <div className="flex justify-between items-center mb-4 border-b border-[var(--border)] pb-2 relative">
-        <div className="flex items-center gap-2">
-          <button 
-            className="p-1.5 hover:bg-[var(--accent-bg)] rounded transition-colors text-[var(--text-muted)] hover:text-red-500 flex items-center gap-1 text-xs"
-            onClick={onClear}
-            title="Clear"
-          >
-            <Trash2 size={16} />
-            <span>Clear</span>
-          </button>
-          <div className="w-px h-4 bg-[var(--border)] mx-1" />
-          <button 
-            className="p-1.5 hover:bg-[var(--accent-bg)] rounded transition-colors text-[var(--text-muted)] hover:text-[var(--accent)]"
-            onClick={onUndo}
-            title="Undo"
-          >
-            <RotateCcw size={16} />
-          </button>
-          <button 
-            className="p-1.5 hover:bg-[var(--accent-bg)] rounded transition-colors text-[var(--text-muted)] hover:text-[var(--accent)]"
-            onClick={onRedo}
-            title="Redo"
-          >
-            <RotateCw size={16} />
-          </button>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <button 
+              className="p-1.5 hover:bg-[var(--accent-bg)] rounded transition-colors text-[var(--text-muted)] hover:text-red-500 flex items-center gap-1 text-xs"
+              onClick={onClear}
+              title="Clear"
+            >
+              <Trash2 size={16} />
+              <span>Clear</span>
+            </button>
+            <div className="w-px h-4 bg-[var(--border)] mx-1" />
+            <button 
+              className="p-1.5 hover:bg-[var(--accent-bg)] rounded transition-colors text-[var(--text-muted)] hover:text-[var(--accent)]"
+              onClick={onUndo}
+              title="Undo"
+            >
+              <RotateCcw size={16} />
+            </button>
+            <button 
+              className="p-1.5 hover:bg-[var(--accent-bg)] rounded transition-colors text-[var(--text-muted)] hover:text-[var(--accent)]"
+              onClick={onRedo}
+              title="Redo"
+            >
+              <RotateCw size={16} />
+            </button>
+          </div>
+
+          {(employeeId === 'ALL' || dayDate === 'ALL') && hasSelectedData && (
+            <div className="flex items-center gap-2 ml-2">
+              <label className="switch">
+                <input 
+                  type="checkbox" 
+                  checked={allowOverwrite} 
+                  onChange={(e) => onAllowOverwriteChange(e.target.checked)}
+                />
+                <span className="slider round"></span>
+              </label>
+              <span className="text-[10px] font-bold uppercase text-[var(--text-muted)]">Allow overwriting</span>
+            </div>
+          )}
         </div>
 
         <div 

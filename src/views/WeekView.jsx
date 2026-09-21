@@ -181,6 +181,8 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
   };
 
   const [editingCell, setEditingCell] = useState(null); // { employeeId, dayDate }
+  const [allowOverwrite, setAllowOverwrite] = useState(false);
+  const [overwritableCells, setOverwritableCells] = useState(new Set());
   const [workRecords, setWorkRecords] = useState({});
 
   const updateWorkRecord = useCallback((ymKey, dayNum, employeeId, newValueOrUpdater, shouldPushHistory = true, oldVal = null) => {
@@ -333,6 +335,10 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
     };
 
     const processUpdate = (empId, date) => {
+      if (!overwritableCells.has(`${empId}|${date}`)) {
+        return;
+      }
+
       const [year, month, day] = date.split('-');
       const ymKey = `${year}-${month}`;
       const dayNum = parseInt(day, 10).toString();
@@ -370,9 +376,14 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
 
   const handleClearCell = (employeeId, dayDate) => {
     const processClear = (empId, date) => {
+      if (!overwritableCells.has(`${empId}|${date}`)) {
+        return;
+      }
+
       const [year, month, day] = date.split('-');
       const ymKey = `${year}-${month}`;
       const dayNum = parseInt(day, 10).toString();
+
       updateWorkRecord(ymKey, dayNum, empId, null);
     };
 
@@ -389,12 +400,96 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
     }
   };
 
-  const getCellData = (employeeId, dayDate) => {
+  const getCellData = useCallback((employeeId, dayDate) => {
     const [year, month, day] = dayDate.split('-');
     const ymKey = `${year}-${month}`;
     const dayNum = parseInt(day, 10).toString();
     return workRecords[ymKey]?.[dayNum]?.[employeeId];
-  };
+  }, [workRecords]);
+
+  // Track overwritable cells
+  useEffect(() => {
+    if (!editingCell) {
+      setOverwritableCells(new Set());
+      return;
+    }
+
+    const newOverwritable = new Set();
+    const { employeeId, dayDate } = editingCell;
+
+    if (employeeId === 'ALL' && dayDate !== 'ALL') {
+      // Column selection
+      Object.keys(employees).forEach(empId => {
+        const data = getCellData(empId, dayDate);
+        const isEmpty = data === undefined || data === null;
+        if (allowOverwrite || isEmpty) {
+          newOverwritable.add(`${empId}|${dayDate}`);
+        }
+      });
+    } else if (dayDate === 'ALL' && employeeId !== 'ALL') {
+      // Row selection
+      weekDays.forEach(day => {
+        const data = getCellData(employeeId, day.date);
+        const isEmpty = data === undefined || data === null;
+        if (allowOverwrite || isEmpty) {
+          newOverwritable.add(`${employeeId}|${day.date}`);
+        }
+      });
+    } else if (employeeId !== 'ALL' && dayDate !== 'ALL') {
+      // Single cell - always overwritable if selected
+      newOverwritable.add(`${employeeId}|${dayDate}`);
+    }
+
+    setOverwritableCells(newOverwritable);
+  }, [editingCell, allowOverwrite, weekDays, employees]); // Removed getCellData to keep cells remembered during data changes
+
+  const hasSelectedData = useMemo(() => {
+    if (!editingCell) return false;
+    
+    if (editingCell.employeeId === 'ALL' && editingCell.dayDate !== 'ALL') {
+      return Object.keys(employees).some(empId => {
+        const data = getCellData(empId, editingCell.dayDate);
+        return data !== undefined && data !== null;
+      });
+    } else if (editingCell.dayDate === 'ALL' && editingCell.employeeId !== 'ALL') {
+      return weekDays.some(day => {
+        const data = getCellData(editingCell.employeeId, day.date);
+        return data !== undefined && data !== null;
+      });
+    }
+    return false;
+  }, [editingCell, employees, weekDays, getCellData]);
+
+  const commonSelectedValue = useMemo(() => {
+    if (!editingCell || overwritableCells.size === 0) return null;
+
+    let commonStart = undefined;
+    let commonEnd = undefined;
+    let first = true;
+    let mismatch = false;
+
+    for (const coord of overwritableCells) {
+      const [empId, date] = coord.split('|');
+      const data = getCellData(empId, date);
+      
+      const start = data?.[0] || '';
+      const end = data?.[1] || '';
+
+      if (first) {
+        commonStart = start;
+        commonEnd = end;
+        first = false;
+      } else {
+        if (start !== commonStart || end !== commonEnd) {
+          mismatch = true;
+          break;
+        }
+      }
+    }
+
+    if (mismatch || first) return null;
+    return [commonStart, commonEnd];
+  }, [editingCell, overwritableCells, getCellData]);
 
   useEffect(() => {
     const loadRecords = () => {
@@ -492,9 +587,7 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
       <div className={`hours-timeline-panel ${editingCell ? 'visible' : ''}`}>
         {editingCell && (
           <HoursTimeline
-            value={editingCell.employeeId === 'ALL' || editingCell.dayDate === 'ALL' 
-              ? null 
-              : getCellData(editingCell.employeeId, editingCell.dayDate)}
+            value={commonSelectedValue}
             onChange={(type, value) => handleTimeChange(editingCell.employeeId, editingCell.dayDate, type, value)}
             onDone={() => setEditingCell(null)}
             onClear={() => handleClearCell(editingCell.employeeId, editingCell.dayDate)}
@@ -507,6 +600,9 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
             employee={editingCell.employeeId === 'ALL' ? null : employees[editingCell.employeeId]}
             dayDate={editingCell.dayDate}
             weekRange={weekDays.length > 0 ? `${weekDays[0].date} - ${weekDays[weekDays.length - 1].date}` : ''}
+            allowOverwrite={allowOverwrite}
+            onAllowOverwriteChange={setAllowOverwrite}
+            hasSelectedData={hasSelectedData}
           />
         )}
       </div>

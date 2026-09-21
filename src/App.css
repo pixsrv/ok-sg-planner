@@ -593,9 +593,11 @@ input:checked + .slider:before {
   transform: translateX(22px);
 }
 
-input:disabled + .slider {
-  opacity: 0.5;
-  cursor: not-allowed;
+.slider.round {
+  border-radius: 22px;
+}
+.slider.round:before {
+  border-radius: 50%;
 }
 
 .slider.round {
