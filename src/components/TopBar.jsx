@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Settings, MoreVertical, Layout, Upload } from 'lucide-react';
 import { parseJsonFile } from '../utils/fileUtils';
+import { VIEW_STAFF, VIEW_MONTH, VIEW_WEEK } from '../constants/views';
 
 const TopBar = ({ onSettingsClick, onDataLoaded, currentView }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -57,9 +58,9 @@ const TopBar = ({ onSettingsClick, onDataLoaded, currentView }) => {
 
   const getHumanReadableName = (view) => {
     switch (view) {
-      case 'Staff': return 'Staff';
-      case 'Month': return 'Months';
-      case 'Week': return 'Weeks';
+      case VIEW_STAFF: return 'Staff';
+      case VIEW_MONTH: return 'Months';
+      case VIEW_WEEK: return 'Weeks';
       default: return view;
     }
   };

@@ -9,6 +9,7 @@ import EmployeeOmnibox from '../components/EmployeeOmnibox';
 import HoursTimeline from '../components/HoursTimeline';
 import WorkHoursGrid from '../components/WorkHoursGrid.jsx';
 import { filterEmployees } from '../utils/employeeFilter';
+import { VIEW_SETTINGS_DATE_TIME } from '../constants/views';
 
 /**
  * @typedef {Object} Term
@@ -207,7 +208,7 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
             onCancel={handleCancelEdit}
             onUndo={handleUndo}
             onRedo={handleRedo}
-            onOpenSettings={() => onOpenSettingsView?.('DateTime')}
+            onOpenSettings={() => onOpenSettingsView?.(VIEW_SETTINGS_DATE_TIME)}
             onCoordinateDoubleClick={handleCoordinateDoubleClick}
             settings={settings}
             employee={editingCell.employeeId === 'ALL' ? null : employees[editingCell.employeeId]}

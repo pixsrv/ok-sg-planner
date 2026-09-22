@@ -1,3 +1,9 @@
+import {
+  VIEW_STAFF,
+  VIEW_MONTH,
+  VIEW_WEEK
+} from './views'
+
 export const DATE_FORMAT_YYYY_MM_DD_ISO = 'YYYY-MM-DD';
 export const DATE_FORMAT_DD_MM_YYYY_DASH = 'DD-MM-YYYY';
 export const DATE_FORMAT_MM_DD_YYYY_SLASH = 'MM/DD/YYYY';
@@ -115,8 +121,8 @@ export const DEFAULT_SETTINGS = {
   startOnMode: START_ON_MODE_RECENT,
   fixedStartDate: new Date().toISOString().split('T')[0],
   sidebar: [
-    { id: 'Staff', name: 'Staff', visible: true, default: true },
-    { id: 'Month', name: 'Month', visible: true, default: false },
-    { id: 'Week', name: 'Week', visible: true, default: false },
+    { id: VIEW_STAFF, name: 'Staff', visible: true, default: true },
+    { id: VIEW_MONTH, name: 'Month', visible: true, default: false },
+    { id: VIEW_WEEK, name: 'Week', visible: true, default: false },
   ]
 };

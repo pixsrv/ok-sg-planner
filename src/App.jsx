@@ -15,12 +15,23 @@ import {
   START_ON_MODE_RECENT,
   DEFAULT_SETTINGS
 } from './constants/settings'
+import {
+  VIEW_STAFF,
+  VIEW_MONTH,
+  VIEW_WEEK,
+  VIEW_SETTINGS_SIDEBAR,
+  VIEW_SETTINGS_OMNIBOX,
+  VIEW_SETTINGS_PROFILE,
+  VIEW_SETTINGS_DATE_TIME,
+  VIEW_SETTINGS_NOTIFICATIONS,
+  VIEW_SETTINGS_SECURITY
+} from './constants/views'
 import { getAllItems, saveItem, saveItems, STORES, getSessionItem, setSessionItem } from './utils/db'
 
 function App() {
-  const [currentView, setCurrentView] = useState('Staff')
+  const [currentView, setCurrentView] = useState(VIEW_STAFF)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  const [settingsView, setSettingsView] = useState('Sidebar')
+  const [settingsView, setSettingsView] = useState(VIEW_SETTINGS_SIDEBAR)
   const [appSettings, setAppSettings] = useState(DEFAULT_SETTINGS)
   const [draftSettings, setDraftSettings] = useState(DEFAULT_SETTINGS)
   
@@ -161,11 +172,11 @@ function App() {
 
   const renderView = () => {
     switch (currentView) {
-      case 'Staff':
+      case VIEW_STAFF:
         return <StaffView employees={employees} settings={appSettings} />
-      case 'Month':
+      case VIEW_MONTH:
         return <MonthView months={months} />
-      case 'Week':
+      case VIEW_WEEK:
         return (
           <WeekView 
             employees={employees} 
@@ -184,17 +195,17 @@ function App() {
 
   const renderSettingsView = () => {
     switch (settingsView) {
-      case 'Sidebar':
+      case VIEW_SETTINGS_SIDEBAR:
         return <SidebarView settings={draftSettings} onSettingChange={handleSettingChange} />
-      case 'Omnibox':
+      case VIEW_SETTINGS_OMNIBOX:
         return <OmniboxView settings={draftSettings} onSettingChange={handleSettingChange} />
-      case 'Profile':
+      case VIEW_SETTINGS_PROFILE:
         return <ProfileView />
-      case 'DateTime':
+      case VIEW_SETTINGS_DATE_TIME:
         return <DateTimeView settings={draftSettings} onSettingChange={handleSettingChange} />
-      case 'Notifications':
+      case VIEW_SETTINGS_NOTIFICATIONS:
         return <NotificationsView />
-      case 'Security':
+      case VIEW_SETTINGS_SECURITY:
         return <SecurityView />
       default:
         return <ProfileView />

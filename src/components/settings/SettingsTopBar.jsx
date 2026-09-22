@@ -1,10 +1,11 @@
 import { Settings } from 'lucide-react';
+import { VIEW_SETTINGS_DATE_TIME, VIEW_SETTINGS_OMNIBOX } from '../../constants/views';
 
 const SettingsTopBar = ({ onSave, onCancel, currentView }) => {
   const getHumanReadableName = (view) => {
     switch (view) {
-      case 'DateTime': return 'Date & Time';
-      case 'Omnibox': return 'Omnibox';
+      case VIEW_SETTINGS_DATE_TIME: return 'Date & Time';
+      case VIEW_SETTINGS_OMNIBOX: return 'Omnibox';
       default: return view;
     }
   };

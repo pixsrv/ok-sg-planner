@@ -1,16 +1,17 @@
 import { Users, Calendar, Columns, ChevronLeft, ChevronRight } from 'lucide-react';
+import { VIEW_STAFF, VIEW_MONTH, VIEW_WEEK } from '../constants/views';
 
 const SideBar = ({ currentView, onViewChange, sidebarSettings, isCollapsed, onToggle }) => {
   const iconMap = {
-    'Staff': <Users size={20} />,
-    'Month': <Calendar size={20} />,
-    'Week': <Columns size={20} />,
+    [VIEW_STAFF]: <Users size={20} />,
+    [VIEW_MONTH]: <Calendar size={20} />,
+    [VIEW_WEEK]: <Columns size={20} />,
   };
 
   const items = (sidebarSettings || [
-    { id: 'Staff', name: 'Staff', visible: true, default: true },
-    { id: 'Month', name: 'Month', visible: true, default: false },
-    { id: 'Week', name: 'Week', visible: true, default: false },
+    { id: VIEW_STAFF, name: 'Staff', visible: true, default: true },
+    { id: VIEW_MONTH, name: 'Month', visible: true, default: false },
+    { id: VIEW_WEEK, name: 'Week', visible: true, default: false },
   ])
     .filter(item => item.visible)
     .map(item => ({
