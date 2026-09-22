@@ -66,13 +66,13 @@ const DateTimeView = ({ settings, onSettingChange }) => {
           ))}
         </div>
         {currentStartOnMode === START_ON_MODE_FIXED && (
-          <div className="flex flex-col gap-2 pl-6 border-l-2 border-[var(--accent)]">
+          <div className="flex flex-col gap-2 pl-6 border-l-2 border-[var(--selection-g1)]">
             <span className="text-xs font-semibold uppercase text-[var(--text-muted)]">Select Fixed Date</span>
             <input 
               type="date" 
               value={currentFixedStartDate}
               onChange={(e) => onSettingChange('fixedStartDate', e.target.value)}
-              className="w-48 bg-[var(--bg)] border border-[var(--border)] rounded px-2 py-1 text-sm text-[var(--text)] focus:ring-1 focus:ring-[var(--accent)] outline-none"
+              className="w-48 bg-[var(--bg)] border border-[var(--border)] rounded px-2 py-1 text-sm text-[var(--text)] focus:ring-1 focus:ring-[var(--selection-g2)] outline-none"
             />
           </div>
         )}
@@ -163,7 +163,7 @@ const DateTimeView = ({ settings, onSettingChange }) => {
               type="time" 
               value={currentWorkDayLength}
               onChange={(e) => onSettingChange('workDayLength', e.target.value)}
-              className="w-32 bg-[var(--bg)] border border-[var(--border)] rounded px-2 py-1 text-sm text-[var(--text)] focus:ring-1 focus:ring-[var(--accent)] outline-none"
+              className="w-32 bg-[var(--bg)] border border-[var(--border)] rounded px-2 py-1 text-sm text-[var(--text)] focus:ring-1 focus:ring-[var(--selection-g2)] outline-none"
             />
           </div>
 

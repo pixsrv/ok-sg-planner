@@ -40,7 +40,7 @@ const OmniboxDropdownItem = React.memo(({ item, index, isSelected, onSelect, onM
   return (
     <div
       className={`px-4 py-2 cursor-pointer text-sm flex items-center gap-3 ${
-        isSelected ? 'bg-[var(--accent-bg)]' : 'hover:bg-[var(--accent-bg)]'
+        isSelected ? 'bg-[var(--selection-bg)]' : 'hover:bg-[var(--selection-bg-dimmed)]'
       }`}
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}

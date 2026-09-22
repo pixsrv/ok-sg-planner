@@ -252,7 +252,7 @@ const Timeline = ({
             return (
               <div
                 key={`m-${month.index}-${month.year}`}
-                className={`absolute top-0 h-[40px] flex items-center justify-center cursor-pointer select-none hover:bg-[var(--accent-bg)] hover:text-[var(--accent)] bg-[var(--code-bg)] border-b border-[var(--border)] transition-colors ${month.isAdditional ? 'timeline-additional' : ''}`}
+                className={`absolute top-0 h-[40px] flex items-center justify-center cursor-pointer select-none hover:bg-[var(--selection-bg-dimmed)] hover:text-[var(--selection-g1)] bg-[var(--code-bg)] border-b border-[var(--border)] transition-colors ${month.isAdditional ? 'timeline-additional' : ''}`}
                 style={{
                   left: `${month.leftPercent}%`,
                   width: `${month.widthPercent}%`,
@@ -279,7 +279,7 @@ const Timeline = ({
             return (
               <div
                 key={`w-${week.num}-${week.year}-${idx}`}
-                className={`absolute top-[40px] h-[40px] flex items-center justify-center cursor-pointer select-none hover:bg-[var(--accent-bg)] hover:text-[var(--accent)] bg-[var(--code-bg)] transition-colors ${isSelected ? 'timeline-week-selected' : ''} ${week.isAdditional ? 'timeline-additional' : ''}`}
+                className={`absolute top-[40px] h-[40px] flex items-center justify-center cursor-pointer select-none hover:bg-[var(--selection-bg-dimmed)] hover:text-[var(--selection-g1)] bg-[var(--code-bg)] transition-colors ${isSelected ? 'timeline-week-selected' : ''} ${week.isAdditional ? 'timeline-additional' : ''}`}
                 style={{
                   left: `${week.leftPercent}%`,
                   width: `${week.widthPercent}%`,
@@ -289,7 +289,7 @@ const Timeline = ({
                 onMouseLeave={() => setHoveredWeek(null)}
               >
                 <span
-                  className={`text-xs px-1 transition-colors ${isSelected ? 'text-[var(--accent)]' : 'text-[var(--text)]'} ${idx === weeks.length - 1 ? '' : 'truncate'}`}>{week.num}</span>
+                  className={`text-xs px-1 transition-colors ${isSelected ? 'text-[var(--selection-g1)]' : 'text-[var(--text)]'} ${idx === weeks.length - 1 ? '' : 'truncate'}`}>{week.num}</span>
                 {idx < weeks.length - 1 && (
                   <div className="absolute right-0 bottom-0 w-[1px] h-[40px] bg-[var(--border)] z-20"/>
                 )}

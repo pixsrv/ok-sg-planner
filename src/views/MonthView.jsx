@@ -18,7 +18,7 @@ const MonthView = ({ months = [] }) => {
               <h3 className="text-lg font-semibold text-[var(--text-h)] mb-2">
                 {month.name}
               </h3>
-              <pre className="bg-[var(--accent-bg)] p-3 rounded text-xs overflow-auto max-h-40">
+              <pre className="bg-[var(--selection-bg-dimmed)] p-3 rounded text-xs overflow-auto max-h-40">
                 {JSON.stringify(month.data, null, 2)}
               </pre>
             </div>

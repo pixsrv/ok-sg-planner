@@ -11,7 +11,7 @@ const DateDropdownItem = React.memo(({ result, index, isSelected, onSelect, onMo
   }, [onMouseEnter, index]);
 
   const className = `px-4 py-2 cursor-pointer text-sm flex items-center gap-3 ${
-    isSelected ? 'bg-[var(--accent-bg)]' : 'hover:bg-[var(--accent-bg)]'
+    isSelected ? 'bg-[var(--selection-bg)]' : 'hover:bg-[var(--selection-bg-dimmed)]'
   }`;
 
   if (result.type === 'clear-history') {

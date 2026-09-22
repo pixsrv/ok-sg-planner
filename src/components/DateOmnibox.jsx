@@ -181,7 +181,7 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => 
         <input
           type="text"
           placeholder="Jump to date, week or month..."
-          className="pl-10 pr-10 py-2 bg-[var(--bg)] border border-[var(--border)] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] w-64"
+          className="pl-10 pr-10 py-2 bg-[var(--bg)] border border-[var(--border)] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--selection-g2)] w-64"
           value={query}
           onChange={(e) => handleSearch(e.target.value)}
           onFocus={() => handleSearch(query)}
@@ -222,10 +222,10 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => 
         <div className="flex items-center border border-[var(--border)] rounded-md overflow-hidden">
           <button
             onClick={handleTodayClick}
-            className="p-2 bg-[var(--bg)] text-[var(--text)] hover:bg-[var(--accent-bg)] transition-colors"
+            className="p-2 bg-[var(--bg)] text-[var(--text)] hover:bg-[var(--selection-bg-dimmed)] transition-colors"
             title="Go to today"
           >
-            <ArrowDownToDot className="w-4 h-4 text-[var(--accent)]" />
+            <ArrowDownToDot className="w-4 h-4 text-[var(--selection-g1)]" />
           </button>
         </div>
       )}

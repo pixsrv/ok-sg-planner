@@ -153,7 +153,7 @@ const EmployeeOmnibox = ({value, onChange, employees, settings, placeholder = "S
         <input
           type="text"
           placeholder={placeholder}
-          className="pl-10 pr-10 py-2 bg-[var(--bg)] border border-[var(--border)] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--accent)] w-64"
+          className="pl-10 pr-10 py-2 bg-[var(--bg)] border border-[var(--border)] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[var(--selection-g2)] w-64"
           value={localQuery}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
@@ -194,7 +194,7 @@ const EmployeeOmnibox = ({value, onChange, employees, settings, placeholder = "S
       {settings?.showClearFilterButton !== false && (
         <button
           onClick={handleClear}
-          className="p-2 bg-[var(--bg)] border border-[var(--border)] rounded-md text-[var(--text-light)] hover:text-[var(--text)] hover:bg-[var(--accent-bg)] hover:border-[var(--accent-border)] transition-colors flex items-center justify-center"
+          className="p-2 bg-[var(--bg)] border border-[var(--border)] rounded-md text-[var(--text-light)] hover:text-[var(--text)] hover:bg-[var(--selection-bg-dimmed)] hover:border-[var(--selection-g2)] transition-colors flex items-center justify-center"
           title="Clear employee filter"
         >
           <FilterX className="w-4 h-4"/>

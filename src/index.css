@@ -133,8 +133,8 @@ body {
 }
 
 .toggle-button:hover {
-    background-color: var(--accent-bg);
-    color: var(--accent);
+    background-color: var(--selection-bg-dimmed);
+    color: var(--selection-g1);
 }
 
 .side-bar nav ul {
@@ -159,14 +159,14 @@ body {
 }
 
 .side-bar nav li:hover {
-    background-color: var(--accent-bg);
-    color: var(--accent);
+    background-color: var(--selection-bg-dimmed);
+    color: var(--selection-g1);
 }
 
 .side-bar nav li.active {
-    background-color: var(--accent-bg);
-    color: var(--accent);
-    border-right: 3px solid var(--accent);
+    background-color: var(--selection-bg);
+    color: var(--selection-g1);
+    border-right: 3px solid var(--selection-g1);
 }
 
 .content-area {

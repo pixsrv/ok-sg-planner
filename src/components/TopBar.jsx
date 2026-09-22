@@ -96,7 +96,7 @@ const TopBar = ({ onSettingsClick, onDataLoaded, currentView }) => {
           {isDropdownOpen && (
             <div className="absolute right-0 mt-2 w-48 bg-[var(--bg)] border border-[var(--border)] rounded-md shadow-[var(--shadow)] z-50 py-1">
               <button
-                className="w-full text-left px-4 py-2 text-sm text-[var(--text)] hover:bg-[var(--accent-bg)] hover:text-[var(--accent)] flex items-center gap-2 transition-colors border-none bg-none cursor-pointer"
+                className="w-full text-left px-4 py-2 text-sm text-[var(--text)] hover:bg-[var(--selection-bg-dimmed)] hover:text-[var(--selection-g1)] flex items-center gap-2 transition-colors border-none bg-none cursor-pointer"
                 onClick={() => {
                   fileInputRef.current?.click();
                 }}

@@ -180,7 +180,7 @@ const HoursTimeline = ({
         </div>
 
         <div 
-          className="absolute left-1/2 -translate-x-1/2 text-sm font-medium text-[var(--text)] px-3 py-1 bg-[var(--accent-bg)] rounded border border-[var(--border)] whitespace-nowrap cursor-pointer select-none"
+          className="absolute left-1/2 -translate-x-1/2 text-sm font-medium text-[var(--selection-g1)] px-3 py-1 bg-[var(--selection-bg)] rounded border border-[var(--selection-g2)] whitespace-nowrap cursor-pointer select-none"
           onDoubleClick={onCoordinateDoubleClick}
           title="Double click to go to this cell"
         >
@@ -212,7 +212,7 @@ const HoursTimeline = ({
                 <div className="text-[10px] font-bold uppercase text-[var(--text-muted)] leading-tight">
                   {type === 'start' ? 'Start Time' : 'End Time'}
                 </div>
-                <div className="text-sm font-mono text-[var(--accent)] font-bold">
+                <div className="text-sm font-mono text-[var(--selection-g1)] font-bold">
                   {type === 'start' ? startTime || '--:--' : endTime || '--:--'}
                 </div>
               </div>

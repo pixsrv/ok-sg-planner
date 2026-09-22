@@ -11,8 +11,8 @@ const IconButton = ({
 }) => {
   const baseClasses = "p-1.5 rounded transition-colors flex items-center gap-1";
   const variants = {
-    default: "hover:bg-[var(--accent-bg)] text-[var(--text-muted)] hover:text-[var(--accent)]",
-    danger: "hover:bg-[var(--accent-bg)] text-[var(--text-muted)] hover:text-red-500",
+    default: "hover:bg-[var(--selection-bg-dimmed)] text-[var(--text-muted)] hover:text-[var(--selection-g1)]",
+    danger: "hover:bg-[var(--selection-bg-dimmed)] text-[var(--text-muted)] hover:text-red-500",
   };
 
   const variantClass = variants[variant] || variants.default;

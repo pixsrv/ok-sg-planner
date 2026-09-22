@@ -48,7 +48,7 @@ const StaffView = ({employees = {}, settings}) => {
             </thead>
             <tbody className="divide-y divide-[var(--border)]">
             {filteredEmployees.map(([id, data]) => (
-              <tr key={id} className="hover:bg-[var(--accent-bg)] transition-colors align-top">
+              <tr key={id} className="hover:bg-[var(--selection-bg-dimmed)] transition-colors align-top">
                 <td className="px-6 py-4 font-mono text-xs">{id}</td>
                 <td className="px-6 py-4">{data.firstName}</td>
                 <td className="px-6 py-4">{data.lastName}</td>
