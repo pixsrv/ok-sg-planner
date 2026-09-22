@@ -1,24 +1,24 @@
-import { Users, Calendar, Columns, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { VIEW_STAFF, VIEW_MONTH, VIEW_WEEK } from '../constants/views';
+import { getViewInfo } from '../utils/viewUtils';
 
 const SideBar = ({ currentView, onViewChange, sidebarSettings, isCollapsed, onToggle }) => {
-  const iconMap = {
-    [VIEW_STAFF]: <Users size={20} />,
-    [VIEW_MONTH]: <Calendar size={20} />,
-    [VIEW_WEEK]: <Columns size={20} />,
-  };
 
   const items = (sidebarSettings || [
-    { id: VIEW_STAFF, name: 'Staff', visible: true, default: true },
-    { id: VIEW_MONTH, name: 'Month', visible: true, default: false },
-    { id: VIEW_WEEK, name: 'Week', visible: true, default: false },
+    { id: VIEW_STAFF, visible: true, default: true },
+    { id: VIEW_MONTH, visible: true, default: false },
+    { id: VIEW_WEEK, visible: true, default: false },
   ])
     .filter(item => item.visible)
-    .map(item => ({
-      id: item.id,
-      icon: iconMap[item.id],
-      text: item.name
-    }));
+    .map(item => {
+      const info = getViewInfo(item.id);
+      const Icon = info.icon;
+      return {
+        id: item.id,
+        icon: Icon ? <Icon size={20} /> : null,
+        text: info.name
+      };
+    });
 
   return (
     <aside className={`side-bar ${isCollapsed ? 'collapsed' : ''}`}>

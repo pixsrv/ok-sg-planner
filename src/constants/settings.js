@@ -121,8 +121,8 @@ export const DEFAULT_SETTINGS = {
   startOnMode: START_ON_MODE_RECENT,
   fixedStartDate: new Date().toISOString().split('T')[0],
   sidebar: [
-    { id: VIEW_STAFF, name: 'Staff', visible: true, default: true },
-    { id: VIEW_MONTH, name: 'Month', visible: true, default: false },
-    { id: VIEW_WEEK, name: 'Week', visible: true, default: false },
+    { id: VIEW_STAFF, visible: true, default: true },
+    { id: VIEW_MONTH, visible: true, default: false },
+    { id: VIEW_WEEK, visible: true, default: false },
   ]
 };

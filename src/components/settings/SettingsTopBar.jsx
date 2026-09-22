@@ -1,14 +1,7 @@
 import { Settings } from 'lucide-react';
-import { VIEW_SETTINGS_DATE_TIME, VIEW_SETTINGS_OMNIBOX } from '../../constants/views';
+import { getViewInfo } from '../../utils/viewUtils';
 
 const SettingsTopBar = ({ onSave, onCancel, currentView }) => {
-  const getHumanReadableName = (view) => {
-    switch (view) {
-      case VIEW_SETTINGS_DATE_TIME: return 'Date & Time';
-      case VIEW_SETTINGS_OMNIBOX: return 'Omnibox';
-      default: return view;
-    }
-  };
 
   return (
     <header className="flex justify-between items-center px-4 h-[60px] border-b border-[var(--border)] bg-[var(--bg)]">
@@ -21,7 +14,7 @@ const SettingsTopBar = ({ onSave, onCancel, currentView }) => {
           {currentView && (
             <>
               <span className="mx-2 text-[var(--text-light)] font-normal">&gt;</span>
-              <span className="text-[var(--text)] font-normal">{getHumanReadableName(currentView)}</span>
+              <span className="text-[var(--text)] font-normal">{getViewInfo(currentView).name}</span>
             </>
           )}
         </div>

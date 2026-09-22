@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Settings, MoreVertical, Layout, Upload } from 'lucide-react';
 import { parseJsonFile } from '../utils/fileUtils';
-import { VIEW_STAFF, VIEW_MONTH, VIEW_WEEK } from '../constants/views';
+import { getViewInfo } from '../utils/viewUtils';
 
 const TopBar = ({ onSettingsClick, onDataLoaded, currentView }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -56,14 +56,6 @@ const TopBar = ({ onSettingsClick, onDataLoaded, currentView }) => {
     event.target.value = '';
   };
 
-  const getHumanReadableName = (view) => {
-    switch (view) {
-      case VIEW_STAFF: return 'Staff';
-      case VIEW_MONTH: return 'Months';
-      case VIEW_WEEK: return 'Weeks';
-      default: return view;
-    }
-  };
 
   return (
     <header className="flex justify-between items-center px-4 h-[60px] border-b border-[var(--border)] bg-[var(--bg)] relative">
@@ -82,7 +74,7 @@ const TopBar = ({ onSettingsClick, onDataLoaded, currentView }) => {
           {currentView && (
             <>
               <span className="mx-2 text-[var(--text-light)] font-normal">&gt;</span>
-              <span className="text-[var(--text)] font-normal">{getHumanReadableName(currentView)}</span>
+              <span className="text-[var(--text)] font-normal">{getViewInfo(currentView).name}</span>
             </>
           )}
         </div>
