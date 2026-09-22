@@ -1,5 +1,7 @@
 import { useMemo } from 'react';
 import { Settings, X, RotateCcw, RotateCw, Trash2 } from 'lucide-react';
+import IconButton from './IconButton';
+import TimeRibbon from './TimeRibbon';
 import {
   AUTO_SET_MODE_NONE,
   AUTO_SET_MODE_FIXED,
@@ -140,29 +142,26 @@ const HoursTimeline = ({
       <div className="flex justify-between items-center mb-4 border-b border-[var(--border)] pb-2 relative">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <button 
-              className="p-1.5 hover:bg-[var(--accent-bg)] rounded transition-colors text-[var(--text-muted)] hover:text-red-500 flex items-center gap-1 text-xs"
+            <IconButton 
+              icon={Trash2}
               onClick={onClear}
               title="Clear"
+              variant="danger"
+              className="text-xs"
             >
-              <Trash2 size={16} />
-              <span>Clear</span>
-            </button>
+              Clear
+            </IconButton>
             <div className="w-px h-4 bg-[var(--border)] mx-1" />
-            <button 
-              className="p-1.5 hover:bg-[var(--accent-bg)] rounded transition-colors text-[var(--text-muted)] hover:text-[var(--accent)]"
+            <IconButton 
+              icon={RotateCcw}
               onClick={onUndo}
               title="Undo"
-            >
-              <RotateCcw size={16} />
-            </button>
-            <button 
-              className="p-1.5 hover:bg-[var(--accent-bg)] rounded transition-colors text-[var(--text-muted)] hover:text-[var(--accent)]"
+            />
+            <IconButton 
+              icon={RotateCw}
               onClick={onRedo}
               title="Redo"
-            >
-              <RotateCw size={16} />
-            </button>
+            />
           </div>
 
           {(employeeId === 'ALL' || dayDate === 'ALL') && hasSelectedData && (
@@ -189,20 +188,17 @@ const HoursTimeline = ({
         </div>
 
         <div className="flex items-center gap-2">
-          <button 
-            className="p-1.5 hover:bg-[var(--accent-bg)] rounded transition-colors text-[var(--text-muted)] hover:text-[var(--accent)]"
+          <IconButton 
+            icon={Settings}
             onClick={onOpenSettings}
             title="Settings"
-          >
-            <Settings size={18} />
-          </button>
-          <button 
-            className="p-1.5 hover:bg-[var(--accent-bg)] rounded transition-colors text-[var(--text-muted)] hover:text-red-500"
+          />
+          <IconButton 
+            icon={X}
             onClick={onDone}
             title="Close"
-          >
-            <X size={20} />
-          </button>
+            variant="danger"
+          />
         </div>
       </div>
 
@@ -224,36 +220,18 @@ const HoursTimeline = ({
               <div className="flex-grow overflow-hidden">
                 <div className="overflow-x-auto pb-2 scrollbar-thin">
                   <div className="flex flex-col gap-1">
-                    {/* Hours Ribbon */}
-                    <div className="flex gap-1">
-                      {hours.map(h => (
-                        <div
-                          key={h}
-                          onClick={() => handleTimeClick(type, h, currentTime?.m || 0)}
-                          className={`flex-shrink-0 w-8 h-8 flex items-center justify-center text-xs border rounded cursor-pointer transition-colors
-                            ${currentTime?.h === h 
-                              ? 'bg-[var(--accent)] text-white border-[var(--accent)]' 
-                              : 'bg-[var(--bg)] border-[var(--border)] hover:bg-[var(--accent-bg)] hover:text-[var(--accent)]'}`}
-                        >
-                          {h}
-                        </div>
-                      ))}
-                    </div>
-                    {/* Minutes Ribbon */}
-                    <div className="flex gap-1">
-                      {minutes.map(m => (
-                        <div
-                          key={m}
-                          onClick={() => handleTimeClick(type, currentH, m)}
-                          className={`flex-shrink-0 w-8 h-6 flex items-center justify-center text-[10px] border rounded cursor-pointer transition-colors
-                            ${currentTime?.m === m 
-                              ? 'bg-[var(--accent-light)] text-[var(--accent)] border-[var(--accent)]' 
-                              : 'bg-[var(--bg)] border-[var(--border)] hover:bg-[var(--accent-bg)] hover:text-[var(--accent)]'}`}
-                        >
-                          {String(m).padStart(2, '0')}
-                        </div>
-                      ))}
-                    </div>
+                    <TimeRibbon 
+                      items={hours}
+                      activeValue={currentTime?.h}
+                      onItemClick={(h) => handleTimeClick(type, h, currentTime?.m || 0)}
+                      type="hours"
+                    />
+                    <TimeRibbon 
+                      items={minutes}
+                      activeValue={currentTime?.m}
+                      onItemClick={(m) => handleTimeClick(type, currentH, m)}
+                      type="minutes"
+                    />
                   </div>
                 </div>
               </div>

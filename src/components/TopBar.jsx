@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Settings, MoreVertical, Layout, Upload } from 'lucide-react';
+import IconButton from './IconButton';
 import { parseJsonFile } from '../utils/fileUtils';
 import { getViewInfo } from '../utils/viewUtils';
 
@@ -80,19 +81,17 @@ const TopBar = ({ onSettingsClick, onDataLoaded, currentView }) => {
         </div>
       </div>
       <div className="flex gap-2">
-        <button 
+        <IconButton 
+          icon={Settings}
           onClick={onSettingsClick}
-          className="bg-none border-none p-2 cursor-pointer text-[var(--text)] hover:bg-[var(--accent-bg)] rounded-md transition-colors"
-        >
-          <Settings size={20} />
-        </button>
+          className="text-[var(--text)]"
+        />
         <div className="relative" ref={dropdownRef}>
-          <button 
+          <IconButton 
+            icon={MoreVertical}
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="bg-none border-none p-2 cursor-pointer text-[var(--text)] hover:bg-[var(--accent-bg)] rounded-md transition-colors"
-          >
-            <MoreVertical size={20} />
-          </button>
+            className="text-[var(--text)]"
+          />
           
           {isDropdownOpen && (
             <div className="absolute right-0 mt-2 w-48 bg-[var(--bg)] border border-[var(--border)] rounded-md shadow-[var(--shadow)] z-50 py-1">
@@ -102,7 +101,7 @@ const TopBar = ({ onSettingsClick, onDataLoaded, currentView }) => {
                   fileInputRef.current?.click();
                 }}
               >
-                <Upload size={16} />
+                <Upload size={20} />
                 <span>Load Data</span>
               </button>
             </div>

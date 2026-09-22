@@ -86,7 +86,7 @@ const SidebarView = ({ settings, onSettingChange }) => {
               >
                 <td className="col-dnd">
                   <div className="dnd-handle">
-                    <GripVertical size={18} />
+                    <GripVertical size={20} />
                   </div>
                 </td>
                 <td className="col-visible">
