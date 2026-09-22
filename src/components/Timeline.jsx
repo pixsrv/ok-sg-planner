@@ -19,6 +19,8 @@ const Timeline = ({
   const startX = useRef(0);
   const scrollLeft = useRef(0);
   const [hoveredWeek, setHoveredWeek] = useState(null);
+  const [isMouseInside, setIsMouseInside] = useState(false);
+  const pendingScrollRef = useRef(null);
 
   const getWeekRange = (weekNum, yr) => {
     const d = new Date(yr, 0, 4);
@@ -111,9 +113,14 @@ const Timeline = ({
       container.classList.remove('active-dragging');
     };
 
+    const handleMouseEnter = () => {
+      setIsMouseInside(true);
+    };
+
     const handleMouseLeave = () => {
       isDragging.current = false;
       container.classList.remove('active-dragging');
+      setIsMouseInside(false);
     };
 
     const handleMouseUp = () => {
@@ -158,6 +165,7 @@ const Timeline = ({
     };
 
     container.addEventListener('mousedown', handleMouseDown);
+    container.addEventListener('mouseenter', handleMouseEnter);
     container.addEventListener('mouseleave', handleMouseLeave);
     container.addEventListener('mouseup', handleMouseUp);
     container.addEventListener('mousemove', handleMouseMove);
@@ -165,6 +173,7 @@ const Timeline = ({
 
     return () => {
       container.removeEventListener('mousedown', handleMouseDown);
+      container.removeEventListener('mouseenter', handleMouseEnter);
       container.removeEventListener('mouseleave', handleMouseLeave);
       container.removeEventListener('mouseup', handleMouseUp);
       container.removeEventListener('mousemove', handleMouseMove);
@@ -176,48 +185,52 @@ const Timeline = ({
     const container = scrollContainerRef.current;
     if (!container) return;
 
+    if (selectedWeek) {
+      pendingScrollRef.current = { week: selectedWeek, year };
+    }
+
+    // Only proceed with animation if mouse is outside
+    if (isMouseInside || !pendingScrollRef.current) return;
+
+    const targetWeek = pendingScrollRef.current.week;
+    const targetYear = pendingScrollRef.current.year;
+
     let animationFrameId = null;
 
-    if (selectedWeek) {
-      const selectedWeekData = weeks.find(w => w.num === selectedWeek && w.year === year);
-      if (selectedWeekData) {
-        const containerWidth = container.offsetWidth;
-        // The inner relative div has min-w-[1700px] and mx-8 (32px total margin)
-        // We need to find the pixel position of the week.
-        // week.leftPercent is relative to the inner content width.
-        const innerContent = container.querySelector('.relative');
-        if (innerContent) {
-          const contentWidth = innerContent.offsetWidth;
-          const weekLeft = (selectedWeekData.leftPercent / 100) * contentWidth;
-          const weekLeftWithMargin = weekLeft + 32; // mx-8 is 2rem (32px)
-          const weekWidth = (selectedWeekData.widthPercent / 100) * contentWidth;
+    const selectedWeekData = weeks.find(w => w.num === targetWeek && w.year === targetYear);
+    if (selectedWeekData) {
+      const containerWidth = container.offsetWidth;
+      const innerContent = container.querySelector('.relative');
+      if (innerContent) {
+        const contentWidth = innerContent.offsetWidth;
+        const weekLeft = (selectedWeekData.leftPercent / 100) * contentWidth;
+        const weekLeftWithMargin = weekLeft + 32; // mx-8 is 2rem (32px)
+        const weekWidth = (selectedWeekData.widthPercent / 100) * contentWidth;
 
-          // Center the week: weekLeftWithMargin + weekWidth/2 - containerWidth/2
-          const targetScroll = weekLeftWithMargin + (weekWidth / 2) - (containerWidth / 2);
+        const targetScroll = weekLeftWithMargin + (weekWidth / 2) - (containerWidth / 2);
 
-          // Fluent animated scroll using requestAnimationFrame
-          const startScroll = container.scrollLeft;
-          const distance = targetScroll - startScroll;
-          const duration = 400; // ms
-          let startTime = null;
+        const startScroll = container.scrollLeft;
+        const distance = targetScroll - startScroll;
+        const duration = 400; // ms
+        let startTime = null;
 
-          const animate = (currentTime) => {
-            if (!startTime) startTime = currentTime;
-            const timeElapsed = currentTime - startTime;
-            const progress = Math.min(timeElapsed / duration, 1);
+        const animate = (currentTime) => {
+          if (!startTime) startTime = currentTime;
+          const timeElapsed = currentTime - startTime;
+          const progress = Math.min(timeElapsed / duration, 1);
 
-            // Easing function: easeOutQuad
-            const easeProgress = progress * (2 - progress);
+          const easeProgress = progress * (2 - progress);
 
-            container.scrollLeft = startScroll + distance * easeProgress;
+          container.scrollLeft = startScroll + distance * easeProgress;
 
-            if (timeElapsed < duration) {
-              animationFrameId = requestAnimationFrame(animate);
-            }
-          };
+          if (timeElapsed < duration) {
+            animationFrameId = requestAnimationFrame(animate);
+          } else {
+            pendingScrollRef.current = null;
+          }
+        };
 
-          animationFrameId = requestAnimationFrame(animate);
-        }
+        animationFrameId = requestAnimationFrame(animate);
       }
     }
 
@@ -226,7 +239,7 @@ const Timeline = ({
         cancelAnimationFrame(animationFrameId);
       }
     };
-  }, [selectedWeek, year, weeks]);
+  }, [selectedWeek, year, weeks, isMouseInside]);
 
   const weekWidth = 36; // px
   const totalWidth = (totalDays / 7) * weekWidth;
