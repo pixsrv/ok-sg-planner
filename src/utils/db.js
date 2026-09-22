@@ -51,8 +51,30 @@ export const removeStorageItem = (key) => {
   }
 };
 
-export const initDB = () => {
-  return Promise.resolve(true);
+/**
+ * Generic JSON getter from sessionStorage with error handling
+ */
+export const getSessionItem = (key, defaultValue = null) => {
+  try {
+    const fullKey = key.startsWith(PREFIX) ? key : getStorageKey(key);
+    const data = sessionStorage.getItem(fullKey);
+    return data ? JSON.parse(data) : defaultValue;
+  } catch (e) {
+    console.error(`Error reading ${key} from sessionStorage`, e);
+    return defaultValue;
+  }
+};
+
+/**
+ * Generic JSON setter for sessionStorage with error handling
+ */
+export const setSessionItem = (key, value) => {
+  try {
+    const fullKey = key.startsWith(PREFIX) ? key : getStorageKey(key);
+    sessionStorage.setItem(fullKey, JSON.stringify(value));
+  } catch (e) {
+    console.error(`Error saving ${key} to sessionStorage`, e);
+  }
 };
 
 const getStoreData = (storeName) => {
@@ -79,12 +101,6 @@ export const saveItems = async (storeName, itemsMap) => {
   });
   setStoreData(storeName, storeData);
   console.log(`Saved multiple items to ${storeName}`);
-};
-
-export const getItem = async (storeName, key) => {
-  const storeData = getStoreData(storeName);
-
-  return storeData[key];
 };
 
 export const getAllItems = async (storeName) => {

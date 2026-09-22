@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { formatDate } from '../utils/formatters';
 import { getISOWeek, getDateFromWeek, DAY_NAMES_SHORT } from '../utils/dateUtils';
-import { getStorageItem, setStorageItem } from '../utils/db';
+import { getStorageItem, setStorageItem, getSessionItem, setSessionItem } from '../utils/db';
 import {
   WEEK_START_SUNDAY,
   START_ON_MODE_RECENT,
@@ -12,11 +12,11 @@ import {
 export const useWeekNavigation = (settings, STORES) => {
   const [referenceDate, setReferenceDate] = useState(() => {
     // Check if this is a fresh start or a refresh
-    const isRefresh = sessionStorage.getItem('ok-sg-session-initialized') === 'true';
+    const isRefresh = getSessionItem('session-initialized') === 'true';
 
     if (!isRefresh) {
       // Mark as initialized so refresh won't trigger this again
-      sessionStorage.setItem('ok-sg-session-initialized', 'true');
+      setSessionItem('session-initialized', 'true');
 
       // Use settings to determine start date
       const mode = settings?.startOnMode || START_ON_MODE_RECENT;

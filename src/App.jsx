@@ -12,74 +12,17 @@ import SecurityView from './views/settings/SecurityView.jsx'
 import SidebarView from './views/settings/SidebarView.jsx'
 import OmniboxView from './views/settings/OmniboxView.jsx'
 import {
-  DATE_FORMAT_YYYY_MM_DD_ISO,
-  TIME_FORMAT_24H,
-  WEEK_START_MONDAY,
-  TIMELINE_EXTENSION_NONE,
-  COORDINATE_ORDER_EMPLOYEE_DATE,
-  TIME_INPUT_CONTROL_SYSTEM,
-  AUTO_SET_MODE_NONE,
   START_ON_MODE_RECENT,
-  TIME_RESOLUTION_1MI
+  DEFAULT_SETTINGS
 } from './constants/settings'
-import { getAllItems, saveItem, saveItems, STORES } from './utils/db'
+import { getAllItems, saveItem, saveItems, STORES, getSessionItem, setSessionItem } from './utils/db'
 
 function App() {
   const [currentView, setCurrentView] = useState('Staff')
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [settingsView, setSettingsView] = useState('Sidebar')
-  const [appSettings, setAppSettings] = useState({
-    dateFormat: DATE_FORMAT_YYYY_MM_DD_ISO,
-    timeFormat: TIME_FORMAT_24H,
-    timeResolution: TIME_RESOLUTION_1MI,
-    timeInputControl: TIME_INPUT_CONTROL_SYSTEM,
-    workDayLength: '08:00',
-    autoSetEndHourMode: AUTO_SET_MODE_NONE,
-    timelineStartHour: 0,
-    timelineEndHour: 23,
-    weekStart: WEEK_START_MONDAY,
-    timelineExtension: TIMELINE_EXTENSION_NONE,
-    coordinateOrder: COORDINATE_ORDER_EMPLOYEE_DATE,
-    employeeFilterImmediate: true,
-    showClearFilterButton: true,
-    employeeFilterHistoryCache: true,
-    jumpHistoryCache: true,
-    showTodayButton: true,
-    sidebarFolded: false,
-    startOnMode: START_ON_MODE_RECENT,
-    fixedStartDate: new Date().toISOString().split('T')[0],
-    sidebar: [
-      { id: 'Staff', name: 'Staff', visible: true, default: true },
-      { id: 'Month', name: 'Month', visible: true, default: false },
-      { id: 'Week', name: 'Week', visible: true, default: false },
-    ]
-  })
-  const [draftSettings, setDraftSettings] = useState({
-    dateFormat: DATE_FORMAT_YYYY_MM_DD_ISO,
-    timeFormat: TIME_FORMAT_24H,
-    timeResolution: TIME_RESOLUTION_1MI,
-    timeInputControl: TIME_INPUT_CONTROL_SYSTEM,
-    workDayLength: '08:00',
-    autoSetEndHourMode: AUTO_SET_MODE_NONE,
-    timelineStartHour: 0,
-    timelineEndHour: 23,
-    weekStart: WEEK_START_MONDAY,
-    timelineExtension: TIMELINE_EXTENSION_NONE,
-    coordinateOrder: COORDINATE_ORDER_EMPLOYEE_DATE,
-    employeeFilterImmediate: true,
-    showClearFilterButton: true,
-    employeeFilterHistoryCache: true,
-    jumpHistoryCache: true,
-    showTodayButton: true,
-    sidebarFolded: false,
-    startOnMode: START_ON_MODE_RECENT,
-    fixedStartDate: new Date().toISOString().split('T')[0],
-    sidebar: [
-      { id: 'Staff', name: 'Staff', visible: true, default: true },
-      { id: 'Month', name: 'Month', visible: true, default: false },
-      { id: 'Week', name: 'Week', visible: true, default: false },
-    ]
-  })
+  const [appSettings, setAppSettings] = useState(DEFAULT_SETTINGS)
+  const [draftSettings, setDraftSettings] = useState(DEFAULT_SETTINGS)
   
   const [employees, setEmployees] = useState({})
   const [months, setMonths] = useState([])
@@ -87,8 +30,8 @@ function App() {
 
   useEffect(() => {
     // Session identification
-    if (!sessionStorage.getItem('ok-sg-session-active')) {
-      sessionStorage.setItem('ok-sg-session-active', 'true');
+    if (!getSessionItem('session-active')) {
+      setSessionItem('session-active', 'true');
     }
 
     const loadFromDB = async () => {

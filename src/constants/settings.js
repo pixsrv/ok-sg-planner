@@ -93,3 +93,30 @@ export const START_ON_MODES = [
   { id: START_ON_MODE_TODAY, label: 'Today' },
   { id: START_ON_MODE_FIXED, label: 'Fixed Date' }
 ];
+
+export const DEFAULT_SETTINGS = {
+  dateFormat: DATE_FORMAT_YYYY_MM_DD_ISO,
+  timeFormat: TIME_FORMAT_24H,
+  timeResolution: TIME_RESOLUTION_1MI,
+  timeInputControl: TIME_INPUT_CONTROL_SYSTEM,
+  workDayLength: '08:00',
+  autoSetEndHourMode: AUTO_SET_MODE_NONE,
+  timelineStartHour: 0,
+  timelineEndHour: 23,
+  weekStart: WEEK_START_MONDAY,
+  timelineExtension: TIMELINE_EXTENSION_NONE,
+  coordinateOrder: COORDINATE_ORDER_EMPLOYEE_DATE,
+  employeeFilterImmediate: true,
+  showClearFilterButton: true,
+  employeeFilterHistoryCache: true,
+  jumpHistoryCache: true,
+  showTodayButton: true,
+  sidebarFolded: false,
+  startOnMode: START_ON_MODE_RECENT,
+  fixedStartDate: new Date().toISOString().split('T')[0],
+  sidebar: [
+    { id: 'Staff', name: 'Staff', visible: true, default: true },
+    { id: 'Month', name: 'Month', visible: true, default: false },
+    { id: 'Week', name: 'Week', visible: true, default: false },
+  ]
+};
