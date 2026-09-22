@@ -13,19 +13,17 @@ const TimeRibbon = ({
       {items.map(val => {
         const isActive = activeValue === val;
         
-        const activeClasses = isActive 
-          ? (isHours 
-            ? 'bg-[var(--accent)] text-white border-[var(--accent)]' 
-            : 'bg-[var(--accent-light)] text-[var(--accent)] border-[var(--accent)]')
-          : 'bg-[var(--bg)] border-[var(--border)] hover:bg-[var(--accent-bg)] hover:text-[var(--accent)]';
-
-        const sizeClasses = isHours ? 'w-8 h-8 text-xs' : 'w-8 h-6 text-[10px]';
+        const itemClasses = [
+          'time-ribbon-item',
+          isHours ? 'hours' : 'minutes',
+          isActive ? 'active' : ''
+        ].filter(Boolean).join(' ');
 
         return (
           <div
             key={val}
             onClick={() => onItemClick(val)}
-            className={`flex-shrink-0 flex items-center justify-center border rounded cursor-pointer transition-colors ${sizeClasses} ${activeClasses}`}
+            className={itemClasses}
           >
             {isHours ? val : String(val).padStart(2, '0')}
           </div>

@@ -14,6 +14,13 @@
     --accent-light: rgba(170, 59, 255, 0.1);
     --accent-border: rgba(170, 59, 255, 0.5);
     --social-bg: rgba(244, 243, 236, 0.5);
+    
+    /* Selection Grades */
+    --selection-g1: var(--accent);
+    --selection-g2: color-mix(in srgb, var(--accent), transparent 20%);
+    --selection-g3: color-mix(in srgb, var(--accent), transparent 50%);
+    --selection-bg: color-mix(in srgb, var(--accent), transparent 90%);
+    --selection-bg-dimmed: color-mix(in srgb, var(--accent), transparent 95%);
     --shadow: rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
     --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
@@ -50,6 +57,13 @@
         --accent-light: rgba(192, 132, 252, 0.1);
         --accent-border: rgba(192, 132, 252, 0.5);
         --social-bg: rgba(47, 48, 58, 0.5);
+        
+        /* Selection Grades (Dark Mode) */
+        --selection-g1: var(--accent);
+        --selection-g2: color-mix(in srgb, var(--accent), transparent 20%);
+        --selection-g3: color-mix(in srgb, var(--accent), transparent 50%);
+        --selection-bg: color-mix(in srgb, var(--accent), transparent 90%);
+        --selection-bg-dimmed: color-mix(in srgb, var(--accent), transparent 93%);
         --shadow: rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
     }
 

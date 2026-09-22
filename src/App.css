@@ -288,25 +288,27 @@
 }
 
 .work-hours-cell.focused-cell {
-  background-color: var(--accent-light) !important;
-  outline: 2px solid var(--accent);
+  background-color: var(--selection-bg) !important;
+  outline: 2px solid var(--selection-g1);
   outline-offset: -2px;
   z-index: 20;
   position: relative;
 }
 
 .work-hours-cell.editing.focused-cell {
-  outline-color: var(--accent-border);
+  outline-color: var(--selection-g1);
 }
 
 .work-hours-cell.editing {
-  background-color: var(--accent-light);
-  box-shadow: inset 0 0 0 2px var(--accent);
+  background-color: var(--selection-bg);
+  box-shadow: inset 0 0 0 2px var(--selection-g2);
+  z-index: 5;
+  position: relative;
 }
 
 .work-hours-cell.editing.focused-cell,
 .work-hours-cell.editing.hover-highlight {
-  box-shadow: inset 0 0 0 2px var(--accent-border);
+  box-shadow: inset 0 0 0 2px var(--selection-g1);
 }
 
 .employee-row.selected {
@@ -678,22 +680,22 @@ input:checked + .slider:before {
 }
 
 .work-hours-cell.editing {
-  background-color: var(--accent-bg);
-  box-shadow: inset 0 0 0 2px var(--accent);
+  background-color: var(--selection-bg-dimmed);
+  box-shadow: inset 0 0 0 2px var(--selection-g2);
   position: relative;
   z-index: 5;
 }
 
 .work-hours-cell.editing-dimmed {
-  background-color: var(--accent-bg);
-  box-shadow: inset 0 0 0 2px var(--accent-border);
+  background-color: var(--selection-bg-dimmed);
+  box-shadow: inset 0 0 0 2px var(--selection-g3);
   opacity: 0.8;
   position: relative;
   z-index: 5;
 }
 
 .work-hours-cell.editing-dimmed.focused-cell {
-  outline-color: var(--accent-border);
+  outline-color: var(--selection-g1);
   opacity: 1;
 }
 
@@ -704,10 +706,52 @@ input:checked + .slider:before {
 }
 
 @keyframes flash {
-  0% { background-color: var(--accent-light); }
+  0% { background-color: var(--selection-bg); }
   100% { background-color: transparent; }
 }
 
 .highlight-flash {
   animation: flash 2s ease-out;
+}
+
+.time-ribbon-item {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: var(--bg);
+}
+
+.time-ribbon-item:hover {
+  background-color: var(--selection-bg-dimmed);
+  color: var(--selection-g1);
+  border-color: var(--selection-g1);
+}
+
+.time-ribbon-item.active.hours {
+  background-color: var(--selection-g1);
+  color: white;
+  border-color: var(--selection-g1);
+}
+
+.time-ribbon-item.active.minutes {
+  background-color: var(--selection-bg);
+  color: var(--selection-g1);
+  border-color: var(--selection-g2);
+}
+
+.time-ribbon-item.hours {
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.75rem;
+}
+
+.time-ribbon-item.minutes {
+  width: 2rem;
+  height: 1.5rem;
+  font-size: 0.625rem;
 }
