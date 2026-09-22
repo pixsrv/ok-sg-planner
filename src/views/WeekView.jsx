@@ -197,6 +197,7 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
         onCellClick={handleCellClick}
         getCellData={getCellData}
         settings={settings}
+        allowOverwrite={allowOverwrite}
       />
       <div className={`hours-timeline-panel ${editingCell ? 'visible' : ''}`}>
         {editingCell && (

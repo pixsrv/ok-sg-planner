@@ -52,6 +52,7 @@ const getCurrentPosition = (emp, todayStr) => {
  * @param {Function} props.setHoveredCell
  * @param {Function} props.getCellData
  * @param {Object} props.settings
+ * @param {boolean} props.allowOverwrite
  */
 const EmployeeRow = React.memo(({
   empId,
@@ -66,7 +67,9 @@ const EmployeeRow = React.memo(({
   onCellClick,
   setHoveredCell,
   getCellData,
-  settings
+  settings,
+  allowOverwrite,
+  isMultipleSelection
 }) => {
   const today = new Date();
   const todayStr = today.toISOString().split('T')[0];
@@ -127,6 +130,8 @@ const EmployeeRow = React.memo(({
             cellData={cellData}
             settings={settings}
             isSelected={isSelected}
+            allowOverwrite={allowOverwrite}
+            isMultipleSelection={isMultipleSelection}
             isEditingCross={isEditingCross}
             isHovered={isHovered}
             isDirectHover={isDirectHover}

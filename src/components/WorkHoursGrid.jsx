@@ -25,6 +25,7 @@ import EmployeeRow from './EmployeeRow';
  * @param {Function} props.onCellClick
  * @param {Function} props.getCellData
  * @param {Object} props.settings
+ * @param {boolean} props.allowOverwrite
  */
 const WorkHoursGrid = ({
   weekDays, 
@@ -32,7 +33,8 @@ const WorkHoursGrid = ({
   editingCell, 
   onCellClick, 
   getCellData, 
-  settings 
+  settings,
+  allowOverwrite
 }) => {
   const [hoveredCell, setHoveredCell] = useState(null); // { employeeId, dayDate }
 
@@ -40,6 +42,7 @@ const WorkHoursGrid = ({
     return editingCell?.dayDate === dayDate && editingCell?.employeeId === 'ALL';
   };
 
+  const isMultipleSelection = editingCell?.employeeId === 'ALL' || editingCell?.dayDate === 'ALL';
 
   return (
     <div className="work-hours-grid-wrapper">
@@ -94,6 +97,8 @@ const WorkHoursGrid = ({
                   setHoveredCell={setHoveredCell}
                   getCellData={getCellData}
                   settings={settings}
+                  allowOverwrite={allowOverwrite}
+                  isMultipleSelection={isMultipleSelection}
                 />
               );
             })

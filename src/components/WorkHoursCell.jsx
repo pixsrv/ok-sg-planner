@@ -11,6 +11,8 @@ import { formatTime } from '../utils/formatters';
  * @param {Array|null} props.cellData
  * @param {Object} props.settings
  * @param {boolean} props.isSelected
+ * @param {boolean} props.allowOverwrite
+ * @param {boolean} props.isMultipleSelection
  * @param {boolean} props.isEditingCross
  * @param {boolean} props.isHovered
  * @param {boolean} props.isDirectHover
@@ -23,12 +25,27 @@ const WorkHoursCell = React.memo(({
   cellData,
   settings,
   isSelected,
+  allowOverwrite,
+  isMultipleSelection,
   isEditingCross,
   isHovered,
   isDirectHover,
   onCellClick,
   setHoveredCell
 }) => {
+  const [hadDataOnSelection, setHadDataOnSelection] = React.useState(null);
+
+  React.useEffect(() => {
+    if (isSelected) {
+      setHadDataOnSelection(prev => {
+        // Only set it when it FIRST becomes selected
+        if (prev === null) return !!cellData;
+        return prev;
+      });
+    } else {
+      setHadDataOnSelection(null);
+    }
+  }, [isSelected, cellData]);
   const handleClick = () => {
     onCellClick(empId, dayDate);
   };
@@ -49,7 +66,11 @@ const WorkHoursCell = React.memo(({
   }
 
   if (isSelected) {
-    classes.push('editing');
+    if (isMultipleSelection && !allowOverwrite && hadDataOnSelection) {
+      classes.push('editing-dimmed');
+    } else {
+      classes.push('editing');
+    }
   } else if (isEditingCross) {
     classes.push('cross-highlight');
   }
