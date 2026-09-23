@@ -114,13 +114,6 @@ export const useWeekNavigation = (settings, STORES) => {
     });
   }, []);
 
-  const handleWeekClick = useCallback((weekNum, weekYear) => {
-    const yearToUse = weekYear || currentWeekYear;
-    const newDate = getDateFromWeek(weekNum, yearToUse);
-
-    setReferenceDate(newDate);
-  }, [currentWeekYear]);
-
   const handleMonthClick = useCallback((monthIndex, monthYear) => {
     const yearToUse = monthYear || currentWeekYear;
     
@@ -128,6 +121,15 @@ export const useWeekNavigation = (settings, STORES) => {
     const d = new Date(yearToUse, monthIndex - 1, 1);
 
     setReferenceDate(d);
+    return { isAdditional: monthYear !== currentWeekYear };
+  }, [currentWeekYear]);
+
+  const handleWeekClick = useCallback((weekNum, weekYear) => {
+    const yearToUse = weekYear || currentWeekYear;
+    const newDate = getDateFromWeek(weekNum, yearToUse);
+
+    setReferenceDate(newDate);
+    return { isAdditional: weekYear !== currentWeekYear };
   }, [currentWeekYear]);
 
   const handleDateSelect = useCallback((selection) => {

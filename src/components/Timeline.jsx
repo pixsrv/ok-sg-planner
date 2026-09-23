@@ -20,7 +20,22 @@ const Timeline = ({
   const scrollLeft = useRef(0);
   const [hoveredWeek, setHoveredWeek] = useState(null);
   const [isMouseInside, setIsMouseInside] = useState(false);
-  const pendingScrollRef = useRef(null);
+  const pendingScrollRef = useRef(null); // { week, year, immediate }
+
+  const [containerWidth, setContainerWidth] = useState(0);
+
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      setContainerWidth(scrollContainerRef.current.offsetWidth);
+      const resizeObserver = new ResizeObserver(entries => {
+        for (let entry of entries) {
+          setContainerWidth(entry.contentRect.width);
+        }
+      });
+      resizeObserver.observe(scrollContainerRef.current);
+      return () => resizeObserver.disconnect();
+    }
+  }, []);
 
   const getWeekRange = (weekNum, yr) => {
     const d = new Date(yr, 0, 4);
@@ -38,7 +53,7 @@ const Timeline = ({
     return `${formatDate(start, format, { showYear })} - ${formatDate(end, format, { showYear })}`;
   };
 
-  const {months, weeks, totalDays} = useMemo(() => {
+  const {months, weeks, totalDays, totalWidth} = useMemo(() => {
     const extMonths = parseInt(settings?.timelineExtension || TIMELINE_EXTENSION_NONE, 10);
     
     // We want to calculate the full range of dates to display
@@ -47,6 +62,9 @@ const Timeline = ({
     
     // Calculate total days for percentage calculations
     const days = (endDate.getTime() - startDate.getTime()) / 86400000 + 1;
+
+    const weekWidth = 36; // px
+    const totalWidthValue = (days / 7) * weekWidth;
 
     const monthsData = [];
     let currentMonth = new Date(startDate);
@@ -98,7 +116,7 @@ const Timeline = ({
       currentDate.setDate(currentDate.getDate() + 7);
     }
 
-    return {months: monthsData, weeks: weeksDataResult, totalDays: days};
+    return {months: monthsData, weeks: weeksDataResult, totalDays: days, totalWidth: totalWidthValue};
   }, [year, settings?.timelineExtension]);
 
   useEffect(() => {
@@ -186,11 +204,18 @@ const Timeline = ({
     if (!container) return;
 
     if (selectedWeek) {
-      pendingScrollRef.current = { week: selectedWeek, year };
+      // If we already have a pending scroll that was marked immediate, keep it immediate.
+      // However, usually selectedWeek changes because of a click, so we update it here.
+      // But we don't know if it's immediate here.
+      // Let's rely on the fact that if selectedWeek changes, we update pendingScrollRef.
+      // If pendingScrollRef was ALREADY set (e.g. by handleClick), we don't want to overwrite its immediate flag with false.
+      if (!pendingScrollRef.current || pendingScrollRef.current.week !== selectedWeek || pendingScrollRef.current.year !== year) {
+        pendingScrollRef.current = { week: selectedWeek, year, immediate: pendingScrollRef.current?.immediate || false };
+      }
     }
 
-    // Only proceed with animation if mouse is outside
-    if (isMouseInside || !pendingScrollRef.current) return;
+    // Only proceed with animation if mouse is outside OR it's an immediate scroll
+    if ((isMouseInside && !pendingScrollRef.current?.immediate) || !pendingScrollRef.current) return;
 
     const targetWeek = pendingScrollRef.current.week;
     const targetYear = pendingScrollRef.current.year;
@@ -199,15 +224,12 @@ const Timeline = ({
 
     const selectedWeekData = weeks.find(w => w.num === targetWeek && w.year === targetYear);
     if (selectedWeekData) {
-      const containerWidth = container.offsetWidth;
       const innerContent = container.querySelector('.relative');
       if (innerContent) {
-        const contentWidth = innerContent.offsetWidth;
-        const weekLeft = (selectedWeekData.leftPercent / 100) * contentWidth;
-        const weekLeftWithMargin = weekLeft + 32; // mx-8 is 2rem (32px)
-        const weekWidth = (selectedWeekData.widthPercent / 100) * contentWidth;
+        const weekLeft = (selectedWeekData.leftPercent / 100) * totalWidth;
+        const weekWidth = (selectedWeekData.widthPercent / 100) * totalWidth;
 
-        const targetScroll = weekLeftWithMargin + (weekWidth / 2) - (containerWidth / 2);
+        const targetScroll = weekLeft + (weekWidth / 2);
 
         const startScroll = container.scrollLeft;
         const distance = targetScroll - startScroll;
@@ -239,10 +261,7 @@ const Timeline = ({
         cancelAnimationFrame(animationFrameId);
       }
     };
-  }, [selectedWeek, year, weeks, isMouseInside]);
-
-  const weekWidth = 36; // px
-  const totalWidth = (totalDays / 7) * weekWidth;
+  }, [selectedWeek, year, weeks, isMouseInside, containerWidth, totalWidth]);
 
   return (
     <div className="flex flex-col mb-6">
@@ -251,64 +270,83 @@ const Timeline = ({
         className="w-full overflow-x-auto overflow-y-hidden border border-[var(--border)] bg-[var(--code-bg)] rounded-lg shadow-sm cursor-grab"
       >
         <div 
-          className="relative mx-8 h-[80px] overflow-visible"
-          style={{ minWidth: `${totalWidth}px` }}
+          className="flex"
+          style={{ width: totalWidth + containerWidth }}
         >
-          {months.map((month, idx) => {
-            const handleClick = () => {
-              // Only trigger click if we are not in a drag state
-              if (!scrollContainerRef.current?.classList.contains('active-dragging')) {
-                onMonthClick && onMonthClick(month.index, month.year);
-              }
-            };
+          <div style={{ width: containerWidth / 2, flexShrink: 0 }} />
+          <div 
+            className="relative h-[80px] shrink-0"
+            style={{ width: totalWidth }}
+          >
+            {months.map((month, idx) => {
+              const handleClick = () => {
+                // Only trigger click if we are not in a drag state
+                if (!scrollContainerRef.current?.classList.contains('active-dragging')) {
+                  const result = onMonthClick && onMonthClick(month.index, month.year);
+                  if (result?.isAdditional) {
+                    // We don't have the selectedWeek yet here usually (it updates via props),
+                    // but we can set a flag that the NEXT scroll should be immediate.
+                    // Actually, since selectedWeek is about to change, we can pre-set pendingScrollRef.
+                    // We need to guess which week will be selected. For month click, it's usually week containing 1st of month.
+                    // But the parent handles the logic. 
+                    // Let's just set a temporary flag.
+                    pendingScrollRef.current = { ...pendingScrollRef.current, immediate: true };
+                  }
+                }
+              };
 
-            return (
-              <div
-                key={`m-${month.index}-${month.year}`}
-                className={`absolute top-0 h-[40px] flex items-center justify-center cursor-pointer select-none hover:bg-[var(--selection-bg-dimmed)] hover:text-[var(--selection-g1)] bg-[var(--code-bg)] border-b border-[var(--border)] transition-colors ${month.isAdditional ? 'timeline-additional' : ''}`}
-                style={{
-                  left: `${month.leftPercent}%`,
-                  width: `${month.widthPercent}%`,
-                }}
-                onClick={handleClick}
-              >
-                <span className="text-sm font-semibold truncate px-2 text-[var(--text-h)]">{month.name}</span>
-                {idx < months.length - 1 && (
-                  <div className="absolute right-0 top-0 w-[1px] h-[40px] bg-[var(--border)] z-20"/>
-                )}
-              </div>
-            );
-          })}
+              return (
+                <div
+                  key={`m-${month.index}-${month.year}`}
+                  className={`absolute top-0 h-[40px] flex items-center justify-center cursor-pointer select-none hover:bg-[var(--selection-bg-dimmed)] hover:text-[var(--selection-g1)] bg-[var(--code-bg)] border-b border-[var(--border)] transition-colors ${month.isAdditional ? 'timeline-additional' : ''}`}
+                  style={{
+                    left: `${month.leftPercent}%`,
+                    width: `${month.widthPercent}%`,
+                  }}
+                  onClick={handleClick}
+                >
+                  <span className="text-sm font-semibold truncate px-2 text-[var(--text-h)]">{month.name}</span>
+                  {idx < months.length - 1 && (
+                    <div className="absolute right-0 top-0 w-[1px] h-[40px] bg-[var(--border)] z-20"/>
+                  )}
+                </div>
+              );
+            })}
 
-          {weeks.map((week, idx) => {
-            const isSelected = week.num === selectedWeek && week.year === year;
-            const handleClick = () => {
-              // Only trigger click if we are not in a drag state
-              if (!scrollContainerRef.current?.classList.contains('active-dragging')) {
-                onWeekClick && onWeekClick(week.num, week.year);
-              }
-            };
+            {weeks.map((week, idx) => {
+              const isSelected = week.num === selectedWeek && week.year === year;
+              const handleClick = () => {
+                // Only trigger click if we are not in a drag state
+                if (!scrollContainerRef.current?.classList.contains('active-dragging')) {
+                  const result = onWeekClick && onWeekClick(week.num, week.year);
+                  if (result?.isAdditional) {
+                    pendingScrollRef.current = { week: week.num, year: week.year, immediate: true };
+                  }
+                }
+              };
 
-            return (
-              <div
-                key={`w-${week.num}-${week.year}-${idx}`}
-                className={`absolute top-[40px] h-[40px] flex items-center justify-center cursor-pointer select-none hover:bg-[var(--selection-bg-dimmed)] hover:text-[var(--selection-g1)] bg-[var(--code-bg)] transition-colors ${isSelected ? 'timeline-week-selected' : ''} ${week.isAdditional ? 'timeline-additional' : ''}`}
-                style={{
-                  left: `${week.leftPercent}%`,
-                  width: `${week.widthPercent}%`,
-                }}
-                onClick={handleClick}
-                onMouseEnter={() => setHoveredWeek({num: week.num, year: week.year})}
-                onMouseLeave={() => setHoveredWeek(null)}
-              >
-                <span
-                  className={`text-xs px-1 transition-colors ${isSelected ? 'text-[var(--selection-g1)]' : 'text-[var(--text)]'} ${idx === weeks.length - 1 ? '' : 'truncate'}`}>{week.num}</span>
-                {idx < weeks.length - 1 && (
-                  <div className="absolute right-0 bottom-0 w-[1px] h-[40px] bg-[var(--border)] z-20"/>
-                )}
-              </div>
-            );
-          })}
+              return (
+                <div
+                  key={`w-${week.num}-${week.year}-${idx}`}
+                  className={`absolute top-[40px] h-[40px] flex items-center justify-center cursor-pointer select-none hover:bg-[var(--selection-bg-dimmed)] hover:text-[var(--selection-g1)] bg-[var(--code-bg)] transition-colors ${isSelected ? 'timeline-week-selected' : ''} ${week.isAdditional ? 'timeline-additional' : ''}`}
+                  style={{
+                    left: `${week.leftPercent}%`,
+                    width: `${week.widthPercent}%`,
+                  }}
+                  onClick={handleClick}
+                  onMouseEnter={() => setHoveredWeek({num: week.num, year: week.year})}
+                  onMouseLeave={() => setHoveredWeek(null)}
+                >
+                  <span
+                    className={`text-xs px-1 transition-colors ${isSelected ? 'text-[var(--selection-g1)]' : 'text-[var(--text)]'} ${idx === weeks.length - 1 ? '' : 'truncate'}`}>{week.num}</span>
+                  {idx < weeks.length - 1 && (
+                    <div className="absolute right-0 bottom-0 w-[1px] h-[40px] bg-[var(--border)] z-20"/>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          <div style={{ width: containerWidth / 2, flexShrink: 0 }} />
         </div>
       </div>
       <div className="h-4 mt-1 flex justify-end">
