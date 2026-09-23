@@ -53,7 +53,7 @@ const Timeline = ({
     return `${formatDate(start, format, { showYear })} - ${formatDate(end, format, { showYear })}`;
   };
 
-  const {months, weeks, totalDays, totalWidth} = useMemo(() => {
+  const {months, weeks, totalWidth, highlightedMonthIndices} = useMemo(() => {
     const extMonths = parseInt(settings?.timelineExtension || TIMELINE_EXTENSION_NONE, 10);
     
     // We want to calculate the full range of dates to display
@@ -116,8 +116,32 @@ const Timeline = ({
       currentDate.setDate(currentDate.getDate() + 7);
     }
 
-    return {months: monthsData, weeks: weeksDataResult, totalDays: days, totalWidth: totalWidthValue};
-  }, [year, settings?.timelineExtension]);
+    // Determine highlighted months based on selectedWeek
+    const highlightedMonthIndicesSet = new Set();
+    if (selectedWeek) {
+      const weekStart = new Date(year, 0, 4);
+      const day = weekStart.getDay();
+      const diff = weekStart.getDate() - day + (day === 0 ? -6 : 1);
+      weekStart.setDate(diff + (selectedWeek - 1) * 7);
+      
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+      
+      const startMonthKey = `${weekStart.getFullYear()}-${weekStart.getMonth() + 1}`;
+      const endMonthKey = `${weekEnd.getFullYear()}-${weekEnd.getMonth() + 1}`;
+      
+      highlightedMonthIndicesSet.add(startMonthKey);
+      highlightedMonthIndicesSet.add(endMonthKey);
+    }
+
+    return {
+      months: monthsData, 
+      weeks: weeksDataResult, 
+      totalDays: days, 
+      totalWidth: totalWidthValue,
+      highlightedMonthIndices: Array.from(highlightedMonthIndicesSet)
+    };
+  }, [year, settings?.timelineExtension, selectedWeek]);
 
   useEffect(() => {
     const container = scrollContainerRef.current;
@@ -279,6 +303,7 @@ const Timeline = ({
             style={{ width: totalWidth }}
           >
             {months.map((month, idx) => {
+              const isSelected = highlightedMonthIndices.includes(`${month.year}-${month.index}`);
               const handleClick = () => {
                 // Only trigger click if we are not in a drag state
                 if (!scrollContainerRef.current?.classList.contains('active-dragging')) {
@@ -298,7 +323,7 @@ const Timeline = ({
               return (
                 <div
                   key={`m-${month.index}-${month.year}`}
-                  className={`absolute top-0 h-[40px] flex items-center justify-center cursor-pointer select-none hover:bg-[var(--selection-bg-dimmed)] hover:text-[var(--selection-g1)] bg-[var(--code-bg)] border-b border-[var(--border)] transition-colors ${month.isAdditional ? 'timeline-additional' : ''}`}
+                  className={`absolute top-0 h-[40px] flex items-center justify-center cursor-pointer select-none hover:bg-[var(--selection-bg-dimmed)] hover:text-[var(--selection-g1)] bg-[var(--code-bg)] border-b border-[var(--border)] transition-colors ${month.isAdditional ? 'timeline-additional' : ''} ${isSelected ? 'timeline-month-selected' : ''}`}
                   style={{
                     left: `${month.leftPercent}%`,
                     width: `${month.widthPercent}%`,
