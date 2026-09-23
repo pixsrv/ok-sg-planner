@@ -1,6 +1,6 @@
 import  { useState, useEffect, useRef } from 'react';
-import { ArrowLeftRight, X, ArrowDownToDot } from 'lucide-react';
-import { getMonthName, getOrdinalSuffix, getDateFromWeek } from '../utils/dateUtils';
+import { ArrowLeftRight, X, AlignCenterVertical } from 'lucide-react';
+import { getMonthName, getOrdinalSuffix, getDateFromWeek, getISOWeek } from '../utils/dateUtils';
 import { parseDateQuery } from '../utils/parseDateQuery';
 import { useJumpHistory } from '../hooks/useJumpHistory';
 import DateDropdownItem from './DateDropdownItem';
@@ -13,6 +13,10 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => 
   const containerRef = useRef(null);
 
   const { historyList, addJumpToHistory, clearHistory } = useJumpHistory(settings, selectedWeek, selectedYear);
+
+  const today = new Date();
+  const { weekNum: currentWeek, weekYear: currentYear } = getISOWeek(today);
+  const isTodaySelected = selectedWeek === currentWeek && selectedYear === currentYear;
 
   const handleTodayClick = () => {
     const today = new Date();
@@ -225,7 +229,7 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => 
             className="p-2 bg-[var(--bg)] text-[var(--text)] hover:bg-[var(--selection-bg-dimmed)] transition-colors"
             title="Go to today"
           >
-            <ArrowDownToDot className="w-4 h-4 text-[var(--selection-g1)]" />
+            <AlignCenterVertical className={`w-4 h-4 ${isTodaySelected ? 'text-[var(--text-light)]' : 'text-[var(--selection-g1)]'}`} />
           </button>
         </div>
       )}

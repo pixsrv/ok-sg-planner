@@ -197,7 +197,7 @@ const EmployeeOmnibox = ({value, onChange, employees, settings, placeholder = "S
           className="p-2 bg-[var(--bg)] border border-[var(--border)] rounded-md text-[var(--text-light)] hover:text-[var(--text)] hover:bg-[var(--selection-bg-dimmed)] hover:border-[var(--selection-g2)] transition-colors flex items-center justify-center"
           title="Clear employee filter"
         >
-          <FilterX className="w-4 h-4"/>
+          <FilterX className={`w-4 h-4 ${value ? 'text-[var(--selection-g1)]' : 'text-[var(--text-light)]'}`}/>
         </button>
       )}
     </div>
