@@ -66,3 +66,30 @@ export const formatTime = (time, format) => {
   // 24h is default
   return `${String(hours).padStart(2, '0')}:${minutesStr}`;
 };
+
+export const formatWorkDuration = (start, end) => {
+  if (!start || !end) return '';
+
+  const parseToMinutes = (time) => {
+    if (time instanceof Date) {
+      return time.getHours() * 60 + time.getMinutes();
+    }
+    if (typeof time === 'string' && time.includes(':')) {
+      const [h, m] = time.split(':').map(Number);
+      return h * 60 + m;
+    }
+    return 0;
+  };
+
+  const startMinutes = parseToMinutes(start);
+  const endMinutes = parseToMinutes(end);
+  let durationMinutes = endMinutes - startMinutes;
+
+  if (durationMinutes < 0) durationMinutes += 24 * 60; // Handle overnight shifts if any
+
+  const h = Math.floor(durationMinutes / 60);
+  const m = durationMinutes % 60;
+
+  if (m === 0) return `${h}h`;
+  return `${h}h${String(m).padStart(2, '0')}`;
+};

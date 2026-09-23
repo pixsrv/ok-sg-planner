@@ -120,6 +120,7 @@ export const DEFAULT_SETTINGS = {
   sidebarFolded: false,
   startOnMode: START_ON_MODE_RECENT,
   fixedStartDate: new Date().toISOString().split('T')[0],
+  hoursStripReverseSecond: true,
   sidebar: [
     { id: VIEW_STAFF, visible: true, default: true },
     { id: VIEW_MONTH, visible: true, default: false },

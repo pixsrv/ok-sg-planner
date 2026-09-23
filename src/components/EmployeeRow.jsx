@@ -35,6 +35,19 @@ const getCurrentPosition = (emp, todayStr) => {
   return currentTerm?.position || '';
 };
 
+const getFTE = (emp, dateStr) => {
+  if (!emp.terms || emp.terms.length === 0) return 1.0;
+
+  const term = emp.terms.find(term => {
+    const from = term.validFrom;
+    const to = term.validTo || '9999-12-31';
+
+    return dateStr >= from && dateStr <= to;
+  }) || emp.terms[emp.terms.length - 1];
+
+  return term?.fte ?? 1.0;
+};
+
 /**
  * Employee row component for the WorkHoursGrid.
  * 
@@ -129,6 +142,7 @@ const EmployeeRow = React.memo(({
             dayDate={day.date}
             cellData={cellData}
             settings={settings}
+            fte={getFTE(emp, day.date)}
             isSelected={isSelected}
             allowOverwrite={allowOverwrite}
             isMultipleSelection={isMultipleSelection}

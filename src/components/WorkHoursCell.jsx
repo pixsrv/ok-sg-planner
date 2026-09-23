@@ -1,5 +1,6 @@
 import React from 'react';
-import { formatTime } from '../utils/formatters';
+import { formatTime, formatWorkDuration } from '../utils/formatters';
+import HoursStrip from './HoursStrip';
 
 /**
  * Individual data cell for the work hours grid.
@@ -10,6 +11,7 @@ import { formatTime } from '../utils/formatters';
  * @param {string} props.dayDate
  * @param {Array|null} props.cellData
  * @param {Object} props.settings
+ * @param {number} props.fte
  * @param {boolean} props.isSelected
  * @param {boolean} props.allowOverwrite
  * @param {boolean} props.isMultipleSelection
@@ -24,6 +26,7 @@ const WorkHoursCell = React.memo(({
   dayDate,
   cellData,
   settings,
+  fte,
   isSelected,
   allowOverwrite,
   isMultipleSelection,
@@ -85,17 +88,25 @@ const WorkHoursCell = React.memo(({
       data-date={dayDate}
     >
       <div className="work-hours-display">
-        {cellData ? (
+        {cellData && (
           <div className="work-hours-values">
             <div className="work-hours-field">
               <span>{formatTime(cellData[0], settings?.timeFormat)}</span>
             </div>
             <div className="work-hours-field">
               <span>{formatTime(cellData[1], settings?.timeFormat)}</span>
+              <span className="work-duration"> ({formatWorkDuration(cellData[0], cellData[1])})</span>
             </div>
           </div>
-        ) : (
-          <div className="empty-cell-placeholder">&nbsp;</div>
+        )}
+        {cellData && (
+          <HoursStrip 
+            startTime={cellData[0]} 
+            endTime={cellData[1]} 
+            fte={fte} 
+            timeResolution={settings?.timeResolution} 
+            reverseSecond={settings?.hoursStripReverseSecond}
+          />
         )}
       </div>
     </td>

@@ -44,6 +44,7 @@ const DateTimeView = ({ settings, onSettingChange }) => {
   const currentCoordinateOrder = settings.coordinateOrder || COORDINATE_ORDER_EMPLOYEE_DATE;
   const currentStartOnMode = settings.startOnMode || START_ON_MODE_RECENT;
   const currentFixedStartDate = settings.fixedStartDate || new Date().toISOString().split('T')[0];
+  const currentHoursStripReverseSecond = settings.hoursStripReverseSecond ?? true;
 
   useEffect(() => {
     const hash = window.location.hash;
@@ -282,6 +283,23 @@ const DateTimeView = ({ settings, onSettingChange }) => {
               <span>{ext.label}</span>
             </label>
           ))}
+        </div>
+      </div>
+
+      <div className="settings-panel">
+        <h3>Work Hours Visualization</h3>
+        <p className="text-sm text-[var(--text-muted)] mb-3">Configure how work hours strips are displayed.</p>
+        <div className="flex items-center gap-2">
+          <input 
+            type="checkbox" 
+            id="hoursStripReverseSecond"
+            checked={currentHoursStripReverseSecond}
+            onChange={(e) => onSettingChange('hoursStripReverseSecond', e.target.checked)}
+            className="w-4 h-4 accent-[var(--selection-g1)]"
+          />
+          <label htmlFor="hoursStripReverseSecond" className="text-sm cursor-pointer">
+            Reverse second strip (exceeding FTE)
+          </label>
         </div>
       </div>
     </div>
