@@ -162,10 +162,12 @@ function App() {
     await saveItem(STORES.SETTINGS, 'startOnMode', draftSettings.startOnMode);
     await saveItem(STORES.SETTINGS, 'fixedStartDate', draftSettings.fixedStartDate);
     await saveItem(STORES.SETTINGS, 'sidebar', draftSettings.sidebar);
+    window.location.hash = '';
     setIsSettingsOpen(false);
   };
 
   const handleCancelSettings = () => {
+    window.location.hash = '';
     setDraftSettings(appSettings);
     setIsSettingsOpen(false);
   };
@@ -181,7 +183,12 @@ function App() {
           <WeekView 
             employees={employees} 
             settings={appSettings} 
-            onOpenSettingsView={(view) => {
+            onOpenSettingsView={(view, sectionId) => {
+              if (sectionId) {
+                window.location.hash = sectionId;
+              } else {
+                window.location.hash = '';
+              }
               setSettingsView(view);
               setDraftSettings(appSettings);
               setIsSettingsOpen(true);

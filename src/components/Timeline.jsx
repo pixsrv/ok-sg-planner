@@ -1,10 +1,12 @@
 import {useEffect, useMemo, useRef, useState} from 'react';
+import { Settings } from 'lucide-react';
 import { getISOWeek, MONTH_NAMES } from '../utils/dateUtils';
 import { formatDate } from '../utils/formatters';
 import {
   DATE_FORMAT_YYYY_MM_DD_ISO,
   TIMELINE_EXTENSION_NONE
 } from '../constants/settings';
+import { VIEW_SETTINGS_DATE_TIME } from '../constants/views';
 
 
 const Timeline = ({
@@ -13,6 +15,7 @@ const Timeline = ({
   onMonthClick,
   onWeekClick,
   settings,
+  onOpenSettings,
 }) => {
   const scrollContainerRef = useRef(null);
   const isDragging = useRef(false);
@@ -350,6 +353,9 @@ const Timeline = ({
                 }
               };
 
+              const isFirst = idx === 0;
+              const isLast = idx === weeks.length - 1;
+
               return (
                 <div
                   key={`w-${week.num}-${week.year}-${idx}`}
@@ -362,10 +368,36 @@ const Timeline = ({
                   onMouseEnter={() => setHoveredWeek({num: week.num, year: week.year})}
                   onMouseLeave={() => setHoveredWeek(null)}
                 >
+                  {isFirst && (
+                    <div 
+                      className="absolute right-full mr-2 top-0 text-[var(--text-muted)] hover:text-[var(--selection-g1)] transition-colors"
+                      style={{ top: '0', transform: 'translateY(-50%)' }}
+                      title="Timeline Extension Settings"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onOpenSettings?.(VIEW_SETTINGS_DATE_TIME, 'timeline-extension-panel');
+                      }}
+                    >
+                      <Settings size={20} />
+                    </div>
+                  )}
                   <span
-                    className={`text-xs px-1 transition-colors ${isSelected ? 'text-[var(--selection-g1)]' : 'text-[var(--text)]'} ${idx === weeks.length - 1 ? '' : 'truncate'}`}>{week.num}</span>
+                    className={`text-xs px-1 transition-colors ${isSelected ? 'text-[var(--selection-g1)]' : 'text-[var(--text)]'} ${isLast ? '' : 'truncate'}`}>{week.num}</span>
                   {idx < weeks.length - 1 && (
                     <div className="absolute right-0 bottom-0 w-[1px] h-[40px] bg-[var(--border)] z-20"/>
+                  )}
+                  {isLast && (
+                    <div 
+                      className="absolute left-full ml-2 top-0 text-[var(--text-muted)] hover:text-[var(--selection-g1)] transition-colors"
+                      style={{ top: '0', transform: 'translateY(-50%)' }}
+                      title="Timeline Extension Settings"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onOpenSettings?.(VIEW_SETTINGS_DATE_TIME, 'timeline-extension-panel');
+                      }}
+                    >
+                      <Settings size={20} />
+                    </div>
                   )}
                 </div>
               );

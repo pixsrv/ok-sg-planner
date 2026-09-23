@@ -45,6 +45,17 @@ const DateTimeView = ({ settings, onSettingChange }) => {
   const currentStartOnMode = settings.startOnMode || START_ON_MODE_RECENT;
   const currentFixedStartDate = settings.fixedStartDate || new Date().toISOString().split('T')[0];
 
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash) {
+      const id = hash.replace('#', '');
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, []);
+
   return (
     <div className="view-container">
       
@@ -255,7 +266,7 @@ const DateTimeView = ({ settings, onSettingChange }) => {
         </div>
       </div>
 
-      <div className="settings-panel">
+      <div className="settings-panel" id="timeline-extension-panel">
         <h3>Timeline Extension</h3>
         <p className="text-sm text-[var(--text-muted)] mb-3">Show additional months before and after currently displayed year.</p>
         <div className="radio-list">

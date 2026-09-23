@@ -168,6 +168,7 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
         onWeekClick={handleWeekClick}
         onMonthClick={handleMonthClick}
         settings={settings}
+        onOpenSettings={onOpenSettingsView}
       />
       <div className="week-view-header">
         <div className="flex items-center gap-4">
