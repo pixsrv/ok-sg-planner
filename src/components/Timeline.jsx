@@ -56,7 +56,7 @@ const Timeline = ({
     return `${formatDate(start, format, { showYear })} - ${formatDate(end, format, { showYear })}`;
   };
 
-  const {months, weeks, totalWidth, highlightedMonthIndices} = useMemo(() => {
+  const {months, weeks, totalWidth, highlightedMonthIndices, todayPercent} = useMemo(() => {
     const extMonths = parseInt(settings?.timelineExtension || TIMELINE_EXTENSION_NONE, 10);
     
     // We want to calculate the full range of dates to display
@@ -137,12 +137,21 @@ const Timeline = ({
       highlightedMonthIndicesSet.add(endMonthKey);
     }
 
+    // Calculate today's position
+    const today = new Date();
+    let todayPercent = null;
+    if (today >= startDate && today <= endDate) {
+      const diffDays = (today.getTime() - startDate.getTime()) / 86400000;
+      todayPercent = (diffDays / days) * 100;
+    }
+
     return {
       months: monthsData, 
       weeks: weeksDataResult, 
       totalDays: days, 
       totalWidth: totalWidthValue,
-      highlightedMonthIndices: Array.from(highlightedMonthIndicesSet)
+      highlightedMonthIndices: Array.from(highlightedMonthIndicesSet),
+      todayPercent
     };
   }, [year, settings?.timelineExtension, selectedWeek]);
 
@@ -291,10 +300,16 @@ const Timeline = ({
   }, [selectedWeek, year, weeks, isMouseInside, containerWidth, totalWidth]);
 
   return (
-    <div className="flex flex-col mb-6">
+    <div className="flex flex-col mb-8 relative">
+      {/* Fixed outline frame that doesn't scroll */}
+      <div 
+        className="absolute left-0 right-0 top-6 h-[80px] border border-[var(--border)] bg-[var(--code-bg)] rounded-lg shadow-sm pointer-events-none z-0"
+      />
+      
       <div
         ref={scrollContainerRef}
-        className="w-full overflow-x-auto overflow-y-hidden border border-[var(--border)] bg-[var(--code-bg)] rounded-lg shadow-sm cursor-grab"
+        className="w-full overflow-x-auto overflow-y-visible cursor-grab relative z-10 py-6"
+        style={{ height: '140px' }}
       >
         <div 
           className="flex"
@@ -326,7 +341,7 @@ const Timeline = ({
               return (
                 <div
                   key={`m-${month.index}-${month.year}`}
-                  className={`absolute top-0 h-[40px] flex items-center justify-center cursor-pointer select-none hover:bg-[var(--selection-bg-dimmed)] hover:text-[var(--selection-g1)] bg-[var(--code-bg)] border-b border-[var(--border)] transition-colors ${month.isAdditional ? 'timeline-additional' : ''} ${isSelected ? 'timeline-month-selected' : ''}`}
+                  className={`absolute top-0 h-[40px] flex items-center justify-center cursor-pointer select-none hover:bg-[var(--selection-bg-dimmed)] hover:text-[var(--selection-g1)] border-b border-[var(--border)] transition-colors ${month.isAdditional ? 'timeline-additional' : ''} ${isSelected ? 'timeline-month-selected' : ''}`}
                   style={{
                     left: `${month.leftPercent}%`,
                     width: `${month.widthPercent}%`,
@@ -359,7 +374,7 @@ const Timeline = ({
               return (
                 <div
                   key={`w-${week.num}-${week.year}-${idx}`}
-                  className={`absolute top-[40px] h-[40px] flex items-center justify-center cursor-pointer select-none hover:bg-[var(--selection-bg-dimmed)] hover:text-[var(--selection-g1)] bg-[var(--code-bg)] transition-colors ${isSelected ? 'timeline-week-selected' : ''} ${week.isAdditional ? 'timeline-additional' : ''}`}
+                  className={`absolute top-[40px] h-[40px] flex items-center justify-center cursor-pointer select-none hover:bg-[var(--selection-bg-dimmed)] hover:text-[var(--selection-g1)] transition-colors ${isSelected ? 'timeline-week-selected' : ''} ${week.isAdditional ? 'timeline-additional' : ''}`}
                   style={{
                     left: `${week.leftPercent}%`,
                     width: `${week.widthPercent}%`,
@@ -402,6 +417,17 @@ const Timeline = ({
                 </div>
               );
             })}
+            {todayPercent !== null && (
+              <div 
+                className="timeline-today-line"
+                style={{
+                  left: `${todayPercent}%`,
+                  top: '-8px',
+                  bottom: '-8px',
+                }}
+                title="Today"
+              />
+            )}
           </div>
           <div style={{ width: containerWidth / 2, flexShrink: 0 }} />
         </div>

@@ -643,13 +643,21 @@ input:checked + .slider:before {
 
 .timeline-additional {
   opacity: 0.6;
-  background-color: var(--code-bg) !important;
   filter: brightness(0.9);
 }
 
 .timeline-additional:hover {
   opacity: 1;
   filter: none;
+}
+
+.timeline-today-line {
+  position: absolute;
+  z-index: 100;
+  pointer-events: none;
+  width: 2px;
+  background-color: var(--selection-g1);
+  box-shadow: 0 0 4px rgba(0,0,0,0.2);
 }
 
 .work-hours-values {
