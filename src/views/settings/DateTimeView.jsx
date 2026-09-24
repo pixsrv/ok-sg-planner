@@ -21,8 +21,47 @@ import {
   START_ON_MODE_RECENT,
   START_ON_MODE_FIXED,
   WORK_LENGTH_MINICHART_TYPES,
-  WORK_LENGTH_MINICHART_SEGMENTED
+  WORK_LENGTH_MINICHART_NONE,
+  WORK_LENGTH_MINICHART_SEGMENTED,
+  WORK_LENGTH_MINICHART_COLORING
 } from '../../constants/settings';
+import HoursStrip from '../../components/HoursStrip';
+
+const ChartPreview = ({ type, reverseSecond }) => {
+  if (type === WORK_LENGTH_MINICHART_NONE) {
+    return (
+      <>
+        <div className="flex-1" />
+        <div className="flex-1" />
+        <div className="flex-1" />
+      </>
+    );
+  }
+  
+  if (type === WORK_LENGTH_MINICHART_COLORING) {
+    return (
+      <>
+        <div className="w-full relative h-8 rounded-sm overflow-hidden flex-1 work-hours-cell fte-under" style={{ backgroundColor: 'var(--cell-bg-lt-fte)' }} />
+        <div className="w-full relative h-8 rounded-sm overflow-hidden flex-1 work-hours-cell fte-equal" style={{ backgroundColor: 'var(--cell-bg-eq-fte)' }} />
+        <div className="w-full relative h-8 rounded-sm overflow-hidden flex-1 work-hours-cell fte-over" style={{ backgroundColor: 'var(--cell-bg-gt-fte)' }} />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <div className="w-full relative h-8 flex items-center justify-center bg-[var(--hours-strip-bg)] rounded-sm overflow-hidden flex-1">
+         <HoursStrip type={type} startTime="08:00" endTime="14:00" fte={1} reverseSecond={reverseSecond} />
+      </div>
+      <div className="w-full relative h-8 flex items-center justify-center bg-[var(--hours-strip-bg)] rounded-sm overflow-hidden flex-1">
+         <HoursStrip type={type} startTime="08:00" endTime="16:00" fte={1} reverseSecond={reverseSecond} />
+      </div>
+      <div className="w-full relative h-8 flex items-center justify-center bg-[var(--hours-strip-bg)] rounded-sm overflow-hidden flex-1">
+         <HoursStrip type={type} startTime="08:00" endTime="18:00" fte={1} reverseSecond={reverseSecond} />
+      </div>
+    </>
+  );
+};
 
 const DateTimeView = ({ settings, onSettingChange }) => {
   const [now, setNow] = useState(new Date());
@@ -295,10 +334,17 @@ const DateTimeView = ({ settings, onSettingChange }) => {
         
         <div className="space-y-4">
           <div className="flex flex-col gap-2">
-            <span className="text-xs font-semibold uppercase text-[var(--text-muted)]">Chart Type</span>
+            <div className="visualization-grid-header uppercase tracking-wider text-[var(--text-muted)] font-semibold mb-1">
+              <div />
+              <div>Name</div>
+              <div className="text-center">&lt;FTE</div>
+              <div className="text-center">=FTE</div>
+              <div className="text-center">&gt;FTE</div>
+              <div />
+            </div>
             <div className="radio-list">
               {WORK_LENGTH_MINICHART_TYPES.map((type) => (
-                <label key={type.id} className="radio-item">
+                <label key={type.id} className="radio-item visualization-grid-item">
                   <input
                     type="radio"
                     name="workLengthMinichartType"
@@ -306,7 +352,9 @@ const DateTimeView = ({ settings, onSettingChange }) => {
                     checked={currentWorkLengthMinichartType === type.id}
                     onChange={(e) => onSettingChange('workLengthMinichartType', e.target.value)}
                   />
-                  <span>{type.label}</span>
+                  <span className="text-sm">{type.label}</span>
+                  <ChartPreview type={type.id} reverseSecond={currentHoursStripReverseSecond} />
+                  <div />
                 </label>
               ))}
             </div>

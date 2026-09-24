@@ -440,6 +440,23 @@
     cursor: pointer;
     padding: 0.5rem;
     border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.radio-item:hover {
+    background-color: var(--selection-bg-dimmed);
+}
+
+.visualization-grid-header,
+.visualization-grid-item {
+    display: grid !important;
+    grid-template-columns: 24px 140px 80px 80px 80px 1fr;
+    gap: 1rem;
+    align-items: center;
+}
+
+.visualization-grid-header {
+    padding: 0 0.5rem;
 }
 
 .radio-item input[type="radio"] {
