@@ -19,7 +19,9 @@ import {
   AUTO_SET_MODE_NONE,
   START_ON_MODES,
   START_ON_MODE_RECENT,
-  START_ON_MODE_FIXED
+  START_ON_MODE_FIXED,
+  WORK_LENGTH_MINICHART_TYPES,
+  WORK_LENGTH_MINICHART_SEGMENTED
 } from '../../constants/settings';
 
 const DateTimeView = ({ settings, onSettingChange }) => {
@@ -45,6 +47,7 @@ const DateTimeView = ({ settings, onSettingChange }) => {
   const currentStartOnMode = settings.startOnMode || START_ON_MODE_RECENT;
   const currentFixedStartDate = settings.fixedStartDate || new Date().toISOString().split('T')[0];
   const currentHoursStripReverseSecond = settings.hoursStripReverseSecond ?? true;
+  const currentWorkLengthMinichartType = settings.workLengthMinichartType || WORK_LENGTH_MINICHART_SEGMENTED;
 
   useEffect(() => {
     const hash = window.location.hash;
@@ -289,17 +292,38 @@ const DateTimeView = ({ settings, onSettingChange }) => {
       <div className="settings-panel">
         <h3>Work Hours Visualization</h3>
         <p className="text-sm text-[var(--text-muted)] mb-3">Configure how work hours strips are displayed.</p>
-        <div className="flex items-center gap-2">
-          <input 
-            type="checkbox" 
-            id="hoursStripReverseSecond"
-            checked={currentHoursStripReverseSecond}
-            onChange={(e) => onSettingChange('hoursStripReverseSecond', e.target.checked)}
-            className="w-4 h-4 accent-[var(--selection-g1)]"
-          />
-          <label htmlFor="hoursStripReverseSecond" className="text-sm cursor-pointer">
-            Reverse second strip (exceeding FTE)
-          </label>
+        
+        <div className="space-y-4">
+          <div className="flex flex-col gap-2">
+            <span className="text-xs font-semibold uppercase text-[var(--text-muted)]">Chart Type</span>
+            <div className="radio-list">
+              {WORK_LENGTH_MINICHART_TYPES.map((type) => (
+                <label key={type.id} className="radio-item">
+                  <input
+                    type="radio"
+                    name="workLengthMinichartType"
+                    value={type.id}
+                    checked={currentWorkLengthMinichartType === type.id}
+                    onChange={(e) => onSettingChange('workLengthMinichartType', e.target.value)}
+                  />
+                  <span>{type.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <input 
+              type="checkbox" 
+              id="hoursStripReverseSecond"
+              checked={currentHoursStripReverseSecond}
+              onChange={(e) => onSettingChange('hoursStripReverseSecond', e.target.checked)}
+              className="w-4 h-4 accent-[var(--selection-g1)]"
+            />
+            <label htmlFor="hoursStripReverseSecond" className="text-sm cursor-pointer">
+              Reverse second strip (exceeding FTE)
+            </label>
+          </div>
         </div>
       </div>
     </div>

@@ -162,6 +162,7 @@ function App() {
     await saveItem(STORES.SETTINGS, 'startOnMode', draftSettings.startOnMode);
     await saveItem(STORES.SETTINGS, 'fixedStartDate', draftSettings.fixedStartDate);
     await saveItem(STORES.SETTINGS, 'hoursStripReverseSecond', draftSettings.hoursStripReverseSecond);
+    await saveItem(STORES.SETTINGS, 'workLengthMinichartType', draftSettings.workLengthMinichartType);
     await saveItem(STORES.SETTINGS, 'sidebar', draftSettings.sidebar);
     window.location.hash = '';
     setIsSettingsOpen(false);

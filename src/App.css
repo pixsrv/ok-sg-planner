@@ -840,4 +840,20 @@ input:checked + .slider:before {
     --hours-strip-eq-fte: rgba(0, 255, 0, 0.08);
     --hours-strip-lt-fte: rgba(255, 0, 0, 0.5);
     --hours-strip-gt-fte: rgba(0, 118, 255, 0.3);
+
+    --cell-bg-eq-fte: rgba(0, 255, 0, 0.05);
+    --cell-bg-lt-fte: rgba(255, 0, 0, 0.05);
+    --cell-bg-gt-fte: rgba(0, 118, 255, 0.05);
+}
+
+.work-hours-cell.fte-equal {
+    background-color: var(--cell-bg-eq-fte);
+}
+
+.work-hours-cell.fte-under {
+    background-color: var(--cell-bg-lt-fte);
+}
+
+.work-hours-cell.fte-over {
+    background-color: var(--cell-bg-gt-fte);
 }

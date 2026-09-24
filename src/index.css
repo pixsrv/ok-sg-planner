@@ -65,6 +65,10 @@
         --selection-bg: color-mix(in srgb, var(--accent), transparent 90%);
         --selection-bg-dimmed: color-mix(in srgb, var(--accent), transparent 93%);
         --shadow: rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
+
+        --cell-bg-eq-fte: rgba(34, 197, 94, 0.1);
+        --cell-bg-lt-fte: rgba(239, 68, 68, 0.1);
+        --cell-bg-gt-fte: rgba(59, 130, 246, 0.1);
     }
 
     #social .button-icon {

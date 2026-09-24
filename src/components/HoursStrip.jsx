@@ -1,6 +1,17 @@
-import 'react';
+import { 
+  WORK_LENGTH_MINICHART_NONE, 
+  WORK_LENGTH_MINICHART_SEGMENTED,
+  WORK_LENGTH_MINICHART_LOLLIPOP,
+  WORK_LENGTH_MINICHART_COLORING
+} from '../constants/settings';
 
-const HoursStrip = ({ startTime, endTime, fte, reverseSecond = true }) => {
+const HoursStrip = ({ 
+  startTime, 
+  endTime, 
+  fte, 
+  reverseSecond = true,
+  type = WORK_LENGTH_MINICHART_SEGMENTED 
+}) => {
   // Parse times HH:mm to total minutes
   const parseTimeToMinutes = (timeStr) => {
     if (!timeStr) return 0;
@@ -70,8 +81,20 @@ const HoursStrip = ({ startTime, endTime, fte, reverseSecond = true }) => {
     );
   };
 
+  if (type === WORK_LENGTH_MINICHART_NONE || type === WORK_LENGTH_MINICHART_COLORING) {
+    return null;
+  }
+
+  const renderLollipop = () => {
+    // Lollipop chart will be developed soon
+    // For now, return a placeholder or nothing
+    return <div className="text-[10px] text-[var(--text-muted)] italic">Lollipop chart soon...</div>;
+  };
+
   let content;
-  if (isEqualFTE) {
+  if (type === WORK_LENGTH_MINICHART_LOLLIPOP) {
+    content = renderLollipop();
+  } else if (isEqualFTE) {
     content = renderStrip('var(--hours-strip-eq-fte)', workLengthHours);
   } else if (isUnderFTE) {
     content = renderStrip('var(--hours-strip-lt-fte)', workLengthHours);

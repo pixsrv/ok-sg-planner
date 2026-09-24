@@ -1,6 +1,7 @@
 import React from 'react';
 import { formatTime, formatWorkDuration } from '../utils/formatters';
 import HoursStrip from './HoursStrip';
+import { WORK_LENGTH_MINICHART_COLORING } from '../constants/settings';
 
 /**
  * Individual data cell for the work hours grid.
@@ -78,6 +79,33 @@ const WorkHoursCell = React.memo(({
     classes.push('cross-highlight');
   }
 
+  // Parse work hours for coloring
+  const parseTimeToMinutes = (timeStr) => {
+    if (!timeStr) return 0;
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    return hours * 60 + (minutes || 0);
+  };
+
+  const isCellColoringEnabled = settings?.workLengthMinichartType === WORK_LENGTH_MINICHART_COLORING;
+  
+  if (isCellColoringEnabled && cellData) {
+    const startMins = parseTimeToMinutes(cellData[0]);
+    const endMins = parseTimeToMinutes(cellData[1]);
+    const workLengthHours = (endMins - startMins) / 60;
+    const fteHours = (fte || 1) * 8;
+
+    const isEqualFTE = Math.abs(workLengthHours - fteHours) < 0.001;
+    const isUnderFTE = workLengthHours < fteHours;
+
+    if (isEqualFTE) {
+      classes.push('fte-equal');
+    } else if (isUnderFTE) {
+      classes.push('fte-under');
+    } else {
+      classes.push('fte-over');
+    }
+  }
+
   return (
     <td
       className={classes.join(' ')}
@@ -106,6 +134,7 @@ const WorkHoursCell = React.memo(({
             fte={fte} 
             timeResolution={settings?.timeResolution} 
             reverseSecond={settings?.hoursStripReverseSecond}
+            type={settings?.workLengthMinichartType}
           />
         )}
       </div>
