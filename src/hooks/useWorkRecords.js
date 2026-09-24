@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getStorageItem, setStorageItem } from '../utils/db';
 import { getUndoHistory, saveUndoHistory, pushAction } from '../utils/undoUtils';
-import { TIME_RESOLUTION_1MI } from '../constants/settings';
+import { TIME_RESOLUTION_5MI } from '../constants/settings';
 
 /**
  * Custom hook for managing work records, data mutation, and undo/redo logic.
@@ -141,7 +141,7 @@ export const useWorkRecords = (weekDays, employees, settings, allowOverwrite, ed
 
   const handleTimeChange = useCallback((employeeId, dayDate, type, value) => {
     const roundValue = (val) => {
-      if (val && settings?.timeResolution && settings.timeResolution > TIME_RESOLUTION_1MI) {
+      if (val && settings?.timeResolution) {
         const [hours, minutes] = val.split(':').map(Number);
         const totalMinutes = hours * 60 + minutes;
         const roundedMinutes = Math.round(totalMinutes / settings.timeResolution) * settings.timeResolution;

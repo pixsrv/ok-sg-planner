@@ -7,7 +7,7 @@ import {
   AUTO_SET_MODE_FIXED,
   AUTO_SET_MODE_CALCULATED,
   COORDINATE_ORDER_EMPLOYEE_DATE,
-  TIME_RESOLUTION_1MI
+  TIME_RESOLUTION_5MI
 } from '../constants/settings';
 
 /**
@@ -36,7 +36,7 @@ const HoursTimeline = ({
   hasSelectedData
 }) => {
   const employeeId = employee ? null : (dayDate && !employee ? 'ALL' : null); // This is a bit hacky, but WeekView passes null employee for 'ALL'
-  const timeResolution = settings?.timeResolution || TIME_RESOLUTION_1MI;
+  const timeResolution = settings?.timeResolution || TIME_RESOLUTION_5MI;
 
   // value is [start, end] where each is 'HH:mm'
   const startTime = value?.[0] || '';

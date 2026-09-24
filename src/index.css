@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+@layer base {
+    p {
+        margin: 0;
+    }
+}
+
 :root {
     --text: #6b6375;
     --text-light: #94a3b8;
@@ -211,9 +217,6 @@ h2 {
     }
 }
 
-p {
-    margin: 0;
-}
 
 code,
 .counter {

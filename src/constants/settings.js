@@ -50,7 +50,6 @@ export const TIMELINE_EXTENSIONS = [
   {id: TIMELINE_EXTENSION_3MO, label: '3 Months'},
 ];
 
-export const TIME_RESOLUTION_1MI = 1;
 export const TIME_RESOLUTION_5MI = 5;
 export const TIME_RESOLUTION_10MI = 10;
 export const TIME_RESOLUTION_15MI = 15;
@@ -58,7 +57,6 @@ export const TIME_RESOLUTION_30MI = 30;
 export const TIME_RESOLUTION_60MI = 60;
 
 export const TIME_RESOLUTIONS = [
-  {id: TIME_RESOLUTION_1MI, label: '1 minute'},
   {id: TIME_RESOLUTION_5MI, label: '5 minutes'},
   {id: TIME_RESOLUTION_10MI, label: '10 minutes'},
   {id: TIME_RESOLUTION_15MI, label: '15 minutes'},
@@ -117,7 +115,7 @@ export const SUMMARY_COL_POSITIONS = [
 export const DEFAULT_SETTINGS = {
   dateFormat: DATE_FORMAT_YYYY_MM_DD_ISO,
   timeFormat: TIME_FORMAT_24H,
-  timeResolution: TIME_RESOLUTION_1MI,
+  timeResolution: TIME_RESOLUTION_5MI,
   workDayLength: '08:00',
   autoSetEndHourMode: AUTO_SET_MODE_NONE,
   timelineStartHour: 0,
