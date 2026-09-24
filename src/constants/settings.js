@@ -100,16 +100,16 @@ export const SUMMARY_ROW_POSITION_TOP = 'top';
 export const SUMMARY_ROW_POSITION_BOTTOM = 'bottom';
 
 export const SUMMARY_ROW_POSITIONS = [
-  {id: SUMMARY_ROW_POSITION_TOP, label: 'Top'},
-  {id: SUMMARY_ROW_POSITION_BOTTOM, label: 'Bottom'},
+  {id: SUMMARY_ROW_POSITION_TOP, label: 'On Top'},
+  {id: SUMMARY_ROW_POSITION_BOTTOM, label: 'On Bottom'},
 ];
 
 export const SUMMARY_COL_POSITION_LEFT = 'left';
 export const SUMMARY_COL_POSITION_RIGHT = 'right';
 
 export const SUMMARY_COL_POSITIONS = [
-  {id: SUMMARY_COL_POSITION_LEFT, label: 'Left'},
-  {id: SUMMARY_COL_POSITION_RIGHT, label: 'Right'},
+  {id: SUMMARY_COL_POSITION_LEFT, label: 'On Left'},
+  {id: SUMMARY_COL_POSITION_RIGHT, label: 'On Right'},
 ];
 
 export const DEFAULT_SETTINGS = {

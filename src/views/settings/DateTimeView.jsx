@@ -85,6 +85,7 @@ const DateTimeView = ({settings, onSettingChange}) => {
   const currentDateFormat = settings.dateFormat || DATE_FORMAT_YYYY_MM_DD_ISO;
   const currentTimeFormat = settings.timeFormat || TIME_FORMAT_24H;
   const currentTimeResolution = settings.timeResolution || TIME_RESOLUTION_5MI;
+  const currentWorkDayLength = settings.workDayLength || '08:00';
   const currentAutoSetEndHourMode = settings.autoSetEndHourMode || AUTO_SET_MODE_NONE;
   const currentTimelineStartHour = settings.timelineStartHour ?? 0;
   const currentTimelineEndHour = settings.timelineEndHour ?? 23;
@@ -362,76 +363,73 @@ const DateTimeView = ({settings, onSettingChange}) => {
           </div>
 
           <div className="settings-panel">
-            <h3>Week View</h3>
-            <p className="text-sm text-[var(--text-muted)] mb-3">Configure visibility of summary information in Week
-              View.</p>
+            <h3>Summary Row & Column</h3>
+            <p className="text-sm text-[var(--text-muted)] mb-3">Configure visibility of summary information in the grid.</p>
 
             <div className="space-y-4">
-              <div className="flex flex-col gap-2">
-                {/*<span className="text-xs font-semibold uppercase text-[var(--text-muted)]">Summary Panel</span>*/}
-
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="showSummaryRow"
-                    checked={currentShowSummaryRow}
-                    onChange={(e) => onSettingChange('showSummaryRow', e.target.checked)}
-                    className="w-4 h-4 accent-[var(--selection-g1)]"
-                  />
+              <div className="flex flex-col gap-4">
+                <div className="flex items-center gap-3 ml-2">
+                  <label className="switch">
+                    <input
+                      type="checkbox"
+                      id="showSummaryRow"
+                      checked={currentShowSummaryRow}
+                      onChange={(e) => onSettingChange('showSummaryRow', e.target.checked)}
+                    />
+                    <span className="slider round"></span>
+                  </label>
                   <label htmlFor="showSummaryRow" className="text-sm cursor-pointer">
                     Show summary row (all employees in this day)
                   </label>
                 </div>
 
                 {currentShowSummaryRow && (
-                  <div className="flex flex-col gap-2 pl-6 border-l-2 border-[var(--selection-g1)] mb-2">
-                    <span className="text-xs font-semibold uppercase text-[var(--text-muted)]">Row Position</span>
-                    <div className="flex gap-4">
+                  <div className="flex flex-col gap-2 mb-2 ml-8">
+                    <div className="radio-list">
                       {SUMMARY_ROW_POSITIONS.map((pos) => (
-                        <label key={pos.id} className="flex items-center gap-2 cursor-pointer">
+                        <label key={pos.id} className="radio-item">
                           <input
                             type="radio"
                             name="summaryRowPosition"
                             value={pos.id}
                             checked={currentSummaryRowPosition === pos.id}
                             onChange={(e) => onSettingChange('summaryRowPosition', e.target.value)}
-                            className="w-4 h-4 accent-[var(--selection-g1)]"
                           />
-                          <span className="text-sm">{pos.label}</span>
+                          <span>{pos.label}</span>
                         </label>
                       ))}
                     </div>
                   </div>
                 )}
 
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="showSummaryCol"
-                    checked={currentShowSummaryCol}
-                    onChange={(e) => onSettingChange('showSummaryCol', e.target.checked)}
-                    className="w-4 h-4 accent-[var(--selection-g1)]"
-                  />
+                <div className="flex items-center gap-3 ml-2">
+                  <label className="switch">
+                    <input
+                      type="checkbox"
+                      id="showSummaryCol"
+                      checked={currentShowSummaryCol}
+                      onChange={(e) => onSettingChange('showSummaryCol', e.target.checked)}
+                    />
+                    <span className="slider round"></span>
+                  </label>
                   <label htmlFor="showSummaryCol" className="text-sm cursor-pointer">
                     Show summary column (all days for this employee)
                   </label>
                 </div>
 
                 {currentShowSummaryCol && (
-                  <div className="flex flex-col gap-2 pl-6 border-l-2 border-[var(--selection-g1)]">
-                    <span className="text-xs font-semibold uppercase text-[var(--text-muted)]">Column Position</span>
-                    <div className="flex gap-4">
+                  <div className="flex flex-col gap-2 ml-8">
+                    <div className="radio-list">
                       {SUMMARY_COL_POSITIONS.map((pos) => (
-                        <label key={pos.id} className="flex items-center gap-2 cursor-pointer">
+                        <label key={pos.id} className="radio-item">
                           <input
                             type="radio"
                             name="summaryColPosition"
                             value={pos.id}
                             checked={currentSummaryColPosition === pos.id}
                             onChange={(e) => onSettingChange('summaryColPosition', e.target.value)}
-                            className="w-4 h-4 accent-[var(--selection-g1)]"
                           />
-                          <span className="text-sm">{pos.label}</span>
+                          <span>{pos.label}</span>
                         </label>
                       ))}
                     </div>
