@@ -145,7 +145,6 @@ function App() {
     await saveItem(STORES.SETTINGS, 'dateFormat', draftSettings.dateFormat);
     await saveItem(STORES.SETTINGS, 'timeFormat', draftSettings.timeFormat);
     await saveItem(STORES.SETTINGS, 'timeResolution', draftSettings.timeResolution);
-    await saveItem(STORES.SETTINGS, 'timeInputControl', draftSettings.timeInputControl);
     await saveItem(STORES.SETTINGS, 'workDayLength', draftSettings.workDayLength);
     await saveItem(STORES.SETTINGS, 'autoSetEndHourMode', draftSettings.autoSetEndHourMode);
     await saveItem(STORES.SETTINGS, 'timelineStartHour', draftSettings.timelineStartHour);

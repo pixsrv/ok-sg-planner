@@ -13,8 +13,6 @@ import {
   TIMELINE_EXTENSION_NONE,
   TIME_RESOLUTIONS,
   TIME_RESOLUTION_1MI,
-  TIME_INPUT_CONTROLS,
-  TIME_INPUT_CONTROL_SYSTEM,
   AUTO_SET_MODES,
   AUTO_SET_MODE_NONE,
   AUTO_SET_MODE_FIXED,
@@ -80,7 +78,6 @@ const DateTimeView = ({ settings, onSettingChange }) => {
   const currentDateFormat = settings.dateFormat || DATE_FORMAT_YYYY_MM_DD_ISO;
   const currentTimeFormat = settings.timeFormat || TIME_FORMAT_24H;
   const currentTimeResolution = settings.timeResolution || TIME_RESOLUTION_1MI;
-  const currentTimeInputControl = settings.timeInputControl || TIME_INPUT_CONTROL_SYSTEM;
   const currentWorkDayLength = settings.workDayLength || '08:00';
   const currentAutoSetEndHourMode = settings.autoSetEndHourMode || AUTO_SET_MODE_NONE;
   const currentTimelineStartHour = settings.timelineStartHour ?? 0;
@@ -191,25 +188,6 @@ const DateTimeView = ({ settings, onSettingChange }) => {
                 onChange={(e) => onSettingChange('timeResolution', parseInt(e.target.value))}
               />
               <span>{res.label}</span>
-            </label>
-          ))}
-        </div>
-      </div>
-
-      <div className="settings-panel">
-        <h3>Time Input Control</h3>
-        <p className="text-sm text-[var(--text-muted)] mb-3">Choose the control used to input time in cells.</p>
-        <div className="radio-list">
-          {TIME_INPUT_CONTROLS.map((ctrl) => (
-            <label key={ctrl.id} className="radio-item">
-              <input
-                type="radio"
-                name="timeInputControl"
-                value={ctrl.id}
-                checked={currentTimeInputControl === ctrl.id}
-                onChange={(e) => onSettingChange('timeInputControl', e.target.value)}
-              />
-              <span>{ctrl.label}</span>
             </label>
           ))}
         </div>

@@ -66,16 +66,6 @@ export const TIME_RESOLUTIONS = [
   {id: TIME_RESOLUTION_60MI, label: '60 minutes'},
 ];
 
-export const TIME_INPUT_CONTROL_SYSTEM = 'system';
-export const TIME_INPUT_CONTROL_LINEAR = 'linear';
-export const TIME_INPUT_CONTROL_CIRCULAR = 'circular';
-
-export const TIME_INPUT_CONTROLS = [
-  {id: TIME_INPUT_CONTROL_SYSTEM, label: 'System'},
-  {id: TIME_INPUT_CONTROL_LINEAR, label: 'Linear'},
-  {id: TIME_INPUT_CONTROL_CIRCULAR, label: 'Circular'},
-];
-
 export const AUTO_SET_MODE_NONE = 'none';
 export const AUTO_SET_MODE_FIXED = 'fixed';
 export const AUTO_SET_MODE_CALCULATED = 'calculated';
@@ -128,7 +118,6 @@ export const DEFAULT_SETTINGS = {
   dateFormat: DATE_FORMAT_YYYY_MM_DD_ISO,
   timeFormat: TIME_FORMAT_24H,
   timeResolution: TIME_RESOLUTION_1MI,
-  timeInputControl: TIME_INPUT_CONTROL_SYSTEM,
   workDayLength: '08:00',
   autoSetEndHourMode: AUTO_SET_MODE_NONE,
   timelineStartHour: 0,
