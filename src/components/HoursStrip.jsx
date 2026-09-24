@@ -86,9 +86,49 @@ const HoursStrip = ({
   }
 
   const renderLollipop = () => {
-    // Lollipop chart will be developed soon
-    // For now, return a placeholder or nothing
-    return <div className="text-[10px] text-[var(--text-muted)] italic">Lollipop chart soon...</div>;
+    const workdayHours = 8;
+    const currentFteHours = fteHours;
+    const maxVal = Math.max(workdayHours, workLengthHours, currentFteHours);
+    
+    const getPos = (val) => (val / maxVal) * 100;
+
+    const workPos = getPos(workLengthHours);
+    const workdayPos = getPos(workdayHours);
+    const ftePos = getPos(currentFteHours);
+
+    let dotColor = 'var(--hours-strip-gt-fte)';
+    let dotClass = 'lollipop-dot';
+    
+    if (isEqualFTE) {
+      dotColor = 'var(--hours-strip-eq-fte)';
+    } else if (isUnderFTE) {
+      dotColor = 'var(--hours-strip-lt-fte)';
+      dotClass += ' is-error';
+    } else {
+      dotClass += ' is-warning';
+    }
+
+    return (
+      <div className="lollipop-chart">
+        {/* Axis */}
+        <div className="lollipop-axis" />
+        
+        {/* Workday Tick */}
+        <div className="lollipop-tick workday-tick" style={{ left: `${workdayPos}%` }} />
+        
+        {/* FTE Tick */}
+        <div className="lollipop-tick fte-tick" style={{ left: `${ftePos}%` }} title={`FTE: ${fte}`} />
+        
+        {/* Work Length Dot */}
+        <div 
+          className={dotClass} 
+          style={{ 
+            left: `${workPos}%`, 
+            backgroundColor: dotColor
+          }} 
+        />
+      </div>
+    );
   };
 
   let content;

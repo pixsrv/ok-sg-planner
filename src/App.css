@@ -819,10 +819,10 @@ input:checked + .slider:before {
     display: flex;
     flex-direction: column-reverse;
     gap: 2px;
-    width: calc(100% - 8px); /* Account for display padding */
+    width: calc(100% - 16px);
     position: absolute;
     bottom: 4px;
-    left: 4px;
+    left: 8px;
 }
 
 .hours-strip {
@@ -831,15 +831,74 @@ input:checked + .slider:before {
     height: 4px;
 }
 
+.lollipop-chart {
+    width: 100%;
+    height: 12px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-top: -4px;
+    margin-bottom: -2px;
+}
+
+.lollipop-axis {
+    position: absolute;
+    width: 100%;
+    height: 1px;
+    background-color: var(--hours-strip-lollipop-axis);
+    opacity: var(--hours-strip-lollipop-opacity);
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.lollipop-tick {
+    position: absolute;
+    width: 1px;
+    background-color: var(--hours-strip-lollipop-tick);
+    opacity: var(--hours-strip-lollipop-opacity);
+    transform: translateX(-50%);
+}
+
+.workday-tick {
+    height: 6px;
+    top: 50%;
+}
+
+.fte-tick {
+    height: 6px;
+    bottom: 50%;
+}
+
+.lollipop-dot {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    top: 50%;
+    z-index: 2;
+    box-shadow: 0 0 2px rgba(0,0,0,0.2);
+}
+
+.lollipop-dot.is-warning,
+.lollipop-dot.is-error {
+    width: 7.5px;
+    height: 7.5px;
+}
+
 .hours-segment {
     height: 4px;
 }
 
 :root {
     --hours-strip-bg: rgba(255, 255, 255, 0.05);
-    --hours-strip-eq-fte: rgba(0, 255, 0, 0.08);
+    --hours-strip-eq-fte: rgba(0, 255, 0, 0.1);
     --hours-strip-lt-fte: rgba(255, 0, 0, 0.5);
-    --hours-strip-gt-fte: rgba(0, 118, 255, 0.3);
+    --hours-strip-gt-fte: rgba(0, 118, 255, 0.5);
+    
+    --hours-strip-lollipop-axis: rgba(255, 255, 255, 0.5);
+    --hours-strip-lollipop-tick: rgba(255, 255, 255, 0.75);
+    --hours-strip-lollipop-opacity: 0.3;
 
     --cell-bg-eq-fte: rgba(0, 255, 0, 0.05);
     --cell-bg-lt-fte: rgba(255, 0, 0, 0.05);
