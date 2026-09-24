@@ -93,3 +93,17 @@ export const formatWorkDuration = (start, end) => {
   if (m === 0) return `${h}h`;
   return `${h}h${String(m).padStart(2, '0')}`;
 };
+
+export const formatDuration = (hours) => {
+  const h = Math.floor(hours);
+  const m = Math.round((hours - h) * 60);
+  if (m === 0) return `${h}h`;
+  return `${h}h${String(m).padStart(2, '0')}`;
+};
+
+export const parseTimeToMinutes = (timeStr) => {
+  if (!timeStr) return 0;
+  if (typeof timeStr !== 'string') return 0;
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  return hours * 60 + (minutes || 0);
+};

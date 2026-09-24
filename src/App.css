@@ -1033,3 +1033,22 @@ input:checked + .slider:before {
 .work-hours-cell.fte-over {
     background-color: var(--cell-bg-gt-fte);
 }
+
+.summary-values {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.summary-workday {
+    font-size: 0.75rem;
+    color: var(--text-h);
+    font-weight: 600;
+}
+
+.summary-scheduled {
+    font-size: 0.75rem;
+    color: var(--text);
+    opacity: 0.8;
+}

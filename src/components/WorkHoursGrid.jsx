@@ -1,6 +1,7 @@
-import React, {useState} from 'react';
+import  {useState} from 'react';
 import DayHeaderCell from './DayHeaderCell';
 import EmployeeRow from './EmployeeRow';
+import { formatDuration, parseTimeToMinutes } from '../utils/formatters';
 
 /**
  * @typedef {Object} Term
@@ -52,6 +53,68 @@ const WorkHoursGrid = ({
 
   const isMultipleSelection = editingCell?.employeeId === 'ALL' || editingCell?.dayDate === 'ALL';
 
+  const getFTEForEmployee = (emp, dateStr) => {
+    if (!emp.terms || emp.terms.length === 0) return 1.0;
+    const term = emp.terms.find(term => {
+      const from = term.validFrom;
+      const to = term.validTo || '9999-12-31';
+      return dateStr >= from && dateStr <= to;
+    }) || emp.terms[emp.terms.length - 1];
+    return term?.fte ?? 1.0;
+  };
+
+  const getDaySummary = (dayDate) => {
+    let totalWorkdayMinutes = 0;
+    let totalScheduledMinutes = 0;
+
+    employeesList.forEach(([empId, emp]) => {
+      const fte = getFTEForEmployee(emp, dayDate);
+      totalWorkdayMinutes += fte * 8 * 60;
+
+      const cellData = getCellData(empId, dayDate);
+      if (cellData && cellData[0] && cellData[1]) {
+        const startMins = parseTimeToMinutes(cellData[0]);
+        const endMins = parseTimeToMinutes(cellData[1]);
+        let duration = endMins - startMins;
+        if (duration < 0) duration += 24 * 60;
+        totalScheduledMinutes += duration;
+      }
+    });
+
+    return {
+      workdayHours: totalWorkdayMinutes / 60,
+      scheduledHours: totalScheduledMinutes / 60
+    };
+  };
+
+  const getTotalSummary = () => {
+    let totalWorkdayMinutes = 0;
+    let totalScheduledMinutes = 0;
+
+    weekDays.forEach(day => {
+      employeesList.forEach(([empId, emp]) => {
+        const fte = getFTEForEmployee(emp, day.date);
+        totalWorkdayMinutes += fte * 8 * 60;
+
+        const cellData = getCellData(empId, day.date);
+        if (cellData && cellData[0] && cellData[1]) {
+          const startMins = parseTimeToMinutes(cellData[0]);
+          const endMins = parseTimeToMinutes(cellData[1]);
+          let duration = endMins - startMins;
+          if (duration < 0) duration += 24 * 60;
+          totalScheduledMinutes += duration;
+        }
+      });
+    });
+
+    return {
+      workdayHours: totalWorkdayMinutes / 60,
+      scheduledHours: totalScheduledMinutes / 60
+    };
+  };
+
+  const totalSummary = getTotalSummary();
+
   const summaryRow = (
     <tr className={`summary-row ${summaryRowPosition}`}>
       <td className={`employee-name-cell summary-row-header ${summaryRowPosition}`}>
@@ -62,19 +125,33 @@ const WorkHoursGrid = ({
       </td>
       {showSummaryCol && summaryColPosition === 'left' && (
         <td
-          className={`work-hours-cell summary-cell left total-summary-cell ${isEditingRow ? 'cross-highlight' : ''}`}/>
+          className={`work-hours-cell summary-cell left total-summary-cell ${isEditingRow ? 'cross-highlight' : ''}`}>
+          <div className="summary-values">
+            <div className="summary-workday">{formatDuration(totalSummary.workdayHours)}</div>
+            <div className="summary-scheduled">{formatDuration(totalSummary.scheduledHours)}</div>
+          </div>
+        </td>
       )}
       {weekDays.map((day, idx) => {
         const isInEditingCol = editingCell?.dayDate === day.date && editingCell?.employeeId !== 'ALL';
+        const { workdayHours, scheduledHours } = getDaySummary(day.date);
         return (
           <td key={idx} className={`work-hours-cell summary-cell ${isInEditingCol ? 'cross-highlight' : ''}`}>
-            {/* Summary calculation will be added later */}
+            <div className="summary-values">
+              <div className="summary-workday">{formatDuration(workdayHours)}</div>
+              <div className="summary-scheduled">{formatDuration(scheduledHours)}</div>
+            </div>
           </td>
         );
       })}
       {showSummaryCol && summaryColPosition === 'right' && (
         <td
-          className={`work-hours-cell summary-cell right total-summary-cell ${isEditingRow ? 'cross-highlight' : ''}`}/>
+          className={`work-hours-cell summary-cell right total-summary-cell ${isEditingRow ? 'cross-highlight' : ''}`}>
+          <div className="summary-values">
+            <div className="summary-workday">{formatDuration(totalSummary.workdayHours)}</div>
+            <div className="summary-scheduled">{formatDuration(totalSummary.scheduledHours)}</div>
+          </div>
+        </td>
       )}
     </tr>
   );

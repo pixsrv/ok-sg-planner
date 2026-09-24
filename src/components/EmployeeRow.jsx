@@ -1,5 +1,6 @@
 import React from 'react';
 import WorkHoursCell from './WorkHoursCell';
+import { formatDuration, parseTimeToMinutes } from '../utils/formatters';
 
 /**
  * @typedef {Object} Term
@@ -116,6 +117,30 @@ const EmployeeRow = React.memo(({
     return editingCell.employeeId === empId && editingCell.dayDate === dayDate;
   };
 
+  const getEmployeeWeeklySummary = () => {
+    let totalWorkdayMinutes = 0;
+    let totalScheduledMinutes = 0;
+    weekDays.forEach(day => {
+      const fte = getFTE(emp, day.date);
+      totalWorkdayMinutes += fte * 8 * 60;
+
+      const cellData = getCellData(empId, day.date);
+      if (cellData && cellData[0] && cellData[1]) {
+        const startMins = parseTimeToMinutes(cellData[0]);
+        const endMins = parseTimeToMinutes(cellData[1]);
+        let duration = endMins - startMins;
+        if (duration < 0) duration += 24 * 60;
+        totalScheduledMinutes += duration;
+      }
+    });
+    return {
+      workdayHours: totalWorkdayMinutes / 60,
+      scheduledHours: totalScheduledMinutes / 60
+    };
+  };
+
+  const weeklySummary = getEmployeeWeeklySummary();
+
   return (
     <tr className={`employee-row ${isSelected ? 'selected' : ''}`}>
       <td 
@@ -131,7 +156,10 @@ const EmployeeRow = React.memo(({
       </td>
       {showSummaryCol && summaryColPosition === 'left' && (
         <td className={`work-hours-cell summary-cell left ${isEditingRow ? 'cross-highlight' : ''}`}>
-          {/* Employee summary calculation will be added later */}
+          <div className="summary-values">
+            <div className="summary-workday">{formatDuration(weeklySummary.workdayHours)}</div>
+            <div className="summary-scheduled">{formatDuration(weeklySummary.scheduledHours)}</div>
+          </div>
         </td>
       )}
       {weekDays.map((day, dayIdx) => {
@@ -165,7 +193,10 @@ const EmployeeRow = React.memo(({
       })}
       {showSummaryCol && summaryColPosition === 'right' && (
         <td className={`work-hours-cell summary-cell right ${isEditingRow ? 'cross-highlight' : ''}`}>
-          {/* Employee summary calculation will be added later */}
+          <div className="summary-values">
+            <div className="summary-workday">{formatDuration(weeklySummary.workdayHours)}</div>
+            <div className="summary-scheduled">{formatDuration(weeklySummary.scheduledHours)}</div>
+          </div>
         </td>
       )}
     </tr>
