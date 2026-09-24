@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, {useState} from 'react';
 import DayHeaderCell from './DayHeaderCell';
 import EmployeeRow from './EmployeeRow';
 
@@ -28,85 +28,139 @@ import EmployeeRow from './EmployeeRow';
  * @param {boolean} props.allowOverwrite
  */
 const WorkHoursGrid = ({
-  weekDays, 
-  employeesList, 
-  editingCell, 
-  onCellClick, 
-  getCellData, 
+  weekDays,
+  employeesList,
+  editingCell,
+  onCellClick,
+  getCellData,
   settings,
-  allowOverwrite
+  allowOverwrite,
 }) => {
   const [hoveredCell, setHoveredCell] = useState(null); // { employeeId, dayDate }
+  const showSummaryRow = settings?.showSummaryRow ?? true;
+  const showSummaryCol = settings?.showSummaryCol ?? true;
+  const summaryRowPosition = settings?.summaryRowPosition || 'bottom';
+  const summaryColPosition = settings?.summaryColPosition || 'right';
 
   const isColSelected = (dayDate) => {
     return editingCell?.dayDate === dayDate && editingCell?.employeeId === 'ALL';
   };
 
+  const isEditingRow = editingCell?.employeeId !== 'ALL' && editingCell?.dayDate !== 'ALL';
+  const isEditingSummaryRow = editingCell?.employeeId === 'ALL' && editingCell?.dayDate !== 'ALL';
+  const isEditingSummaryCol = editingCell?.dayDate === 'ALL' && editingCell?.employeeId !== 'ALL';
+
   const isMultipleSelection = editingCell?.employeeId === 'ALL' || editingCell?.dayDate === 'ALL';
+
+  const summaryRow = (
+    <tr className={`summary-row ${summaryRowPosition}`}>
+      <td className={`employee-name-cell summary-row-header ${summaryRowPosition}`}>
+        <div className="employee-info-wrapper">
+          <div className="employee-full-name">Summary</div>
+          <div className="employee-position">Days</div>
+        </div>
+      </td>
+      {showSummaryCol && summaryColPosition === 'left' && (
+        <td
+          className={`work-hours-cell summary-cell left total-summary-cell ${isEditingRow ? 'cross-highlight' : ''}`}/>
+      )}
+      {weekDays.map((day, idx) => {
+        const isInEditingCol = editingCell?.dayDate === day.date && editingCell?.employeeId !== 'ALL';
+        return (
+          <td key={idx} className={`work-hours-cell summary-cell ${isInEditingCol ? 'cross-highlight' : ''}`}>
+            {/* Summary calculation will be added later */}
+          </td>
+        );
+      })}
+      {showSummaryCol && summaryColPosition === 'right' && (
+        <td
+          className={`work-hours-cell summary-cell right total-summary-cell ${isEditingRow ? 'cross-highlight' : ''}`}/>
+      )}
+    </tr>
+  );
 
   return (
     <div className="work-hours-grid-wrapper">
       <table className="work-hours-grid">
         <thead>
-          <tr>
-            <th className="employee-col-header">Employee</th>
-            {weekDays.map((day) => {
-              const isSelected = isColSelected(day.date);
-              const isDirectHover = hoveredCell?.dayDate === day.date && hoveredCell?.employeeId === 'ALL';
-              const isEditingCol = editingCell?.dayDate === day.date && editingCell?.employeeId !== 'ALL';
-              const isCrossHover = hoveredCell?.dayDate === day.date && hoveredCell?.employeeId !== 'ALL';
-              
-              const isHeaderHovered = isDirectHover || isEditingCol;
-              
-              return (
-                <DayHeaderCell
-                  key={day.date}
-                  day={day}
-                  isSelected={isSelected}
-                  isDirectHeaderHovered={isDirectHover}
-                  isHeaderHovered={isHeaderHovered}
-                  isCrossHover={isCrossHover}
-                  onCellClick={onCellClick}
-                  setHoveredCell={setHoveredCell}
-                />
-              );
-            })}
-          </tr>
+        <tr>
+          <th className={`employee-col-header ${isEditingSummaryRow ? 'cross-highlight' : ''}`}>Employee</th>
+          {showSummaryCol && summaryColPosition === 'left' && (
+            <th
+              className={`summary-col-header left ${isEditingSummaryRow || isEditingSummaryCol ? 'cross-highlight' : ''}`}>
+              <div className="day-header-content">
+                <span className="day-name">Summary</span>
+                <span className="week-num">Employees</span>
+              </div>
+            </th>
+          )}
+          {weekDays.map((day) => {
+            const isSelected = isColSelected(day.date);
+            const isDirectHover = hoveredCell?.dayDate === day.date && hoveredCell?.employeeId === 'ALL';
+            const isEditingCol = editingCell?.dayDate === day.date && editingCell?.employeeId !== 'ALL';
+            const isCrossHover = hoveredCell?.dayDate === day.date && hoveredCell?.employeeId !== 'ALL';
+
+            const isHeaderHovered = isDirectHover || isEditingCol;
+
+            return (
+              <DayHeaderCell
+                key={day.date}
+                day={day}
+                isSelected={isSelected}
+                isDirectHeaderHovered={isDirectHover}
+                isHeaderHovered={isHeaderHovered}
+                isCrossHover={isCrossHover}
+                onCellClick={onCellClick}
+                setHoveredCell={setHoveredCell}
+              />
+            );
+          })}
+          {showSummaryCol && summaryColPosition === 'right' && (
+            <th
+              className={`summary-col-header right ${isEditingSummaryRow || isEditingSummaryCol ? 'cross-highlight' : ''}`}>Summary</th>
+          )}
+        </tr>
         </thead>
         <tbody>
-          {employeesList.length > 0 ? (
-            employeesList.map(([empId, emp]) => {
-              const isSelected = editingCell?.employeeId === empId && editingCell?.dayDate === 'ALL';
-              const isDirectHover = hoveredCell?.employeeId === empId && hoveredCell?.dayDate === 'ALL';
-              const isEditingRow = editingCell?.employeeId === empId && editingCell?.dayDate !== 'ALL';
-              const isCrossHover = hoveredCell?.employeeId === empId && hoveredCell?.dayDate !== 'ALL';
+        {showSummaryRow && summaryRowPosition === 'top' && summaryRow}
+        {employeesList.length > 0 ? (
+          employeesList.map(([empId, emp]) => {
+            const isSelected = editingCell?.employeeId === empId && editingCell?.dayDate === 'ALL';
+            const isDirectHover = hoveredCell?.employeeId === empId && hoveredCell?.dayDate === 'ALL';
+            const isEmpEditingRow = editingCell?.employeeId === empId && editingCell?.dayDate !== 'ALL';
+            const isCrossHover = hoveredCell?.employeeId === empId && hoveredCell?.dayDate !== 'ALL';
 
-              return (
-                <EmployeeRow
-                  key={empId}
-                  empId={empId}
-                  emp={emp}
-                  weekDays={weekDays}
-                  isSelected={isSelected}
-                  isDirectHover={isDirectHover}
-                  isEditingRow={isEditingRow}
-                  isCrossHover={isCrossHover}
-                  hoveredCell={hoveredCell}
-                  editingCell={editingCell}
-                  onCellClick={onCellClick}
-                  setHoveredCell={setHoveredCell}
-                  getCellData={getCellData}
-                  settings={settings}
-                  allowOverwrite={allowOverwrite}
-                  isMultipleSelection={isMultipleSelection}
-                />
-              );
-            })
-          ) : (
-            <tr>
-              <td colSpan={weekDays.length + 1} className="empty-state">No employees available</td>
-            </tr>
-          )}
+            return (
+              <EmployeeRow
+                key={empId}
+                empId={empId}
+                emp={emp}
+                weekDays={weekDays}
+                isSelected={isSelected}
+                isDirectHover={isDirectHover}
+                isEditingRow={isEmpEditingRow}
+                isCrossHover={isCrossHover}
+                hoveredCell={hoveredCell}
+                editingCell={editingCell}
+                onCellClick={onCellClick}
+                setHoveredCell={setHoveredCell}
+                getCellData={getCellData}
+                settings={settings}
+                allowOverwrite={allowOverwrite}
+                isMultipleSelection={isMultipleSelection}
+                showSummaryCol={showSummaryCol}
+                summaryColPosition={summaryColPosition}
+              />
+            );
+          })
+        ) : (
+          <tr>
+            <td colSpan={weekDays.length + 1 + (showSummaryCol ? 1 : 0) + (showSummaryCol ? 1 : 0)}
+              className="empty-state">No employees available
+            </td>
+          </tr>
+        )}
+        {showSummaryRow && summaryRowPosition === 'bottom' && summaryRow}
         </tbody>
       </table>
     </div>

@@ -218,10 +218,21 @@
     transition: background-color 0.2s;
 }
 
+.employee-col-header {
+    position: sticky;
+    left: 0;
+    top: 0;
+    z-index: 30;
+    background: var(--social-bg);
+}
+
 .day-col-header {
     min-width: 120px;
     background-color: var(--social-bg);
     cursor: pointer;
+    position: sticky;
+    top: 0;
+    z-index: 20;
 }
 
 .day-col-header:hover {
@@ -254,6 +265,91 @@
     cursor: pointer;
 }
 
+.summary-row.bottom {
+    position: sticky;
+    bottom: 0;
+    background: var(--bg);
+    z-index: 10;
+}
+
+.summary-row.top {
+    position: sticky;
+    top: 41px; /* Height of the header tr */
+    background: var(--bg);
+    z-index: 15;
+}
+
+.summary-col-header.right,
+.summary-cell.right {
+    position: sticky;
+    right: 0;
+    background: var(--bg);
+    z-index: 10;
+}
+
+.summary-col-header.left,
+.summary-cell.left {
+    position: sticky;
+    left: 200px;
+    background: var(--bg);
+    z-index: 10;
+}
+
+.summary-col-header.right {
+    top: 0;
+    z-index: 30;
+    background: var(--social-bg);
+}
+
+.summary-col-header.left {
+    top: 0;
+    z-index: 30;
+    background: var(--social-bg);
+}
+
+.total-summary-cell.right {
+    z-index: 30;
+}
+
+.total-summary-cell.left {
+    z-index: 30;
+}
+
+.summary-row.bottom .total-summary-cell {
+    bottom: 0;
+}
+
+.summary-row.top .total-summary-cell {
+    bottom: auto;
+    top: 41px;
+}
+
+.summary-row td {
+    border-top: 2px solid var(--border);
+    border-bottom: 2px solid var(--border);
+    font-weight: 500;
+}
+
+.summary-cell.right {
+    border-left: 2px solid var(--border);
+    font-weight: 500;
+}
+
+.summary-cell.left {
+    border-right: 2px solid var(--border);
+    font-weight: 500;
+}
+
+.summary-row-header.bottom {
+    z-index: 20;
+    bottom: 0;
+}
+
+.summary-row-header.top {
+    z-index: 20;
+    top: 41px;
+}
+
 .employee-name-cell:hover {
     background-color: var(--selection-bg-dimmed);
 }
@@ -280,6 +376,10 @@
     cursor: pointer;
 }
 
+.employee-name-cell.cross-highlight,
+.day-col-header.cross-highlight,
+.work-hours-cell.summary-cell.cross-highlight,
+.summary-col-header.cross-highlight,
 .work-hours-cell.cross-highlight {
     background-color: var(--selection-bg-dimmed);
     opacity: 0.6;

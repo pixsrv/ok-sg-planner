@@ -108,6 +108,21 @@ export const WORK_LENGTH_MINICHART_TYPES = [
   {id: WORK_LENGTH_MINICHART_COLORING, label: 'Cell Coloring'},
 ];
 
+export const SUMMARY_ROW_POSITION_TOP = 'top';
+export const SUMMARY_ROW_POSITION_BOTTOM = 'bottom';
+
+export const SUMMARY_ROW_POSITIONS = [
+  {id: SUMMARY_ROW_POSITION_TOP, label: 'Top'},
+  {id: SUMMARY_ROW_POSITION_BOTTOM, label: 'Bottom'},
+];
+
+export const SUMMARY_COL_POSITION_LEFT = 'left';
+export const SUMMARY_COL_POSITION_RIGHT = 'right';
+
+export const SUMMARY_COL_POSITIONS = [
+  {id: SUMMARY_COL_POSITION_LEFT, label: 'Left'},
+  {id: SUMMARY_COL_POSITION_RIGHT, label: 'Right'},
+];
 
 export const DEFAULT_SETTINGS = {
   dateFormat: DATE_FORMAT_YYYY_MM_DD_ISO,
@@ -131,6 +146,10 @@ export const DEFAULT_SETTINGS = {
   fixedStartDate: new Date().toISOString().split('T')[0],
   hoursStripReverseSecond: true,
   workLengthMinichartType: WORK_LENGTH_MINICHART_SEGMENTED,
+  showSummaryRow: true,
+  showSummaryCol: true,
+  summaryRowPosition: SUMMARY_ROW_POSITION_BOTTOM,
+  summaryColPosition: SUMMARY_COL_POSITION_RIGHT,
   sidebar: [
     {id: VIEW_STAFF, visible: true, default: true},
     {id: VIEW_MONTH, visible: true, default: false},

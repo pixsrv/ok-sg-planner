@@ -17,10 +17,10 @@ import { WORK_LENGTH_MINICHART_COLORING } from '../constants/settings';
  * @param {boolean} props.allowOverwrite
  * @param {boolean} props.isMultipleSelection
  * @param {boolean} props.isEditingCross
- * @param {boolean} props.isHovered
  * @param {boolean} props.isDirectHover
  * @param {Function} props.onCellClick
  * @param {Function} props.setHoveredCell
+ * @param {Function} props.getCellData
  */
 const WorkHoursCell = React.memo(({
   empId,
@@ -32,10 +32,10 @@ const WorkHoursCell = React.memo(({
   allowOverwrite,
   isMultipleSelection,
   isEditingCross,
-  isHovered,
   isDirectHover,
   onCellClick,
-  setHoveredCell
+  setHoveredCell,
+  getCellData
 }) => {
   const [hadDataOnSelection, setHadDataOnSelection] = React.useState(null);
 
@@ -65,8 +65,6 @@ const WorkHoursCell = React.memo(({
   const classes = ['work-hours-cell'];
   if (isDirectHover) {
     classes.push('focused-cell');
-  } else if (isHovered) {
-    classes.push('hover-highlight');
   }
 
   if (isSelected) {

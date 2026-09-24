@@ -34,6 +34,8 @@ const DayHeaderCell = React.memo(({
     setHoveredCell(null);
   };
 
+  const isEditingCrossHighlight = isCrossHover || isHeaderHovered;
+  
   const classes = ['day-col-header'];
   if (isDirectHeaderHovered) {
     classes.push('hovered');
@@ -45,6 +47,8 @@ const DayHeaderCell = React.memo(({
 
   if (isSelected) {
     classes.push('selected');
+  } else if (isEditingCrossHighlight) {
+    classes.push('cross-highlight');
   }
 
   return (

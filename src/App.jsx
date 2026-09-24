@@ -163,6 +163,10 @@ function App() {
     await saveItem(STORES.SETTINGS, 'fixedStartDate', draftSettings.fixedStartDate);
     await saveItem(STORES.SETTINGS, 'hoursStripReverseSecond', draftSettings.hoursStripReverseSecond);
     await saveItem(STORES.SETTINGS, 'workLengthMinichartType', draftSettings.workLengthMinichartType);
+    await saveItem(STORES.SETTINGS, 'showSummaryRow', draftSettings.showSummaryRow);
+    await saveItem(STORES.SETTINGS, 'showSummaryCol', draftSettings.showSummaryCol);
+    await saveItem(STORES.SETTINGS, 'summaryRowPosition', draftSettings.summaryRowPosition);
+    await saveItem(STORES.SETTINGS, 'summaryColPosition', draftSettings.summaryColPosition);
     await saveItem(STORES.SETTINGS, 'sidebar', draftSettings.sidebar);
     window.location.hash = '';
     setIsSettingsOpen(false);

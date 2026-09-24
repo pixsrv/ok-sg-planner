@@ -82,12 +82,15 @@ const EmployeeRow = React.memo(({
   getCellData,
   settings,
   allowOverwrite,
-  isMultipleSelection
+  isMultipleSelection,
+  showSummaryCol,
+  summaryColPosition
 }) => {
   const today = new Date();
   const todayStr = today.toISOString().split('T')[0];
 
   const isNameCellHovered = isDirectHover || isEditingRow;
+  const isEditingCrossHighlight = isEditingRow || isCrossHover;
   
   const classes = ['employee-name-cell'];
   if (isDirectHover || isNameCellHovered) {
@@ -98,6 +101,8 @@ const EmployeeRow = React.memo(({
   
   if (isSelected) {
     classes.push('selected');
+  } else if (isEditingCrossHighlight) {
+    classes.push('cross-highlight');
   }
 
   const handleClick = () => onCellClick(empId, 'ALL');
@@ -124,6 +129,11 @@ const EmployeeRow = React.memo(({
           <div className="employee-position">{getCurrentPosition(emp, todayStr)}</div>
         </div>
       </td>
+      {showSummaryCol && summaryColPosition === 'left' && (
+        <td className={`work-hours-cell summary-cell left ${isEditingRow ? 'cross-highlight' : ''}`}>
+          {/* Employee summary calculation will be added later */}
+        </td>
+      )}
       {weekDays.map((day, dayIdx) => {
         const cellData = getCellData(empId, day.date);
         const isSelected = isCellSelected(day.date);
@@ -132,7 +142,6 @@ const EmployeeRow = React.memo(({
         const isInEditingCol = editingCell?.dayDate === day.date && editingCell?.employeeId !== 'ALL';
         const isEditingCross = isInEditingRow || isInEditingCol;
         
-        const isHovered = hoveredCell?.employeeId === empId || hoveredCell?.dayDate === day.date;
         const isDirectHover = hoveredCell?.employeeId === empId && hoveredCell?.dayDate === day.date;
 
         return (
@@ -147,13 +156,18 @@ const EmployeeRow = React.memo(({
             allowOverwrite={allowOverwrite}
             isMultipleSelection={isMultipleSelection}
             isEditingCross={isEditingCross}
-            isHovered={isHovered}
             isDirectHover={isDirectHover}
             onCellClick={onCellClick}
             setHoveredCell={setHoveredCell}
+            getCellData={getCellData}
           />
         );
       })}
+      {showSummaryCol && summaryColPosition === 'right' && (
+        <td className={`work-hours-cell summary-cell right ${isEditingRow ? 'cross-highlight' : ''}`}>
+          {/* Employee summary calculation will be added later */}
+        </td>
+      )}
     </tr>
   );
 });

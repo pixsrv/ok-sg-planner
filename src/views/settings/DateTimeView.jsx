@@ -23,7 +23,11 @@ import {
   WORK_LENGTH_MINICHART_TYPES,
   WORK_LENGTH_MINICHART_NONE,
   WORK_LENGTH_MINICHART_SEGMENTED,
-  WORK_LENGTH_MINICHART_COLORING
+  WORK_LENGTH_MINICHART_COLORING,
+  SUMMARY_ROW_POSITIONS,
+  SUMMARY_ROW_POSITION_BOTTOM,
+  SUMMARY_COL_POSITIONS,
+  SUMMARY_COL_POSITION_RIGHT
 } from '../../constants/settings';
 import HoursStrip from '../../components/HoursStrip';
 
@@ -87,6 +91,10 @@ const DateTimeView = ({ settings, onSettingChange }) => {
   const currentFixedStartDate = settings.fixedStartDate || new Date().toISOString().split('T')[0];
   const currentHoursStripReverseSecond = settings.hoursStripReverseSecond ?? true;
   const currentWorkLengthMinichartType = settings.workLengthMinichartType || WORK_LENGTH_MINICHART_SEGMENTED;
+  const currentShowSummaryRow = settings.showSummaryRow ?? true;
+  const currentShowSummaryCol = settings.showSummaryCol ?? true;
+  const currentSummaryRowPosition = settings.summaryRowPosition || SUMMARY_ROW_POSITION_BOTTOM;
+  const currentSummaryColPosition = settings.summaryColPosition || SUMMARY_COL_POSITION_RIGHT;
 
   useEffect(() => {
     const hash = window.location.hash;
@@ -325,6 +333,85 @@ const DateTimeView = ({ settings, onSettingChange }) => {
               <span>{ext.label}</span>
             </label>
           ))}
+        </div>
+      </div>
+
+      <div className="settings-panel">
+        <h3>Week View</h3>
+        <p className="text-sm text-[var(--text-muted)] mb-3">Configure visibility of summary information in Week View.</p>
+        
+        <div className="space-y-4">
+          <div className="flex flex-col gap-2">
+            <span className="text-xs font-semibold uppercase text-[var(--text-muted)]">Summary Panel</span>
+            
+            <div className="flex items-center gap-2">
+              <input 
+                type="checkbox" 
+                id="showSummaryRow"
+                checked={currentShowSummaryRow}
+                onChange={(e) => onSettingChange('showSummaryRow', e.target.checked)}
+                className="w-4 h-4 accent-[var(--selection-g1)]"
+              />
+              <label htmlFor="showSummaryRow" className="text-sm cursor-pointer">
+                Show summary row (all employees in this day)
+              </label>
+            </div>
+
+            {currentShowSummaryRow && (
+              <div className="flex flex-col gap-2 pl-6 border-l-2 border-[var(--selection-g1)] mb-2">
+                <span className="text-xs font-semibold uppercase text-[var(--text-muted)]">Row Position</span>
+                <div className="flex gap-4">
+                  {SUMMARY_ROW_POSITIONS.map((pos) => (
+                    <label key={pos.id} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="summaryRowPosition"
+                        value={pos.id}
+                        checked={currentSummaryRowPosition === pos.id}
+                        onChange={(e) => onSettingChange('summaryRowPosition', e.target.value)}
+                        className="w-4 h-4 accent-[var(--selection-g1)]"
+                      />
+                      <span className="text-sm">{pos.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center gap-2">
+              <input 
+                type="checkbox" 
+                id="showSummaryCol"
+                checked={currentShowSummaryCol}
+                onChange={(e) => onSettingChange('showSummaryCol', e.target.checked)}
+                className="w-4 h-4 accent-[var(--selection-g1)]"
+              />
+              <label htmlFor="showSummaryCol" className="text-sm cursor-pointer">
+                Show summary column (all days for this employee)
+              </label>
+            </div>
+
+            {currentShowSummaryCol && (
+              <div className="flex flex-col gap-2 pl-6 border-l-2 border-[var(--selection-g1)]">
+                <span className="text-xs font-semibold uppercase text-[var(--text-muted)]">Column Position</span>
+                <div className="flex gap-4">
+                  {SUMMARY_COL_POSITIONS.map((pos) => (
+                    <label key={pos.id} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="summaryColPosition"
+                        value={pos.id}
+                        checked={currentSummaryColPosition === pos.id}
+                        onChange={(e) => onSettingChange('summaryColPosition', e.target.value)}
+                        className="w-4 h-4 accent-[var(--selection-g1)]"
+                      />
+                      <span className="text-sm">{pos.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
