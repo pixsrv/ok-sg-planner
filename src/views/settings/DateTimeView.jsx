@@ -17,6 +17,7 @@ import {
   TIME_INPUT_CONTROL_SYSTEM,
   AUTO_SET_MODES,
   AUTO_SET_MODE_NONE,
+  AUTO_SET_MODE_FIXED,
   START_ON_MODES,
   START_ON_MODE_RECENT,
   START_ON_MODE_FIXED,
@@ -220,16 +221,6 @@ const DateTimeView = ({ settings, onSettingChange }) => {
         
         <div className="space-y-6">
           <div className="flex flex-col gap-2">
-            <span className="text-xs font-semibold uppercase text-[var(--text-muted)]">Work Day Length (Etat)</span>
-            <input 
-              type="time" 
-              value={currentWorkDayLength}
-              onChange={(e) => onSettingChange('workDayLength', e.target.value)}
-              className="w-32 bg-[var(--bg)] border border-[var(--border)] rounded px-2 py-1 text-sm text-[var(--text)] focus:ring-1 focus:ring-[var(--selection-g2)] outline-none"
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
             <span className="text-xs font-semibold uppercase text-[var(--text-muted)]">Auto Set End Hour Mode</span>
             <div className="radio-list">
               {AUTO_SET_MODES.map((mode) => (
@@ -242,6 +233,16 @@ const DateTimeView = ({ settings, onSettingChange }) => {
                     onChange={(e) => onSettingChange('autoSetEndHourMode', e.target.value)}
                   />
                   <span>{mode.label}</span>
+                  
+                  {mode.id === AUTO_SET_MODE_FIXED && (
+                    <input 
+                      type="time" 
+                      value={currentWorkDayLength}
+                      onChange={(e) => onSettingChange('workDayLength', e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                      className="w-32 bg-[var(--bg)] border border-[var(--border)] rounded px-2 py-1 text-sm text-[var(--text)] focus:ring-1 focus:ring-[var(--selection-g2)] outline-none"
+                    />
+                  )}
                 </label>
               ))}
             </div>
