@@ -27,6 +27,8 @@
     --selection-g3: color-mix(in srgb, var(--accent), transparent 50%);
     --selection-bg: color-mix(in srgb, var(--accent), transparent 90%);
     --selection-bg-dimmed: color-mix(in srgb, var(--accent), transparent 95%);
+    --text-muted: #94a3b8;
+    --bg-dimmed: #f1f5f9;
     --shadow: rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
     --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
@@ -70,6 +72,8 @@
         --selection-g3: color-mix(in srgb, var(--accent), transparent 50%);
         --selection-bg: color-mix(in srgb, var(--accent), transparent 90%);
         --selection-bg-dimmed: color-mix(in srgb, var(--accent), transparent 93%);
+        --text-muted: #64748b;
+        --bg-dimmed: #1e293b;
         --shadow: rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
 
         --cell-bg-eq-fte: rgba(34, 197, 94, 0.1);

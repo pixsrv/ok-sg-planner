@@ -15,6 +15,45 @@ import {
 
 const PREVIEW_DATE = new Date('2026-11-15T15:30:00');
 
+const TimelineExtensionPreview = ({extensionMonths}) => {
+  const months = parseInt(extensionMonths);
+  const maxExtension = 3;
+  const totalSlots = 12 + (maxExtension * 2);
+
+  return (
+    <div className="week-schema flex gap-1">
+      {Array.from({length: totalSlots}, (_, i) => {
+        const slotIndex = i - maxExtension; // -3 to 14
+        const isMainMonth = slotIndex >= 0 && slotIndex < 12;
+        const isPreExtension = slotIndex < 0 && slotIndex >= -months;
+        const isPostExtension = slotIndex >= 12 && slotIndex < 12 + months;
+
+        if (!isMainMonth && !isPreExtension && !isPostExtension) {
+          return <div key={i} className="w-8 h-8" />; // Empty slot for alignment (2rem = w-8)
+        }
+
+        let monthNum;
+        if (isMainMonth) {
+          monthNum = slotIndex + 1;
+        } else if (isPreExtension) {
+          monthNum = 12 + slotIndex + 1;
+        } else {
+          monthNum = slotIndex - 12 + 1;
+        }
+
+        return (
+          <div
+            key={i}
+            className={`time-ribbon-item hours text-[0.65rem] w-8 h-8 cursor-default ${!isMainMonth ? 'timeline-schema-extension' : ''}`}
+          >
+            {monthNum}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
 const DateSettingsTab = ({settings, onSettingChange}) => {
   const currentDateFormat = settings.dateFormat || DATE_FORMAT_YYYY_MM_DD_ISO;
   const currentWeekStart = settings.weekStart || WEEK_START_MONDAY;
@@ -101,7 +140,7 @@ const DateSettingsTab = ({settings, onSettingChange}) => {
                     return (
                       <div
                         key={i}
-                        className={`time-ribbon-item hours text-[0.65rem] w-6 h-6 cursor-default ${isSunday ? 'week-schema-sunday' : ''}`}
+                        className={`time-ribbon-item hours text-[0.65rem] w-8 h-8 cursor-default ${isSunday ? 'week-schema-sunday' : ''}`}
                       >
                         {d}
                       </div>
@@ -120,7 +159,7 @@ const DateSettingsTab = ({settings, onSettingChange}) => {
           displayed year.</p>
         <div className="radio-list">
           {TIMELINE_EXTENSIONS.map((ext) => (
-            <label key={ext.id} className="radio-item">
+            <label key={ext.id} className="radio-item settings-grid">
               <input
                 type="radio"
                 name="timelineExtension"
@@ -128,7 +167,8 @@ const DateSettingsTab = ({settings, onSettingChange}) => {
                 checked={currentTimelineExtension === ext.id}
                 onChange={(e) => onSettingChange('timelineExtension', e.target.value)}
               />
-              <span>{ext.label}</span>
+              <span className="format-label">{ext.label}</span>
+              <TimelineExtensionPreview extensionMonths={ext.id} />
             </label>
           ))}
         </div>

@@ -590,6 +590,12 @@
     font-weight: bold;
 }
 
+.timeline-schema-extension {
+    opacity: 0.4;
+    background-color: var(--bg-dimmed) !important;
+    color: var(--text-muted) !important;
+}
+
 /* SidebarView Grid Styles */
 .sidebar-grid {
     width: 100%;
