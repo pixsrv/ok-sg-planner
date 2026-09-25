@@ -8,6 +8,9 @@ import {
   TIMELINE_EXTENSIONS,
   WEEK_START_DAYS,
   WEEK_START_MONDAY,
+  WEEK_START_SUNDAY,
+  WEEKDAYS_SHORT,
+  WEEKDAYS_SHORT_SUNDAY,
 } from '../../constants/settings';
 
 const PREVIEW_DATE = new Date('2026-11-15T15:30:00');
@@ -56,9 +59,9 @@ const DateSettingsTab = ({settings, onSettingChange}) => {
         <h3>Date Format</h3>
         <p className="text-sm text-[var(--text-muted)] mb-4">Choose which date date format is to be used across the
           whole app</p>
-        <div className="radio-list">
+        <div className="radio-list date-format-list">
           {DATE_FORMATS.map((format) => (
-            <label key={format.id} className="radio-item">
+            <label key={format.id} className="radio-item settings-grid">
               <input
                 type="radio"
                 name="dateFormat"
@@ -66,7 +69,8 @@ const DateSettingsTab = ({settings, onSettingChange}) => {
                 checked={currentDateFormat === format.id}
                 onChange={(e) => onSettingChange('dateFormat', e.target.value)}
               />
-              <span>{format.label} ({formatDate(PREVIEW_DATE, format.id)})</span>
+              <span className="format-label">{format.label}</span>
+              <span className="format-example">{formatDate(PREVIEW_DATE, format.id)}</span>
             </label>
           ))}
         </div>
@@ -75,19 +79,38 @@ const DateSettingsTab = ({settings, onSettingChange}) => {
       <div className="settings-panel">
         <h3>Week Start</h3>
         <p className="text-sm text-[var(--text-muted)] mb-4">Choose when the week starts</p>
-        <div className="radio-list">
-          {WEEK_START_DAYS.map((day) => (
-            <label key={day.id} className="radio-item">
-              <input
-                type="radio"
-                name="weekStart"
-                value={day.id}
-                checked={currentWeekStart === day.id}
-                onChange={(e) => onSettingChange('weekStart', e.target.value)}
-              />
-              <span>{day.label}</span>
-            </label>
-          ))}
+        <div className="radio-list week-start-list">
+          {WEEK_START_DAYS.map((day) => {
+            const displayDays = day.id === WEEK_START_SUNDAY 
+              ? WEEKDAYS_SHORT_SUNDAY 
+              : WEEKDAYS_SHORT;
+
+            return (
+              <label key={day.id} className="radio-item settings-grid">
+                <input
+                  type="radio"
+                  name="weekStart"
+                  value={day.id}
+                  checked={currentWeekStart === day.id}
+                  onChange={(e) => onSettingChange('weekStart', e.target.value)}
+                />
+                <span className="format-label">{day.label}</span>
+                <div className="week-schema flex gap-1">
+                  {displayDays.map((d, i) => {
+                    const isSunday = d === 'S';
+                    return (
+                      <div
+                        key={i}
+                        className={`time-ribbon-item hours text-[0.65rem] w-6 h-6 cursor-default ${isSunday ? 'week-schema-sunday' : ''}`}
+                      >
+                        {d}
+                      </div>
+                    );
+                  })}
+                </div>
+              </label>
+            );
+          })}
         </div>
       </div>
 

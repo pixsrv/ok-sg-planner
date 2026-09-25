@@ -25,9 +25,9 @@ const TimeSettingsTab = ({settings, onSettingChange}) => {
       <div className="settings-panel">
         <h3>Time Format</h3>
         <p className="text-sm text-[var(--text-muted)] mb-4">Choose how the time should be displayed</p>
-        <div className="radio-list">
+        <div className="radio-list time-format-list">
           {TIME_FORMATS.map((format) => (
-            <label key={format.id} className="radio-item">
+            <label key={format.id} className="radio-item settings-grid">
               <input
                 type="radio"
                 name="timeFormat"
@@ -35,7 +35,8 @@ const TimeSettingsTab = ({settings, onSettingChange}) => {
                 checked={currentTimeFormat === format.id}
                 onChange={(e) => onSettingChange('timeFormat', e.target.value)}
               />
-              <span>{format.label} ({formatTime(PREVIEW_DATE, format.id)})</span>
+              <span className="format-label">{format.label}</span>
+              <span className="format-example">{formatTime(PREVIEW_DATE, format.id)}</span>
             </label>
           ))}
         </div>

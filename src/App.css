@@ -571,6 +571,25 @@
     color: var(--text);
 }
 
+.settings-grid {
+    display: grid !important;
+    grid-template-columns: 24px 200px 1fr;
+    gap: 1rem;
+    align-items: center;
+}
+
+.settings-grid .format-example {
+    color: var(--text-light);
+    opacity: 0.8;
+}
+
+.week-schema-sunday {
+    background-color: var(--selection-bg) !important;
+    color: var(--selection-g1) !important;
+    border-color: var(--selection-g1) !important;
+    font-weight: bold;
+}
+
 /* SidebarView Grid Styles */
 .sidebar-grid {
     width: 100%;

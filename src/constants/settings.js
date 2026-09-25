@@ -25,6 +25,9 @@ export const TIME_FORMATS = [
 export const WEEK_START_MONDAY = 'Monday';
 export const WEEK_START_SUNDAY = 'Sunday';
 
+export const WEEKDAYS_SHORT = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+export const WEEKDAYS_SHORT_SUNDAY = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+
 export const WEEK_START_DAYS = [
   {id: WEEK_START_MONDAY, label: 'Monday (ISO)'},
   {id: WEEK_START_SUNDAY, label: 'Sunday'},
