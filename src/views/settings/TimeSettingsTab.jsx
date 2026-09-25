@@ -1,4 +1,5 @@
 import {formatTime} from '../../utils/formatters';
+import TimeRibbon from '../../components/TimeRibbon';
 import {
   AUTO_SET_MODE_FIXED,
   AUTO_SET_MODE_NONE,
@@ -100,30 +101,28 @@ const TimeSettingsTab = ({settings, onSettingChange}) => {
         <h3>Hours Timeline Range</h3>
         <p className="text-sm text-[var(--text-muted)] mb-3">Set the earliest and latest hour displayed on the
           linear timeline.</p>
-        <div className="flex gap-4 items-center">
-          <div className="flex flex-col gap-1">
-            <span className="text-xs font-semibold">Start Hour</span>
-            <select
-              value={currentTimelineStartHour}
-              onChange={(e) => onSettingChange('timelineStartHour', parseInt(e.target.value))}
-              className="bg-[var(--bg)] border border-[var(--border)] rounded px-2 py-1 text-sm text-[var(--text)]"
-            >
-              {Array.from({length: 24}, (_, i) => (
-                <option key={i} value={i}>{i}:00</option>
-              ))}
-            </select>
+        <div className="space-y-4">
+          <div className="flex flex-col gap-2">
+            <span className="text-xs font-semibold uppercase text-[var(--text-muted)]">Start Hour</span>
+            <div className="overflow-x-auto pb-2">
+              <TimeRibbon
+                items={Array.from({length: 24}, (_, i) => i)}
+                activeValue={currentTimelineStartHour}
+                onItemClick={(h) => onSettingChange('timelineStartHour', h)}
+                type="hours"
+              />
+            </div>
           </div>
-          <div className="flex flex-col gap-1">
-            <span className="text-xs font-semibold">End Hour</span>
-            <select
-              value={currentTimelineEndHour}
-              onChange={(e) => onSettingChange('timelineEndHour', parseInt(e.target.value))}
-              className="bg-[var(--bg)] border border-[var(--border)] rounded px-2 py-1 text-sm text-[var(--text)]"
-            >
-              {Array.from({length: 24}, (_, i) => (
-                <option key={i} value={i}>{i}:00</option>
-              ))}
-            </select>
+          <div className="flex flex-col gap-2">
+            <span className="text-xs font-semibold uppercase text-[var(--text-muted)]">End Hour</span>
+            <div className="overflow-x-auto pb-2">
+              <TimeRibbon
+                items={Array.from({length: 24}, (_, i) => i)}
+                activeValue={currentTimelineEndHour}
+                onItemClick={(h) => onSettingChange('timelineEndHour', h)}
+                type="hours"
+              />
+            </div>
           </div>
         </div>
       </div>
