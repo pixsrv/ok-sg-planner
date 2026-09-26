@@ -1,3 +1,5 @@
+import { DEFAULT_SETTINGS } from '../constants/settings';
+
 export const MONTH_NAMES = [
   'January', 'February', 'March', 'April', 'May', 'June',
   'July', 'August', 'September', 'October', 'November', 'December'
@@ -53,4 +55,26 @@ export const getDateFromWeek = (week, year, weekStart = 'Monday') => {
   }
   
   return d;
+};
+
+/**
+ * Checks if a given date string or Date object is a Sunday.
+ * @param {string|Date} date
+ * @returns {boolean}
+ */
+export const isSunday = (date) => {
+  return new Date(date).getDay() === 0;
+};
+
+/**
+ * Checks if a given date is in the working Sundays list.
+ * @param {string} date - Date string in YYYY-MM-DD format.
+ * @param {string} [workingSundays] - Comma-separated string of YYYY-MM-DD dates. If ommited, uses DEFAULT_SETTINGS.
+ * @returns {boolean}
+ */
+export const isWorkingSunday = (date, workingSundays) => {
+  const ws = workingSundays ?? DEFAULT_SETTINGS.workingSundays;
+  if (!ws) return false;
+  const list = ws.split(',').map(d => d.trim());
+  return list.includes(date);
 };

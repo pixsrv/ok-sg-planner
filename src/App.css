@@ -590,6 +590,16 @@
     font-weight: bold;
 }
 
+.sunday-greyed-out {
+    background-color: var(--bg-dimmed) !important;
+    opacity: 0.6;
+}
+
+.sunday-greyed-out .day-name,
+.sunday-greyed-out .day-date {
+    color: var(--text-muted) !important;
+}
+
 .timeline-schema-extension {
     opacity: 0.4;
     background-color: var(--bg-dimmed) !important;

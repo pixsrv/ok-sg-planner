@@ -166,6 +166,8 @@ function App() {
     await saveItem(STORES.SETTINGS, 'showSummaryCol', draftSettings.showSummaryCol);
     await saveItem(STORES.SETTINGS, 'summaryRowPosition', draftSettings.summaryRowPosition);
     await saveItem(STORES.SETTINGS, 'summaryColPosition', draftSettings.summaryColPosition);
+    await saveItem(STORES.SETTINGS, 'greyOutSundays', draftSettings.greyOutSundays);
+    await saveItem(STORES.SETTINGS, 'workingSundays', draftSettings.workingSundays);
     await saveItem(STORES.SETTINGS, 'sidebar', draftSettings.sidebar);
     window.location.hash = '';
     setIsSettingsOpen(false);

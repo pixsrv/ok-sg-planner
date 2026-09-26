@@ -2,6 +2,7 @@ import  {useState} from 'react';
 import DayHeaderCell from './DayHeaderCell';
 import EmployeeRow from './EmployeeRow';
 import { formatDuration, parseTimeToMinutes } from '../utils/formatters';
+import { isSunday, isWorkingSunday } from '../utils/dateUtils';
 
 /**
  * @typedef {Object} Term
@@ -135,8 +136,18 @@ const WorkHoursGrid = ({
       {weekDays.map((day, idx) => {
         const isInEditingCol = editingCell?.dayDate === day.date && editingCell?.employeeId !== 'ALL';
         const { workdayHours, scheduledHours } = getDaySummary(day.date);
+        
+        const summaryClasses = ['work-hours-cell', 'summary-cell'];
+        if (isInEditingCol) summaryClasses.push('cross-highlight');
+        
+        if (isSunday(day.date) && settings?.greyOutSundays) {
+          if (!isWorkingSunday(day.date, settings?.workingSundays)) {
+            summaryClasses.push('sunday-greyed-out');
+          }
+        }
+
         return (
-          <td key={idx} className={`work-hours-cell summary-cell ${isInEditingCol ? 'cross-highlight' : ''}`}>
+          <td key={idx} className={summaryClasses.join(' ')}>
             <div className="summary-values">
               <div className="summary-workday">{formatDuration(workdayHours)}</div>
               <div className="summary-scheduled">{formatDuration(scheduledHours)}</div>
@@ -187,6 +198,7 @@ const WorkHoursGrid = ({
                 isDirectHeaderHovered={isDirectHover}
                 isHeaderHovered={isHeaderHovered}
                 isCrossHover={isCrossHover}
+                settings={settings}
                 onCellClick={onCellClick}
                 setHoveredCell={setHoveredCell}
               />

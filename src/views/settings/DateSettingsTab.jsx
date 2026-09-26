@@ -60,9 +60,38 @@ const DateSettingsTab = ({settings, onSettingChange}) => {
   const currentTimelineExtension = settings.timelineExtension || TIMELINE_EXTENSION_NONE;
   const currentStartOnMode = settings.startOnMode || 'recent';
   const currentFixedStartDate = settings.fixedStartDate || new Date().toISOString().split('T')[0];
+  const currentGreyOutSundays = settings.greyOutSundays || false;
+  const currentWorkingSundays = settings.workingSundays || '';
 
   return (
     <>
+      <div className="settings-panel">
+        <h3>Weekends</h3>
+        <p className="text-sm text-[var(--text-muted)] mb-4">Manage weekend display and exceptions</p>
+        <div className="flex flex-col gap-4">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={currentGreyOutSundays}
+              onChange={(e) => onSettingChange('greyOutSundays', e.target.checked)}
+              className="w-4 h-4 rounded border-[var(--border)] text-[var(--selection-g2)] focus:ring-[var(--selection-g2)]"
+            />
+            <span className="text-sm">Grey out Sundays</span>
+          </label>
+          
+          <div className="flex flex-col gap-2">
+            <span className="text-xs font-semibold uppercase text-[var(--text-muted)]">Working Sundays (comma separated dates)</span>
+            <input
+              type="text"
+              placeholder="YYYY-MM-DD, YYYY-MM-DD"
+              value={currentWorkingSundays}
+              onChange={(e) => onSettingChange('workingSundays', e.target.value)}
+              className="w-full bg-[var(--bg)] border border-[var(--border)] rounded px-2 py-1 text-sm text-[var(--text)] focus:ring-1 focus:ring-[var(--selection-g2)] outline-none"
+            />
+          </div>
+        </div>
+      </div>
+
       <div className="settings-panel">
         <h3>Start On (New Session)</h3>
         <p className="text-sm text-[var(--text-muted)] mb-4">Choose which date will be shown by default when

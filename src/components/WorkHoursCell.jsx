@@ -2,6 +2,7 @@ import React from 'react';
 import { formatTime, formatWorkDuration } from '../utils/formatters';
 import HoursStrip from './HoursStrip';
 import { WORK_LENGTH_MINICHART_COLORING } from '../constants/settings';
+import { isSunday, isWorkingSunday } from '../utils/dateUtils';
 
 /**
  * Individual data cell for the work hours grid.
@@ -34,8 +35,7 @@ const WorkHoursCell = React.memo(({
   isEditingCross,
   isDirectHover,
   onCellClick,
-  setHoveredCell,
-  getCellData
+  setHoveredCell
 }) => {
   const [hadDataOnSelection, setHadDataOnSelection] = React.useState(null);
 
@@ -75,6 +75,12 @@ const WorkHoursCell = React.memo(({
     }
   } else if (isEditingCross) {
     classes.push('cross-highlight');
+  }
+
+  if (isSunday(dayDate) && settings?.greyOutSundays) {
+    if (!isWorkingSunday(dayDate, settings?.workingSundays)) {
+      classes.push('sunday-greyed-out');
+    }
   }
 
   // Parse work hours for coloring

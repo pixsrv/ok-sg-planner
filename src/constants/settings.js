@@ -140,6 +140,8 @@ export const DEFAULT_SETTINGS = {
   showSummaryCol: true,
   summaryRowPosition: SUMMARY_ROW_POSITION_BOTTOM,
   summaryColPosition: SUMMARY_COL_POSITION_RIGHT,
+  greyOutSundays: false,
+  workingSundays: '',
   sidebar: [
     {id: VIEW_STAFF, visible: true, default: true},
     {id: VIEW_MONTH, visible: true, default: false},

@@ -1,4 +1,5 @@
 import React from 'react';
+import { isSunday, isWorkingSunday } from '../utils/dateUtils';
 
 /**
  * Individual header cell for the work hours grid.
@@ -10,6 +11,7 @@ import React from 'react';
  * @param {boolean} props.isDirectHeaderHovered
  * @param {boolean} props.isHeaderHovered
  * @param {boolean} props.isCrossHover
+ * @param {Object} props.settings
  * @param {Function} props.onCellClick
  * @param {Function} props.setHoveredCell
  */
@@ -19,6 +21,7 @@ const DayHeaderCell = React.memo(({
   isDirectHeaderHovered,
   isHeaderHovered,
   isCrossHover,
+  settings,
   onCellClick,
   setHoveredCell
 }) => {
@@ -49,6 +52,12 @@ const DayHeaderCell = React.memo(({
     classes.push('selected');
   } else if (isEditingCrossHighlight) {
     classes.push('cross-highlight');
+  }
+
+  if (isSunday(day.date) && settings?.greyOutSundays) {
+    if (!isWorkingSunday(day.date, settings?.workingSundays)) {
+      classes.push('sunday-greyed-out');
+    }
   }
 
   return (
