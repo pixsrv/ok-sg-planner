@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { Settings, X, RotateCcw, RotateCw, Trash2 } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Settings, X, RotateCcw, RotateCw, Trash2, Clock, CalendarOff } from 'lucide-react';
 import IconButton from './IconButton';
 import TimeRibbon from './TimeRibbon';
 import {
@@ -35,7 +35,8 @@ const HoursTimeline = ({
   onAllowOverwriteChange,
   hasSelectedData
 }) => {
-  const employeeId = employee ? null : (dayDate && !employee ? 'ALL' : null); // This is a bit hacky, but WeekView passes null employee for 'ALL'
+  const [activeTab, setActiveTab] = useState('work');
+  const employeeId = employee ? null : (dayDate && !employee ? 'ALL' : null);
   const timeResolution = settings?.timeResolution || TIME_RESOLUTION_5MI;
 
   // value is [start, end] where each is 'HH:mm'
@@ -134,6 +135,12 @@ const HoursTimeline = ({
     ? `${employeeName} : ${displayDate}`
     : `${displayDate} : ${employeeName}`;
 
+  const absenceOptions = [
+    { id: 'holiday', label: 'Bank Holiday', description: 'Company days off' },
+    { id: 'vacation', label: 'Vacation', description: 'Employee holidays' },
+    { id: 'excused', label: 'Excused Absence', description: 'Sickleave or similar' },
+  ];
+
   return (
     <div 
       className="hours-timeline-content bg-[var(--code-bg)] p-2 w-full max-w-7xl"
@@ -179,12 +186,39 @@ const HoursTimeline = ({
           )}
         </div>
 
-        <div 
-          className="absolute left-1/2 -translate-x-1/2 text-sm font-medium text-[var(--selection-g1)] px-3 py-1 bg-[var(--selection-bg)] rounded border border-[var(--selection-g2)] whitespace-nowrap cursor-pointer select-none"
-          onDoubleClick={onCoordinateDoubleClick}
-          title="Double click to go to this cell"
-        >
-          {coordinateDisplay}
+        <div className="flex items-center gap-4 flex-grow justify-center">
+          <div 
+            className="text-sm font-medium text-[var(--selection-g1)] px-3 py-1 bg-[var(--selection-bg)] rounded border border-[var(--selection-g2)] whitespace-nowrap cursor-pointer select-none"
+            onDoubleClick={onCoordinateDoubleClick}
+            title="Double click to go to this cell"
+          >
+            {coordinateDisplay}
+          </div>
+
+          <div className="flex bg-[var(--social-bg)] rounded-md p-1 border border-[var(--border)]">
+            <button
+              onClick={() => setActiveTab('work')}
+              className={`flex items-center gap-2 px-3 py-1 rounded text-xs font-bold uppercase transition-all ${
+                activeTab === 'work' 
+                  ? 'bg-[var(--selection-g1)] text-white shadow-sm' 
+                  : 'text-[var(--text-muted)] hover:text-[var(--text)]'
+              }`}
+            >
+              <Clock size={14} />
+              Work
+            </button>
+            <button
+              onClick={() => setActiveTab('absence')}
+              className={`flex items-center gap-2 px-3 py-1 rounded text-xs font-bold uppercase transition-all ${
+                activeTab === 'absence' 
+                  ? 'bg-[var(--selection-g1)] text-white shadow-sm' 
+                  : 'text-[var(--text-muted)] hover:text-[var(--text)]'
+              }`}
+            >
+              <CalendarOff size={14} />
+              Absence
+            </button>
+          </div>
         </div>
 
         <div className="flex items-center gap-2">
@@ -202,42 +236,66 @@ const HoursTimeline = ({
         </div>
       </div>
 
-      <div className="space-y-4">
-        {['start', 'end'].map((type) => {
-          const currentTime = type === 'start' ? start : end;
-          const currentH = ensureHourInRange(currentTime?.h);
-          return (
-            <div key={type} className="flex items-start gap-4">
-              <div className="w-24 flex-shrink-0 pt-2">
-                <div className="text-[10px] font-bold uppercase text-[var(--text-muted)] leading-tight">
-                  {type === 'start' ? 'Start Time' : 'End Time'}
-                </div>
-                <div className="text-sm font-mono text-[var(--selection-g1)] font-bold">
-                  {type === 'start' ? startTime || '--:--' : endTime || '--:--'}
-                </div>
-              </div>
-              
-              <div className="flex-grow overflow-hidden">
-                <div className="overflow-x-auto pb-2 scrollbar-thin">
-                  <div className="flex flex-col gap-1">
-                    <TimeRibbon 
-                      items={hours}
-                      activeValue={currentTime?.h}
-                      onItemClick={(h) => handleTimeClick(type, h, currentTime?.m || 0)}
-                      type="hours"
-                    />
-                    <TimeRibbon 
-                      items={minutes}
-                      activeValue={currentTime?.m}
-                      onItemClick={(m) => handleTimeClick(type, currentH, m)}
-                      type="minutes"
-                    />
+      <div className="h-[160px]">
+        {activeTab === 'work' ? (
+          <div className="space-y-4 animate-in fade-in duration-200">
+            {['start', 'end'].map((type) => {
+              const currentTime = type === 'start' ? start : end;
+              const currentH = ensureHourInRange(currentTime?.h);
+              return (
+                <div key={type} className="flex items-start gap-4">
+                  <div className="w-24 flex-shrink-0 pt-2">
+                    <div className="text-[10px] font-bold uppercase text-[var(--text-muted)] leading-tight">
+                      {type === 'start' ? 'Start Time' : 'End Time'}
+                    </div>
+                    <div className="text-sm font-mono text-[var(--selection-g1)] font-bold">
+                      {type === 'start' ? startTime || '--:--' : endTime || '--:--'}
+                    </div>
+                  </div>
+                  
+                  <div className="flex-grow overflow-hidden">
+                    <div className="overflow-x-auto pb-2 scrollbar-thin">
+                      <div className="flex flex-col gap-1">
+                        <TimeRibbon 
+                          items={hours}
+                          activeValue={currentTime?.h}
+                          onItemClick={(h) => handleTimeClick(type, h, currentTime?.m || 0)}
+                          type="hours"
+                        />
+                        <TimeRibbon 
+                          items={minutes}
+                          activeValue={currentTime?.m}
+                          onItemClick={(m) => handleTimeClick(type, currentH, m)}
+                          type="minutes"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-          );
-        })}
+              );
+            })}
+          </div>
+        ) : (
+          <div className="flex flex-wrap gap-4 py-4 animate-in fade-in duration-200 justify-center">
+            {absenceOptions.map((opt) => (
+              <button
+                key={opt.id}
+                className="flex flex-col items-center gap-2 p-5 rounded-lg border border-[var(--border)] bg-[var(--bg)] hover:border-[var(--selection-g1)] hover:bg-[var(--selection-bg-dimmed)] transition-all w-64 group"
+                onClick={() => {
+                  // Not saved for now, as per requirements
+                  console.log(`Absence type selected: ${opt.id}`);
+                }}
+              >
+                <span className="text-base font-bold text-[var(--text-h)] group-hover:text-[var(--selection-g1)]">
+                  {opt.label}
+                </span>
+                <span className="text-xs text-[var(--text-muted)] text-center">
+                  {opt.description}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
