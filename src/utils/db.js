@@ -8,7 +8,8 @@ export const STORES = {
   CURRENT_STATE: 'current',
   UNDO: 'undo',
   JUMPS: 'jumps',
-  FILTERS: 'filters'
+  FILTERS: 'filters',
+  DAYS_OFF: 'days-off'
 };
 
 const getStorageKey = (storeName) => `${PREFIX}${storeName}`;

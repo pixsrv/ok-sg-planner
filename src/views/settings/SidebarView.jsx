@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { GripVertical } from 'lucide-react';
-import { VIEW_STAFF, VIEW_MONTH, VIEW_WEEK } from '../../constants/views';
+import { VIEW_STAFF, VIEW_MONTH, VIEW_WEEK, VIEW_DAYS_OFF } from '../../constants/views';
 import { getViewInfo } from '../../utils/viewUtils';
 
 const SidebarView = ({ settings, onSettingChange }) => {
@@ -8,6 +8,7 @@ const SidebarView = ({ settings, onSettingChange }) => {
     { id: VIEW_STAFF, visible: true, default: true },
     { id: VIEW_MONTH, visible: true, default: false },
     { id: VIEW_WEEK, visible: true, default: false },
+    { id: VIEW_DAYS_OFF, visible: true, default: false },
   ];
 
   const [draggedItemIndex, setDraggedItemIndex] = useState(null);

@@ -5,6 +5,7 @@ import SettingsLayout from './components/settings/SettingsLayout'
 import StaffView from './views/StaffView'
 import MonthView from './views/MonthView'
 import WeekView from './views/WeekView'
+import DaysOffView from './views/DaysOffView'
 import ProfileView from './views/settings/ProfileView.jsx'
 import DateTimeView from './views/settings/DateTimeView.jsx'
 import NotificationsView from './views/settings/NotificationsView.jsx'
@@ -19,6 +20,7 @@ import {
   VIEW_STAFF,
   VIEW_MONTH,
   VIEW_WEEK,
+  VIEW_DAYS_OFF,
   VIEW_SETTINGS_SIDEBAR,
   VIEW_SETTINGS_OMNIBOX,
   VIEW_SETTINGS_PROFILE,
@@ -69,31 +71,40 @@ function App() {
           setEmployees(storedEmployees);
         }
 
-        if (storedMonths && storedMonths.length > 0) {
-          setMonths(storedMonths);
+      if (storedMonths && storedMonths.length > 0) {
+        setMonths(storedMonths);
+      }
+
+      if (storedSettings && Object.keys(storedSettings).length > 0) {
+        const mergedSettings = { ...DEFAULT_SETTINGS, ...storedSettings };
+
+        // Ensure sidebar contains all views from DEFAULT_SETTINGS, but keep user's visibility/order
+        if (storedSettings.sidebar) {
+          const storedSidebarIds = new Set(storedSettings.sidebar.map(item => item.id));
+          const missingViews = DEFAULT_SETTINGS.sidebar.filter(item => !storedSidebarIds.has(item.id));
+          if (missingViews.length > 0) {
+            mergedSettings.sidebar = [...storedSettings.sidebar, ...missingViews];
+          }
         }
 
-        if (storedSettings && Object.keys(storedSettings).length > 0) {
-          setAppSettings(prev => ({ ...prev, ...storedSettings }));
-          setDraftSettings(prev => ({ ...prev, ...storedSettings }));
-          
-          if (storedSettings.startOnMode === undefined) {
-             setAppSettings(prev => ({ ...prev, startOnMode: START_ON_MODE_RECENT, fixedStartDate: new Date().toISOString().split('T')[0] }));
-             setDraftSettings(prev => ({ ...prev, startOnMode: START_ON_MODE_RECENT, fixedStartDate: new Date().toISOString().split('T')[0] }));
-          }
-          
-          if (storedSettings.sidebarFolded !== undefined) {
-            setIsSidebarCollapsed(storedSettings.sidebarFolded);
-          }
-          
-          if (storedSettings.sidebar) {
-            const defaultView = storedSettings.sidebar.find(item => item.default);
+        setAppSettings(mergedSettings);
+        setDraftSettings(mergedSettings);
 
-            if (defaultView) {
-              setCurrentView(defaultView.id);
-            }
-          }
+        if (storedSettings.sidebarFolded !== undefined) {
+          setIsSidebarCollapsed(storedSettings.sidebarFolded);
         }
+
+        const defaultView = mergedSettings.sidebar?.find(item => item.default);
+        if (defaultView) {
+          setCurrentView(defaultView.id);
+        }
+      } else {
+        // No stored settings, but we might want to set the currentView to default from DEFAULT_SETTINGS
+        const defaultView = DEFAULT_SETTINGS.sidebar.find(item => item.default);
+        if (defaultView) {
+          setCurrentView(defaultView.id);
+        }
+      }
       } catch (error) {
         console.error('Failed to load data from localStorage:', error);
       }
@@ -202,6 +213,8 @@ function App() {
             }}
           />
         )
+      case VIEW_DAYS_OFF:
+        return <DaysOffView employees={employees} settings={appSettings} />
       default:
         return <StaffView employees={employees} settings={appSettings} />
     }

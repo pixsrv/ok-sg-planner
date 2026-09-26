@@ -1,4 +1,4 @@
-import {VIEW_MONTH, VIEW_STAFF, VIEW_WEEK} from './views'
+import {VIEW_DAYS_OFF, VIEW_MONTH, VIEW_STAFF, VIEW_WEEK} from './views'
 
 export const DATE_FORMAT_YYYY_MM_DD_ISO = 'YYYY-MM-DD';
 export const DATE_FORMAT_DD_MM_YYYY_DASH = 'DD-MM-YYYY';
@@ -146,5 +146,6 @@ export const DEFAULT_SETTINGS = {
     {id: VIEW_STAFF, visible: true, default: true},
     {id: VIEW_MONTH, visible: true, default: false},
     {id: VIEW_WEEK, visible: true, default: false},
+    {id: VIEW_DAYS_OFF, visible: true, default: false},
   ],
 };
