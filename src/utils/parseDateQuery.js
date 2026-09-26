@@ -1,13 +1,14 @@
-import { getMonthName, getOrdinalSuffix, MONTH_NAMES } from './dateUtils';
+import { getMonthName, getOrdinalSuffix, MONTH_NAMES, getISOWeek } from './dateUtils';
 
 /**
  * Parses a search query for dates, weeks, months, or years.
  *
  * @param {string} query The search query string.
  * @param {Date} contextDate The reference date for relative or contextual parsing.
+ * @param {Object} settings Application settings.
  * @returns {Array} An array of unique match objects.
  */
-export function parseDateQuery(query, contextDate) {
+export function parseDateQuery(query, contextDate, settings) {
   const matches = [];
   const input = query.trim().toLowerCase();
   
@@ -218,10 +219,14 @@ export function parseDateQuery(query, contextDate) {
 
   // 3. Today recognition
   if ('today'.startsWith(input)) {
+    const today = new Date();
+    const { weekNum, weekYear } = getISOWeek(today, settings?.weekStart);
     matches.push({
       type: 'today',
       label: 'Today',
-      value: new Date()
+      value: today,
+      weekNum,
+      year: weekYear
     });
   }
 

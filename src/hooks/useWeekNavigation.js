@@ -36,7 +36,7 @@ export const useWeekNavigation = (settings, STORES) => {
     const stored = getStorageItem(STORES.CURRENT_STATE);
     if (stored?.selectedWeek) {
       const year = stored.selectedYear || new Date().getFullYear();
-      return getDateFromWeek(stored.selectedWeek, year);
+      return getDateFromWeek(stored.selectedWeek, year, settings?.weekStart);
     }
 
     return new Date();
@@ -64,8 +64,8 @@ export const useWeekNavigation = (settings, STORES) => {
 
   // Helper to get week number
   const getWeekNumber = useCallback((d) => {
-    return getISOWeek(d);
-  }, []);
+    return getISOWeek(d, settings?.weekStart);
+  }, [settings?.weekStart]);
 
   const startOfWeek = useMemo(() => {
     return getStartOfWeek(referenceDate);
@@ -126,11 +126,11 @@ export const useWeekNavigation = (settings, STORES) => {
 
   const handleWeekClick = useCallback((weekNum, weekYear) => {
     const yearToUse = weekYear || currentWeekYear;
-    const newDate = getDateFromWeek(weekNum, yearToUse);
+    const newDate = getDateFromWeek(weekNum, yearToUse, settings?.weekStart);
 
     setReferenceDate(newDate);
     return { isAdditional: weekYear !== currentWeekYear };
-  }, [currentWeekYear]);
+  }, [currentWeekYear, settings?.weekStart]);
 
   const handleDateSelect = useCallback((selection) => {
     if (selection.date) {

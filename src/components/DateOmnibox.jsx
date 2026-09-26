@@ -15,7 +15,7 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => 
   const { historyList, addJumpToHistory, clearHistory } = useJumpHistory(settings, selectedWeek, selectedYear);
 
   const today = new Date();
-  const { weekNum: currentWeek, weekYear: currentYear } = getISOWeek(today);
+  const { weekNum: currentWeek, weekYear: currentYear } = getISOWeek(today, settings?.weekStart);
   const isTodaySelected = selectedWeek === currentWeek && selectedYear === currentYear;
 
   const handleTodayClick = () => {
@@ -118,8 +118,8 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => 
       return;
     }
 
-    const contextDate = getDateFromWeek(selectedWeek, selectedYear);
-    const uniqueMatches = parseDateQuery(text, contextDate);
+    const contextDate = getDateFromWeek(selectedWeek, selectedYear, settings?.weekStart);
+    const uniqueMatches = parseDateQuery(text, contextDate, settings);
 
     setResults(uniqueMatches.slice(0, 8));
     setSelectedIndex(0);
@@ -137,7 +137,7 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => 
       addJumpToHistory(targetDate);
       onDateSelect({ date: targetDate });
     } else if (result.type === 'week') {
-      const date = getDateFromWeek(result.weekNum, result.year);
+      const date = getDateFromWeek(result.weekNum, result.year, settings?.weekStart);
       addJumpToHistory(date);
       onDateSelect({ weekNum: result.weekNum, year: result.year });
     } else if (result.type === 'month') {
@@ -152,7 +152,7 @@ const DateOmnibox = ({ selectedWeek, selectedYear, onDateSelect, settings }) => 
       addJumpToHistory(result.value);
       onDateSelect({ date: result.value });
     } else if (result.type === 'move') {
-      const contextDate = getDateFromWeek(selectedWeek, selectedYear);
+      const contextDate = getDateFromWeek(selectedWeek, selectedYear, settings?.weekStart);
       
       if (result.unit === 'days') {
         targetDate = new Date(contextDate);

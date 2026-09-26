@@ -21,7 +21,7 @@ export const useJumpHistory = (settings, selectedWeek, selectedYear) => {
       }
     }
     
-    const contextDate = getDateFromWeek(selectedWeek, selectedYear);
+    const contextDate = getDateFromWeek(selectedWeek, selectedYear, settings?.weekStart);
     contextDate.setHours(0, 0, 0, 0);
     return { list: [contextDate], pointer: 0 };
   });

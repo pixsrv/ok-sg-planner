@@ -25,9 +25,16 @@ export const getOrdinalSuffix = (day) => {
   }
 };
 
-export const getISOWeek = (d) => {
+export const getISOWeek = (d, weekStart = 'Monday') => {
   const date = new Date(d.getTime());
   date.setHours(0, 0, 0, 0);
+
+  // If Sunday is start of week, and current date is Sunday, 
+  // it should belong to the NEXT week compared to ISO (where Sunday is the end of the previous week).
+  if (weekStart === 'Sunday') {
+    date.setDate(date.getDate() + 1);
+  }
+
   date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
   const weekYear = date.getFullYear();
   const week1 = new Date(weekYear, 0, 4);
@@ -35,10 +42,15 @@ export const getISOWeek = (d) => {
   return { weekNum, weekYear };
 };
 
-export const getDateFromWeek = (week, year) => {
+export const getDateFromWeek = (week, year, weekStart = 'Monday') => {
   const d = new Date(year, 0, 4);
   const day = d.getDay();
   const diff = d.getDate() - day + (day === 0 ? -6 : 1);
   d.setDate(diff + (week - 1) * 7);
+  
+  if (weekStart === 'Sunday') {
+    d.setDate(d.getDate() - 1);
+  }
+  
   return d;
 };

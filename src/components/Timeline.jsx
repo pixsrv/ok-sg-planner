@@ -1,10 +1,11 @@
 import {useEffect, useMemo, useRef, useState} from 'react';
 import { Settings } from 'lucide-react';
-import { getISOWeek, MONTH_NAMES } from '../utils/dateUtils';
+import { getISOWeek, MONTH_NAMES, getDateFromWeek } from '../utils/dateUtils';
 import { formatDate } from '../utils/formatters';
 import {
   DATE_FORMAT_YYYY_MM_DD_ISO,
-  TIMELINE_EXTENSION_NONE
+  TIMELINE_EXTENSION_NONE,
+  WEEK_START_SUNDAY
 } from '../constants/settings';
 import { VIEW_SETTINGS_DATE_TIME } from '../constants/views';
 
@@ -41,10 +42,7 @@ const Timeline = ({
   }, []);
 
   const getWeekRange = (weekNum, yr) => {
-    const d = new Date(yr, 0, 4);
-    const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-    d.setDate(diff + (weekNum - 1) * 7);
+    const d = getDateFromWeek(weekNum, yr, settings?.weekStart);
 
     const start = new Date(d);
     const end = new Date(d);
@@ -58,6 +56,7 @@ const Timeline = ({
 
   const {months, weeks, totalWidth, highlightedMonthIndices, todayPercent} = useMemo(() => {
     const extMonths = parseInt(settings?.timelineExtension || TIMELINE_EXTENSION_NONE, 10);
+    const isSundayStart = settings?.weekStart === WEEK_START_SUNDAY;
     
     // We want to calculate the full range of dates to display
     const startDate = new Date(year, -extMonths, 1);
@@ -97,15 +96,20 @@ const Timeline = ({
     }
 
     const weeksDataResult = [];
-    // Find the Monday of the week containing startDate
+    // Find the Monday/Sunday of the week containing startDate
     const startOfFirstWeek = new Date(startDate);
-    const firstDayOfWeek = (startOfFirstWeek.getDay() + 6) % 7;
+    let firstDayOfWeek;
+    if (isSundayStart) {
+      firstDayOfWeek = startOfFirstWeek.getDay();
+    } else {
+      firstDayOfWeek = (startOfFirstWeek.getDay() + 6) % 7;
+    }
     startOfFirstWeek.setDate(startOfFirstWeek.getDate() - firstDayOfWeek);
 
     let currentDate = new Date(startOfFirstWeek);
 
     while (currentDate <= endDate) {
-      const { weekNum, weekYear } = getISOWeek(currentDate);
+      const { weekNum, weekYear } = getISOWeek(currentDate, settings?.weekStart);
       const diffDays = (currentDate.getTime() - startDate.getTime()) / 86400000;
 
       weeksDataResult.push({
@@ -122,10 +126,7 @@ const Timeline = ({
     // Determine highlighted months based on selectedWeek
     const highlightedMonthIndicesSet = new Set();
     if (selectedWeek) {
-      const weekStart = new Date(year, 0, 4);
-      const day = weekStart.getDay();
-      const diff = weekStart.getDate() - day + (day === 0 ? -6 : 1);
-      weekStart.setDate(diff + (selectedWeek - 1) * 7);
+      const weekStart = getDateFromWeek(selectedWeek, year, settings?.weekStart);
       
       const weekEnd = new Date(weekStart);
       weekEnd.setDate(weekEnd.getDate() + 6);
@@ -153,7 +154,7 @@ const Timeline = ({
       highlightedMonthIndices: Array.from(highlightedMonthIndicesSet),
       todayPercent
     };
-  }, [year, settings?.timelineExtension, selectedWeek]);
+  }, [year, settings?.timelineExtension, selectedWeek, settings?.weekStart]);
 
   useEffect(() => {
     const container = scrollContainerRef.current;
