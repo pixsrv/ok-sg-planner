@@ -9,7 +9,8 @@ export const STORES = {
   UNDO: 'undo',
   JUMPS: 'jumps',
   FILTERS: 'filters',
-  DAYS_OFF: 'days-off'
+  DAYS_OFF: 'days-off',
+  ABSENCE: 'absence'
 };
 
 const getStorageKey = (storeName) => `${PREFIX}${storeName}`;
@@ -117,9 +118,27 @@ export const saveItems = async (storeName, itemsMap) => {
 export const getAllItems = async (storeName) => {
   const storeData = getStoreData(storeName);
 
-  if (storeName === STORES.EMPLOYEES || storeName === STORES.SETTINGS) {
+  if (storeName === STORES.EMPLOYEES || storeName === STORES.SETTINGS || storeName === STORES.ABSENCE) {
     return storeData;
   } else {
     return Object.values(storeData);
   }
+};
+
+/**
+ * Specifically for absence store, ensures the array structure for each employee
+ */
+export const saveAbsenceItem = async (employeeId, absenceData) => {
+  const storeData = getStoreData(STORES.ABSENCE);
+  if (!storeData[employeeId]) {
+    storeData[employeeId] = [];
+  }
+  
+  // To avoid duplicates or overlaps, a more complex logic could be here,
+  // but for now, we follow the requirement to save the absence.
+  // We can push the new absence.
+  storeData[employeeId].push(absenceData);
+  
+  setStoreData(STORES.ABSENCE, storeData);
+  console.log(`Saved absence for ${employeeId}:`, absenceData);
 };

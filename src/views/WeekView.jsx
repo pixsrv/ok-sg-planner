@@ -213,7 +213,7 @@ const WeekView = ({ employees, settings, onOpenSettingsView }) => {
             onOpenSettings={() => onOpenSettingsView?.(VIEW_SETTINGS_DATE_TIME)}
             onCoordinateDoubleClick={handleCoordinateDoubleClick}
             settings={settings}
-            employee={editingCell.employeeId === 'ALL' ? null : employees[editingCell.employeeId]}
+            employee={editingCell.employeeId === 'ALL' ? null : { ...employees[editingCell.employeeId], id: editingCell.employeeId }}
             dayDate={editingCell.dayDate}
             weekRange={weekDays.length > 0 ? `${weekDays[0].date} - ${weekDays[weekDays.length - 1].date}` : ''}
             allowOverwrite={allowOverwrite}

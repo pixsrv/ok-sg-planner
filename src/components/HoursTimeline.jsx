@@ -9,6 +9,7 @@ import {
   COORDINATE_ORDER_EMPLOYEE_DATE,
   TIME_RESOLUTION_5MI
 } from '../constants/settings';
+import { saveAbsenceItem } from '../utils/db';
 
 /**
  * @typedef {Object} Term
@@ -36,7 +37,7 @@ const HoursTimeline = ({
   hasSelectedData
 }) => {
   const [activeTab, setActiveTab] = useState('work');
-  const employeeId = employee ? null : (dayDate && !employee ? 'ALL' : null);
+  const employeeId = employee?.id || (dayDate && !employee ? 'ALL' : null);
   const timeResolution = settings?.timeResolution || TIME_RESOLUTION_5MI;
 
   // value is [start, end] where each is 'HH:mm'
@@ -140,6 +141,32 @@ const HoursTimeline = ({
     { id: 'vacation', label: 'Vacation', description: 'Employee holidays' },
     { id: 'excused', label: 'Excused Absence', description: 'Sickleave or similar' },
   ];
+
+  const handleAbsenceClick = (type) => {
+    if (!employee && employeeId !== 'ALL') return;
+
+    const targetEmployeeId = employee?.id || 'ALL';
+    const absenceData = {
+      type,
+      timestamp: new Date().toISOString(),
+    };
+
+    if (dayDate && dayDate !== 'ALL') {
+      absenceData.date = dayDate;
+    } else if (weekRange) {
+      // Assuming weekRange is something like "2026-09-21 - 2026-09-27"
+      const parts = weekRange.split(' - ');
+      if (parts.length === 2) {
+        absenceData.from = parts[0];
+        absenceData.to = parts[1];
+      } else {
+        absenceData.range = weekRange;
+      }
+    }
+
+    saveAbsenceItem(targetEmployeeId, absenceData);
+    if (onDone) onDone();
+  };
 
   return (
     <div 
@@ -271,10 +298,7 @@ const HoursTimeline = ({
               <button
                 key={opt.id}
                 className="flex flex-col items-center gap-2 p-5 rounded-lg border border-[var(--border)] bg-[var(--bg)] hover:border-[var(--selection-g1)] hover:bg-[var(--selection-bg-dimmed)] transition-all w-64 group"
-                onClick={() => {
-                  // Not saved for now, as per requirements
-                  console.log(`Absence type selected: ${opt.id}`);
-                }}
+                onClick={() => handleAbsenceClick(opt.id)}
               >
                 <span className="text-base font-bold text-[var(--text-h)] group-hover:text-[var(--selection-g1)]">
                   {opt.label}
