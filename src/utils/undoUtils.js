@@ -23,6 +23,7 @@ export const pushAction = (action) => {
   // Prevent duplicate consecutive actions (especially for React StrictMode)
   if (history.pointer >= 0) {
     const lastAction = history.list[history.pointer];
+
     if (JSON.stringify(lastAction) === JSON.stringify(action)) {
       return history;
     }
@@ -42,6 +43,7 @@ export const pushAction = (action) => {
   };
   
   saveUndoHistory(newHistory);
+
   return newHistory;
 };
 

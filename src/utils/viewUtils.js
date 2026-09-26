@@ -38,8 +38,10 @@ const viewInfos = {
 
 export const getViewInfo = (viewId) => {
   const info = viewInfos[viewId];
+
   if (info) {
     return info;
   }
+
   return { name: viewId, icon: null };
 };

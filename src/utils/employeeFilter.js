@@ -2,9 +2,11 @@ import {formatDate} from './formatters';
 
 export const filterEmployees = (employees, searchQuery, settings) => {
   const employeeList = Object.entries(employees || {});
+
   if (!searchQuery) return employeeList;
 
   const terms = searchQuery.toLowerCase().split(/\s+/).filter(term => term.length > 0);
+
   if (terms.length === 0) return employeeList;
 
   return employeeList.filter(([id, data]) => {

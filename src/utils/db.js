@@ -21,9 +21,11 @@ export const getStorageItem = (key, defaultValue = null) => {
   try {
     const fullKey = key.startsWith(PREFIX) ? key : getStorageKey(key);
     const data = localStorage.getItem(fullKey);
+
     return data ? JSON.parse(data) : defaultValue;
   } catch (e) {
     console.error(`Error reading ${key} from localStorage`, e);
+
     return defaultValue;
   }
 };
@@ -34,6 +36,7 @@ export const getStorageItem = (key, defaultValue = null) => {
 export const setStorageItem = (key, value) => {
   try {
     const fullKey = key.startsWith(PREFIX) ? key : getStorageKey(key);
+
     localStorage.setItem(fullKey, JSON.stringify(value));
   } catch (e) {
     console.error(`Error saving ${key} to localStorage`, e);
@@ -46,6 +49,7 @@ export const setStorageItem = (key, value) => {
 export const removeStorageItem = (key) => {
   try {
     const fullKey = key.startsWith(PREFIX) ? key : getStorageKey(key);
+
     localStorage.removeItem(fullKey);
   } catch (e) {
     console.error(`Error removing ${key} from localStorage`, e);
@@ -59,9 +63,11 @@ export const getSessionItem = (key, defaultValue = null) => {
   try {
     const fullKey = key.startsWith(PREFIX) ? key : getStorageKey(key);
     const data = sessionStorage.getItem(fullKey);
+
     return data ? JSON.parse(data) : defaultValue;
   } catch (e) {
     console.error(`Error reading ${key} from sessionStorage`, e);
+
     return defaultValue;
   }
 };
@@ -72,6 +78,7 @@ export const getSessionItem = (key, defaultValue = null) => {
 export const setSessionItem = (key, value) => {
   try {
     const fullKey = key.startsWith(PREFIX) ? key : getStorageKey(key);
+
     sessionStorage.setItem(fullKey, JSON.stringify(value));
   } catch (e) {
     console.error(`Error saving ${key} to sessionStorage`, e);
@@ -91,6 +98,7 @@ export const saveItem = async (storeName, key, data) => {
 
   storeData[key] = data;
   setStoreData(storeName, storeData);
+
   console.log(`Saved to ${storeName}: ${key} =`, data);
 };
 
@@ -100,7 +108,9 @@ export const saveItems = async (storeName, itemsMap) => {
   Object.entries(itemsMap).forEach(([key, value]) => {
     storeData[key] = value;
   });
+
   setStoreData(storeName, storeData);
+
   console.log(`Saved multiple items to ${storeName}`);
 };
 

@@ -22,8 +22,10 @@ export function parseDateQuery(query, contextDate, settings) {
   const dMatch = input.match(/^d(\d+)$/);
   if (dMatch) {
     const day = parseInt(dMatch[1], 10);
+
     if (day >= 1 && day <= 31) {
       const date1 = new Date(contextYear, contextMonth, day);
+
       if (date1.getMonth() === contextMonth) {
         matches.push({
           type: 'date',
@@ -31,7 +33,9 @@ export function parseDateQuery(query, contextDate, settings) {
           value: date1
         });
       }
+
       const date2 = new Date(contextYear, 11, day);
+
       matches.push({
         type: 'date',
         label: `December ${day}${getOrdinalSuffix(day)}`,
@@ -42,8 +46,10 @@ export function parseDateQuery(query, contextDate, settings) {
 
   // "w" with a number
   const wMatch = input.match(/^w(\d+)$/);
+
   if (wMatch) {
     const week = parseInt(wMatch[1], 10);
+
     if (week >= 1 && week <= 53) {
       matches.push({
         type: 'week',
@@ -56,8 +62,10 @@ export function parseDateQuery(query, contextDate, settings) {
 
   // "m" with a number
   const mMatch = input.match(/^m(\d+)$/);
+
   if (mMatch) {
     const month = parseInt(mMatch[1], 10);
+
     if (month >= 1 && month <= 12) {
       matches.push({
         type: 'month',
@@ -70,9 +78,12 @@ export function parseDateQuery(query, contextDate, settings) {
 
   // "y" with a number
   const yMatch = input.match(/^y(\d+)$/);
+
   if (yMatch) {
     let year = parseInt(yMatch[1], 10);
+
     if (year < 100) year += 2000;
+
     matches.push({
       type: 'year',
       label: `${year}`,
@@ -83,6 +94,7 @@ export function parseDateQuery(query, contextDate, settings) {
   // Relative movement: "-2", "+3", "+2m", "-1w", etc.
   const relMatch = input.match(/^([-+])(\d+)([dwmy]?)$/);
   if (relMatch) {
+
     const sign = relMatch[1];
     const amount = parseInt(relMatch[2], 10);
     const unit = relMatch[3];
@@ -97,6 +109,7 @@ export function parseDateQuery(query, contextDate, settings) {
         label: `${labelPrefix} ${amount} day${amount !== 1 ? 's' : ''}`
       });
     }
+
     if (!unit || unit === 'w') {
       matches.push({
         type: 'move',
@@ -104,6 +117,7 @@ export function parseDateQuery(query, contextDate, settings) {
         amount: isBack ? -amount : amount,
         label: `${labelPrefix} ${amount} week${amount !== 1 ? 's' : ''}`
       });
+
     }
     if (!unit || unit === 'm') {
       matches.push({
@@ -113,6 +127,7 @@ export function parseDateQuery(query, contextDate, settings) {
         label: `${labelPrefix} ${amount} month${amount !== 1 ? 's' : ''}`
       });
     }
+
     if (!unit || unit === 'y') {
       matches.push({
         type: 'move',
@@ -125,11 +140,14 @@ export function parseDateQuery(query, contextDate, settings) {
 
   // Space separator: "m7 d24"
   const mdMatch = input.match(/^m(\d+)\s+d(\d+)$/);
+
   if (mdMatch) {
     const month = parseInt(mdMatch[1], 10);
     const day = parseInt(mdMatch[2], 10);
+
     if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
       const date = new Date(contextYear, month - 1, day);
+
       if (date.getMonth() === month - 1) {
         matches.push({
           type: 'date',
@@ -143,8 +161,10 @@ export function parseDateQuery(query, contextDate, settings) {
   // 2. Try to parse as single number (Legacy/Fallback)
   if (/^\d+$/.test(input)) {
     const num = parseInt(input, 10);
+
     if (num >= 1 && num <= 31) {
       const date = new Date(contextYear, contextMonth, num);
+
       if (date.getMonth() === contextMonth) {
         matches.push({
           type: 'date',
@@ -153,6 +173,7 @@ export function parseDateQuery(query, contextDate, settings) {
         });
       }
     }
+
     if (num >= 1 && num <= 53) {
       matches.push({
         type: 'week',
@@ -161,6 +182,7 @@ export function parseDateQuery(query, contextDate, settings) {
         year: contextYear
       });
     }
+
     if (num >= 1 && num <= 12) {
       matches.push({
         type: 'month',
@@ -169,7 +191,9 @@ export function parseDateQuery(query, contextDate, settings) {
         year: contextYear
       });
     }
+
     const fullYear = num < 100 ? 2000 + num : num;
+
     if (Math.abs(fullYear - contextYear) <= 3) {
       matches.push({
         type: 'year',
@@ -181,12 +205,15 @@ export function parseDateQuery(query, contextDate, settings) {
   
   // 2. Try to parse as Month-Day or similar (12-26)
   const parts = input.split(/[-/ .]/).filter(p => p.length > 0);
+
   if (parts.length === 2) {
     const p1 = parseInt(parts[0], 10);
     const p2 = parseInt(parts[1], 10);
+
     if (!isNaN(p1) && !isNaN(p2)) {
       if (p1 >= 1 && p1 <= 12 && p2 >= 1 && p2 <= 31) {
          const date = new Date(contextYear, p1 - 1, p2);
+
          if (date.getMonth() === p1 - 1) {
            matches.push({
              type: 'date',
@@ -195,7 +222,9 @@ export function parseDateQuery(query, contextDate, settings) {
            });
          }
       }
+
       const yearMatch = p2 < 100 ? 2000 + p2 : p2;
+
       if (yearMatch >= 2000 && yearMatch <= 2100) {
           if (p1 >= 1 && p1 <= 12) {
               matches.push({
@@ -205,6 +234,7 @@ export function parseDateQuery(query, contextDate, settings) {
                 year: yearMatch
               });
           }
+
           if (p1 >= 1 && p1 <= 53) {
               matches.push({
                 type: 'week',
@@ -221,6 +251,7 @@ export function parseDateQuery(query, contextDate, settings) {
   if ('today'.startsWith(input)) {
     const today = new Date();
     const { weekNum, weekYear } = getISOWeek(today, settings?.weekStart);
+
     matches.push({
       type: 'today',
       label: 'Today',
@@ -232,6 +263,7 @@ export function parseDateQuery(query, contextDate, settings) {
 
   // 4. Month name recognition
   const monthNamesLower = MONTH_NAMES.map(m => m.toLowerCase());
+
   monthNamesLower.forEach((name, index) => {
     if (name.startsWith(input)) {
       matches.push({
@@ -246,6 +278,7 @@ export function parseDateQuery(query, contextDate, settings) {
   // Remove duplicates based on label
   const uniqueMatches = [];
   const seenLabels = new Set();
+
   matches.forEach(m => {
     if (!seenLabels.has(m.label)) {
       uniqueMatches.push(m);

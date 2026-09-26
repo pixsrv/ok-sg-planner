@@ -19,6 +19,7 @@ export const getMonthName = (monthIndex) => {
 
 export const getOrdinalSuffix = (day) => {
   if (day > 3 && day < 21) return 'th';
+
   switch (day % 10) {
     case 1: return 'st';
     case 2: return 'nd';
@@ -29,6 +30,7 @@ export const getOrdinalSuffix = (day) => {
 
 export const getISOWeek = (d, weekStart = 'Monday') => {
   const date = new Date(d.getTime());
+
   date.setHours(0, 0, 0, 0);
 
   // If Sunday is start of week, and current date is Sunday, 
@@ -41,6 +43,7 @@ export const getISOWeek = (d, weekStart = 'Monday') => {
   const weekYear = date.getFullYear();
   const week1 = new Date(weekYear, 0, 4);
   const weekNum = 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+
   return { weekNum, weekYear };
 };
 
@@ -48,6 +51,7 @@ export const getDateFromWeek = (week, year, weekStart = 'Monday') => {
   const d = new Date(year, 0, 4);
   const day = d.getDay();
   const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+
   d.setDate(diff + (week - 1) * 7);
   
   if (weekStart === 'Sunday') {
@@ -74,7 +78,10 @@ export const isSunday = (date) => {
  */
 export const isWorkingSunday = (date, workingSundays) => {
   const ws = workingSundays ?? DEFAULT_SETTINGS.workingSundays;
+
   if (!ws) return false;
+
   const list = ws.split(',').map(d => d.trim());
+
   return list.includes(date);
 };
