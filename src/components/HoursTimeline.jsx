@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Settings, X, RotateCcw, RotateCw, Trash2, Clock, CalendarOff } from 'lucide-react';
+import { Settings, X, RotateCcw, RotateCw, Trash2 } from 'lucide-react';
 import IconButton from './IconButton';
 import TimeRibbon from './TimeRibbon';
 import {
@@ -186,38 +186,28 @@ const HoursTimeline = ({
           )}
         </div>
 
-        <div className="flex items-center gap-4 flex-grow justify-center">
+        <div className="flex items-center gap-8 flex-grow justify-center -mb-2">
           <div 
-            className="text-sm font-medium text-[var(--selection-g1)] px-3 py-1 bg-[var(--selection-bg)] rounded border border-[var(--selection-g2)] whitespace-nowrap cursor-pointer select-none"
+            className="text-sm font-medium text-[var(--selection-g1)] px-3 py-1 bg-[var(--selection-bg)] rounded border border-[var(--selection-g2)] whitespace-nowrap cursor-pointer select-none mb-2"
             onDoubleClick={onCoordinateDoubleClick}
             title="Double click to go to this cell"
           >
             {coordinateDisplay}
           </div>
 
-          <div className="flex bg-[var(--social-bg)] rounded-md p-1 border border-[var(--border)]">
-            <button
+          <div className="flex gap-6">
+            <div
               onClick={() => setActiveTab('work')}
-              className={`flex items-center gap-2 px-3 py-1 rounded text-xs font-bold uppercase transition-all ${
-                activeTab === 'work' 
-                  ? 'bg-[var(--selection-g1)] text-white shadow-sm' 
-                  : 'text-[var(--text-muted)] hover:text-[var(--text)]'
-              }`}
+              className={`tab-item !py-1 !mb-0 ${activeTab === 'work' ? 'active' : ''}`}
             >
-              <Clock size={14} />
               Work
-            </button>
-            <button
+            </div>
+            <div
               onClick={() => setActiveTab('absence')}
-              className={`flex items-center gap-2 px-3 py-1 rounded text-xs font-bold uppercase transition-all ${
-                activeTab === 'absence' 
-                  ? 'bg-[var(--selection-g1)] text-white shadow-sm' 
-                  : 'text-[var(--text-muted)] hover:text-[var(--text)]'
-              }`}
+              className={`tab-item !py-1 !mb-0 ${activeTab === 'absence' ? 'active' : ''}`}
             >
-              <CalendarOff size={14} />
               Absence
-            </button>
+            </div>
           </div>
         </div>
 

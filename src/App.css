@@ -1123,8 +1123,9 @@ input:checked + .slider:before {
     border-bottom: 2px solid transparent;
     transition: all 0.2s;
     text-transform: uppercase;
-    font-size: 0.875rem;
+    font-size: 0.8rem;
     letter-spacing: 0.05em;
+    user-select: none;
 }
 
 .tab-item:hover {
